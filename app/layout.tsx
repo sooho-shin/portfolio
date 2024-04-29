@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import StyledComponentsRegistry from "@/lib/registry";
+import NaviComponent from "@/components/NaviBox";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -14,7 +15,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <StyledComponentsRegistry>{children}</StyledComponentsRegistry>
+        <StyledComponentsRegistry>
+          <NaviComponent />
+          {children}
+        </StyledComponentsRegistry>
       </body>
     </html>
   );

@@ -1,5 +1,7 @@
-import Image from "next/image";
+"use client";
+
+import MainWrapper from "@/components/main/MainWrapper";
 
 export default function Home() {
-  return <main></main>;
+  return <MainWrapper />;
 }

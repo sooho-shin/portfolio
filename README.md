@@ -16,3 +16,6 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ## NODE VERSION
 v20.12.2
+
+## 참고 사이트 
+https://blumenkopf.spatzek.studio/home
