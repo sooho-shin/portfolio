@@ -1,4 +1,5 @@
 import { createGlobalStyle } from "styled-components";
+import { breakpoints } from "@/config/breakboint";
 
 const GlobalStyles = createGlobalStyle`
     * {
@@ -63,10 +64,16 @@ const GlobalStyles = createGlobalStyle`
         &::placeholder {
         }
     }
-    // img {
-    //   min-width: 100%;
-    //   display: block;
-    // }
+    .tablet{
+        @media (min-width: ${breakpoints.md + 1}px) {
+            display: none !important;
+        }
+    }
+    .pc{
+        @media (max-width: ${breakpoints.md}px) {
+            display:none !important;
+        }
+    }
 
 `;
 

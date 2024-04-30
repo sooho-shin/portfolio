@@ -7,11 +7,17 @@ import { Textfit } from "react-textfit";
 import Link from "next/link";
 import FooterComponent from "@/components/Footer";
 import EffectComponent from "@/components/EffectBox";
-
+import { Playfair_Display } from "next/font/google";
+import classNames from "classnames";
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "700", "900"],
+});
 const MainWrapper = () => {
   const [effectTitle] = useState("home");
   const [effectRollingText] = useState("SOOHO ZZANG");
   const [hoverState, setHoverState] = useState<boolean>(false);
+
   return (
     <Wrapper>
       <Section>
@@ -110,7 +116,7 @@ const MainWrapper = () => {
               <br />
               Everything
               <br />
-              <span className="sec-font">you need.</span>
+              <span className={playfair.className}>you need.</span>
             </p>
           </div>
         </CenterTextMobile>
@@ -216,109 +222,53 @@ const MainWrapper = () => {
               </div>
               <div className="text-loop-container top">
                 <div className="loop-box">
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
+                  {Array.from({ length: 10 }).map((_, i) => (
+                    <span key={i}>test</span>
+                  ))}
                 </div>
                 <div className="loop-box">
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
+                  {Array.from({ length: 10 }).map((_, i) => (
+                    <span key={i}>test</span>
+                  ))}
                 </div>
               </div>
 
               <div className="text-loop-container right">
                 <div className="loop-box">
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
+                  {Array.from({ length: 10 }).map((_, i) => (
+                    <span key={i}>test</span>
+                  ))}
                 </div>
                 <div className="loop-box">
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
+                  {Array.from({ length: 10 }).map((_, i) => (
+                    <span key={i}>test</span>
+                  ))}
                 </div>
               </div>
 
               <div className="text-loop-container left">
                 <div className="loop-box">
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
+                  {Array.from({ length: 10 }).map((_, i) => (
+                    <span key={i}>test</span>
+                  ))}
                 </div>
                 <div className="loop-box">
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
+                  {Array.from({ length: 10 }).map((_, i) => (
+                    <span key={i}>test</span>
+                  ))}
                 </div>
               </div>
 
               <div className="text-loop-container bottom">
                 <div className="loop-box">
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
+                  {Array.from({ length: 10 }).map((_, i) => (
+                    <span key={i}>test</span>
+                  ))}
                 </div>
                 <div className="loop-box">
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
-                  <span>test</span>
+                  {Array.from({ length: 10 }).map((_, i) => (
+                    <span key={i}>test</span>
+                  ))}
                 </div>
               </div>
             </div>
@@ -382,7 +332,7 @@ const MainBgContainer = styled.div`
   width: 100%;
   height: 100%;
   z-index: -1;
-  background-image: url("/images/img_main.jpg");
+  background-image: url("/images/main.jpeg");
   background-position: center;
   background-size: cover;
 `;

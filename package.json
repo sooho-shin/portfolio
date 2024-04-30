@@ -9,13 +9,15 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "classnames": "^2.5.1",
     "next": "14.2.3",
     "react": "^18",
     "react-dom": "^18",
     "react-textfit": "^1.1.1",
     "react-use": "^17.5.0",
     "styled": "^1.0.0",
-    "styled-components": "^6.1.8"
+    "styled-components": "^6.1.8",
+    "zustand": "^4.5.2"
   },
   "devDependencies": {
     "@types/node": "^20",

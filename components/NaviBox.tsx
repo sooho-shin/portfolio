@@ -6,25 +6,16 @@ import React, { useEffect, useState, useRef } from "react";
 import { useWindowSize } from "react-use";
 import styled, { css, keyframes } from "styled-components";
 import { breakpoints } from "@/config/breakboint";
-
-type Props = {
-  text: string;
-  rollingText?: string;
-};
+import { Playfair_Display } from "next/font/google";
+import classNames from "classnames";
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "700", "900"],
+});
 
 // const EffectComponent = ({text,rollingText = 'text text'}:Props) => {
 const NaviComponent = () => {
   const [naviState, setNaviState] = useState<boolean>(false);
-  // const router = useRouter();
-  // useEffect(()=>{
-  //   console.log(router.pathname);
-  // })
-  // const pushRouter = (url: string) => {
-  //   if (router.pathname === url) {
-  //     setNaviState(false);
-  //   }
-  //   router.push(url);
-  // };
   return (
     <NaviWrapper naviState={naviState}>
       <div className="tablet mobile-navi">
@@ -40,17 +31,19 @@ const NaviComponent = () => {
         </button>
       </div>
       <div className="navi-group">
-        <Link className="navi home sec-font" href={"/"}>
-          HOME
-        </Link>
-        <Link className="navi home sec-font" href={"/"}>
+        {/*playfair*/}
+        {/*<Link className="navi home sec-font" href={"/"}>*/}
+        <Link
+          className={classNames("navi", "home", playfair.className)}
+          href={"/"}
+        >
           HOME
         </Link>
         <Link className="navi" href={"/work"}>
           WORK
         </Link>
         <Link className="navi" href={"/about"}>
-          WORK
+          ABOUT
         </Link>
       </div>
     </NaviWrapper>
@@ -68,33 +61,32 @@ const NaviWrapper = styled.div<{ naviState: boolean }>`
     margin-left: 40px;
     width: calc(100% - 40px);
     height: calc(12vw + 24px);
-  }
+    .mobile-navi {
+      position: fixed;
+      width: calc(100% - 64px);
+      top: 12px;
+      right: 12px;
+      height: 12vw;
+      border-radius: 8vw;
+      z-index: 190;
+      background-color: #fff;
+      box-shadow: 0 3px 6px 0 rgb(0 0 0 / 16%);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4vw;
+      padding-right: 0;
 
-  .mobile-navi {
-    position: fixed;
-    width: calc(100% - 64px);
-    top: 12px;
-    right: 12px;
-    height: 12vw;
-    border-radius: 8vw;
-    z-index: 190;
-    background-color: #fff;
-    box-shadow: 0 3px 6px 0 rgb(0 0 0 / 16%);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 4vw;
-    padding-right: 0;
-
-    .hamburger-group {
-      padding: 4vw;
-      > div {
-        width: 34px;
-        height: 6px;
-        background-color: #000;
-      }
-      div + div {
-        margin-top: 4px;
+      .hamburger-group {
+        padding: 4vw;
+        > div {
+          width: 34px;
+          height: 6px;
+          background-color: #000;
+        }
+        div + div {
+          margin-top: 4px;
+        }
       }
     }
   }
@@ -135,7 +127,9 @@ const NaviWrapper = styled.div<{ naviState: boolean }>`
       @media (max-width: ${breakpoints.md}px) {
         color: white;
       }
-
+      &.home {
+        font-weight: 700;
+      }
       &:hover {
         text-decoration: underline;
       }
