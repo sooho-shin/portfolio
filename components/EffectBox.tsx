@@ -31,7 +31,7 @@ const EffectComponent = ({ text, rollingText = "text text" }: Props) => {
   }, [windowWidth]);
 
   return (
-    <EffectBox pageState={pageState} ref={effectRef}>
+    <EffectBox $pageState={pageState} ref={effectRef}>
       {pageState ? (
         <>
           <div className="mask">
@@ -146,7 +146,7 @@ const rowAniReverse = keyframes`
   }
 `;
 
-const EffectBox = styled.div<{ pageState: string | null }>`
+const EffectBox = styled.div<{ $pageState: string | null }>`
   position: fixed;
   left: 0;
   width: 100%;

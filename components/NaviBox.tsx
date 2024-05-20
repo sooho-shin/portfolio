@@ -17,7 +17,7 @@ const playfair = Playfair_Display({
 const NaviComponent = () => {
   const [naviState, setNaviState] = useState<boolean>(false);
   return (
-    <NaviWrapper naviState={naviState}>
+    <NaviWrapper $navistate={naviState}>
       <div className="tablet mobile-navi">
         <p className="title">Sooho</p>
         <button
@@ -50,7 +50,7 @@ const NaviComponent = () => {
   );
 };
 
-const NaviWrapper = styled.div<{ naviState: boolean }>`
+const NaviWrapper = styled.div<{ $navistate: boolean }>`
   position: fixed;
   top: 20px;
   right: 20px;
@@ -110,7 +110,7 @@ const NaviWrapper = styled.div<{ naviState: boolean }>`
       z-index: 200;
       transition: all 100ms;
       ${props =>
-        props.naviState
+        props.$navistate
           ? css`
               left: 0;
             `

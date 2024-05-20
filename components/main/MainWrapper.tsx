@@ -62,10 +62,10 @@ const MainWrapper = () => {
             </div>
             <div className="right">
               <span>
-                Blumenkopf is no
+                Sooho is not just
                 <br />
-                studio. with everything{" "}
-                <span className="sec-font">you need</span>
+                developer. with everything{" "}
+                <span className={playfair.className}>you need</span>
               </span>
             </div>
           </TopRightInfo>
@@ -136,7 +136,7 @@ const MainWrapper = () => {
               <br />
               1010 Wien, Austria
               <br />
-              <span className="sec-font">BLUMENKOPF@GMAIL.COM</span>
+              <span className={playfair.className}>BLUMENKOPF@GMAIL.COM</span>
             </p>
           </div>
         </InfoBoxMobile>
@@ -206,7 +206,7 @@ const MainWrapper = () => {
           </Link>
         </div>
       </Section>
-      <ProjectWrapper hover={hoverState}>
+      <ProjectWrapper $hover={hoverState}>
         <LeftWrapperComponent></LeftWrapperComponent>
         <RightWrapperComponent>
           <div
@@ -445,7 +445,7 @@ const textLoopAniVertical = keyframes`
   }
 `;
 
-const ProjectWrapper = styled.div<{ hover: boolean }>`
+const ProjectWrapper = styled.div<{ $hover: boolean }>`
   width: 100%;
   display: flex;
   height: 49.5vw;
@@ -458,7 +458,7 @@ const ProjectWrapper = styled.div<{ hover: boolean }>`
   }
 
   ${props =>
-    props.hover
+    props.$hover
       ? css`
           .project {
             &.first {

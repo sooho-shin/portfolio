@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import StyledComponentsRegistry from "@/lib/registry";
 import NaviComponent from "@/components/NaviBox";
-import { Roboto } from "next/font/google"; // 해당 폰트의 함수를 사용합니다.
+import { Roboto } from "next/font/google";
+import SmoothScrolling from "@/lib/smoothScrolling"; // 해당 폰트의 함수를 사용합니다.
 
 export const metadata: Metadata = {
   title: "SOOHO's HoMEPaGE",
@@ -20,10 +21,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={roboto.className}>
-        <StyledComponentsRegistry>
-          <NaviComponent />
-          {children}
-        </StyledComponentsRegistry>
+        <SmoothScrolling>
+          <StyledComponentsRegistry>
+            <NaviComponent />
+            {children}
+          </StyledComponentsRegistry>
+        </SmoothScrolling>
       </body>
     </html>
   );
