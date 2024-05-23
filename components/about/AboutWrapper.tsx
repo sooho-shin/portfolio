@@ -294,8 +294,7 @@ const AboutWrapper = () => {
           </SwipeWrppaer>
           <ClientWrapper>
             <p className="title">
-              Clients we wish we had{" "}
-              <span className="sec-font">WORKED FOR:</span>
+              Clients i wish i had <span className="sec-font">WORKED FOR:</span>
             </p>
             <ul>
               {clientArray.map(client => (
@@ -330,7 +329,7 @@ const AboutWrapper = () => {
             <p className="title">
               {/* eslint-disable-next-line react/no-unescaped-entities */}
               <span className="sec-font">YOU</span> won't{" "}
-              <span className="sec-font">FIND US HERE</span>
+              <span className="sec-font">FIND ME HERE</span>
             </p>
             <a href="https://www.naver.com/" target="_blank">
               <span>Twitter</span>
@@ -593,6 +592,7 @@ const ClientWrapper = styled.div`
     flex-wrap: wrap;
     width: 100%;
     margin-bottom: 6vw;
+    padding-right: 10px;
 
     li {
       display: flex;
@@ -904,6 +904,7 @@ const CenterInfo = styled.div`
 const Title = styled.div`
   border-top: 4px solid #000;
   border-bottom: 4px solid #000;
+  overflow-x: hidden;
   * {
     line-height: 1;
     font-weight: bold;

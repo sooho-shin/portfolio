@@ -144,7 +144,7 @@ const MainWrapper = () => {
       <Section className="no-border home-about">
         <LeftWrapperComponent>
           <AboutLeft>
-            <p className="title">Clients we have not worked for at all:</p>
+            <p className="title">Clients i have not worked for at all:</p>
             <ul className="brand-list">
               <li>Adidas</li>
               <li>Nike</li>
@@ -158,7 +158,7 @@ const MainWrapper = () => {
         <RightWrapperComponent>
           <AboutRight>
             <div className="left tablet">
-              <p className="title">Clients we have not worked for at all:</p>
+              <p className="title">Clients i have not worked for at all:</p>
               <ul className="brand-list">
                 <li>Adidas</li>
                 <li>Nike</li>
@@ -171,18 +171,26 @@ const MainWrapper = () => {
             <div className="right">
               <div className="top-text">
                 <p>
-                  Where beauty goes the eyes might follow.
-                  <span className="sec-font">Yet often it is missing.</span>
-                  But not with us. Because we don t design.
+                  Some minds seem almost to create themselves,
+                  <span className={playfair.className}>
+                    {" "}
+                    springing up under{" "}
+                  </span>
+                  every disadvantage and working their
                 </p>
-                <p>Still, we can help since that depends on how it looks.</p>
+                <p>solitary but irresistible</p>
               </div>
               <div className="bottom-text">
                 <p>
-                  Quite strange is the appearance,
-                  <span className="sec-font"> just right </span>
-                  we would assume.
+                  way through a thousand obstacles.
+                  <span className={playfair.className}>
+                    {" "}
+                    The Legend of the Sleepy Hollow{" "}
+                  </span>
                 </p>
+                {/*몇몇 사람들은 고독하지만 결코 외면할 수 없는 수많은 장애물들과*/}
+                {/*싸우고, 모든 불이익을 이겨내면서 자신의 길을 개척해 나간다.*/}
+                {/*슬리피 할로우의 전설 (The Legend of the Sleepy Hollow)*/}
               </div>
               <Link prefetch href={"/about"} passHref>
                 <StyledButton>About</StyledButton>
