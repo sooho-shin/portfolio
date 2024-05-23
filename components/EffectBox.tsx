@@ -189,6 +189,7 @@ const EffectBox = styled.div<{ $pageState: string | null }>`
       animation: ${titleAni} linear 1000ms alternate forwards 250ms;
     }
   }
+
   > .loop-row-mask {
     overflow: hidden;
     display: flex;

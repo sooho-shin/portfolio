@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import React, { useEffect, useState, useRef } from "react";
 import { useWindowSize } from "react-use";
 import styled, { css, keyframes } from "styled-components";
@@ -16,6 +16,12 @@ const playfair = Playfair_Display({
 // const EffectComponent = ({text,rollingText = 'text text'}:Props) => {
 const NaviComponent = () => {
   const [naviState, setNaviState] = useState<boolean>(false);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    setNaviState(false);
+  }, [pathname]);
+
   return (
     <NaviWrapper $navistate={naviState}>
       <div className="tablet mobile-navi">

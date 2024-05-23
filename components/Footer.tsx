@@ -42,6 +42,7 @@ function FooterComponent() {
             <span className="sec-font">SOOJOON92@GMAIL.COM</span>
           </p>
         </InfoMobile>
+
         <div className="footer-info-group">
           <div className="info pc">
             <p>
