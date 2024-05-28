@@ -39,18 +39,27 @@ const NaviComponent = () => {
       <div className="navi-group">
         {/*playfair*/}
         {/*<Link className="navi home sec-font" href={"/"}>*/}
-        <Link
-          className={classNames("navi", "home", playfair.className)}
-          href={"/"}
-        >
-          HOME
-        </Link>
-        <Link className="navi" href={"/work"}>
-          WORK
-        </Link>
-        <Link className="navi" href={"/about"}>
-          ABOUT
-        </Link>
+        <div className="content">
+          <button
+            className="dim"
+            type={"button"}
+            onClick={() => {
+              setNaviState(false);
+            }}
+          ></button>
+          <Link
+            className={classNames("navi", "home", playfair.className)}
+            href={"/"}
+          >
+            HOME
+          </Link>
+          <Link className="navi" href={"/"}>
+            WORK
+          </Link>
+          <Link className="navi" href={"/about"}>
+            ABOUT
+          </Link>
+        </div>
       </div>
     </NaviWrapper>
   );
@@ -98,20 +107,54 @@ const NaviWrapper = styled.div<{ $navistate: boolean }>`
   }
 
   .navi-group {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 1vw;
     border-radius: 2.8vw;
     background-color: #fff;
     box-shadow: 0 3px 6px 0 rgb(0 0 0 / 16%);
+    .content {
+      width: 100%;
+      height: 100%;
+      padding: 0 1vw;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      > .dim {
+        display: none;
+        background-color: #000;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 10;
+        cursor: default;
+      }
+      .navi {
+        padding: 0.5vw;
+        margin: 0.5vw;
+        font-size: 0.92em;
+        color: black;
+        cursor: pointer;
+        display: block;
+        z-index: 15;
+        @media (max-width: ${breakpoints.md}px) {
+          color: white;
+        }
+        &.home {
+          font-weight: 700;
+        }
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
     @media (max-width: ${breakpoints.md}px) {
       position: fixed;
       width: 100%;
       height: 100%;
-      padding: 0 1vw;
+      padding: 0;
       border-radius: 0px;
-      background-color: #000;
+      // background-color: #000;
       top: 0;
       z-index: 200;
       transition: all 100ms;
@@ -123,21 +166,20 @@ const NaviWrapper = styled.div<{ $navistate: boolean }>`
           : css`
               left: -100%;
             `}
-    }
-    .navi {
-      padding: 0.5vw;
-      margin: 0.5vw;
-      font-size: 0.92em;
-      color: black;
-      cursor: pointer;
-      @media (max-width: ${breakpoints.md}px) {
-        color: white;
-      }
-      &.home {
-        font-weight: 700;
-      }
-      &:hover {
-        text-decoration: underline;
+      .content {
+        padding-left: 48px;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+
+        > .dim {
+          display: block;
+        }
+        .navi {
+          font-size: 16vw;
+          line-height: 0.85em;
+          text-transform: uppercase;
+        }
       }
     }
   }

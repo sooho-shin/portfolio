@@ -119,10 +119,10 @@ const AboutWrapper = () => {
         <RightWrapperComponent>
           <Title>
             <Textfit
-              style={{ width: "100%", height: "auto" }}
+              // style={{ width: "100%", height: "auto" }}
               max={9999}
               mode="single"
-              forceSingleModeWidth={true}
+              // forceSingleModeWidth={true}
             >
               INFO
             </Textfit>
@@ -746,6 +746,7 @@ const SwipeWrppaer = styled.div`
   align-items: center;
   justify-content: center;
   border-bottom: 4px solid #000;
+  overflow: hidden;
   @media (max-width: ${breakpoints.md}px) {
     flex-direction: column-reverse;
   }
@@ -904,7 +905,7 @@ const CenterInfo = styled.div`
 const Title = styled.div`
   border-top: 4px solid #000;
   border-bottom: 4px solid #000;
-  overflow-x: hidden;
+  overflow: hidden;
   * {
     line-height: 1;
     font-weight: bold;

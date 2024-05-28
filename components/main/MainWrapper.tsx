@@ -30,11 +30,11 @@ const MainWrapper = () => {
             </div>
             <div className="info-right">
               <p>
-                Blumenkopf kein Studio
+                _soooho
                 <br />
-                Burgring 123
+                😇😇😇😇
                 <br />
-                1010 Wien, Austria
+                1010 8080
               </p>
               <a href="#">soojoon92@gmail.com</a>
             </div>
@@ -49,15 +49,15 @@ const MainWrapper = () => {
                 to none:
               </span>
               <span>
-                Editorial
+                NODEJS
                 <br />
-                Print
+                REACT
                 <br />
-                Graphicdesign
+                NEXTJS
                 <br />
-                Branding
+                SQL
                 <br />
-                illustration
+                EXPRESS
               </span>
             </div>
             <div className="right">
@@ -95,26 +95,26 @@ const MainWrapper = () => {
         <CenterTextMobile>
           <div className="info-left">
             <p>
-              We do little to none:
+              I do little to none:
               <br />
             </p>
             <p>
-              Editorial
-              <br /> Print
-              <br /> Graphicdesign
-              <br /> Branding
-              <br /> Illustration
+              NODEJS
+              <br /> REACT
+              <br /> NEXTJS
+              <br /> SQL
+              <br /> EXPRESS
             </p>
           </div>
           <div className="info-right">
             <p>
-              Blumenkopf
+              Sooho
               <br />
-              is no studio.
+              is not just
               <br />
-              with
+              developer
               <br />
-              Everything
+              with everything
               <br />
               <span className={playfair.className}>you need.</span>
             </p>
@@ -304,6 +304,7 @@ const InfoBoxMobile = styled.div`
   .info-right {
     width: 100%;
     padding-left: 5vw;
+    flex: 1;
     /* font-size: 11vw;
     letter-spacing: -2px;
     line-height: 0.85em;
@@ -330,6 +331,7 @@ const CenterTextMobile = styled.div`
     letter-spacing: -2px;
     line-height: 0.85em;
     text-transform: uppercase;
+    flex: 1;
   }
 `;
 
@@ -735,6 +737,7 @@ const AboutRight = styled.div`
       &.right {
         width: 100%;
         padding-left: 5vw;
+        flex: 1;
       }
     }
     a {

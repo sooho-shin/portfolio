@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import styled, { css, keyframes } from "styled-components";
 import LeftWrapperComponent from "./LeftWrapper";
 import RightWrapperComponent from "./RightWrapper";
+import { breakpoints } from "@/config/breakboint";
 import IcoTwitter from "../public/images/ico_twitter.png";
 import IcoFacebook from "../public/images/ico_facebook.png";
 import IcoInsta from "../public/images/ico_insta.png";
@@ -176,6 +177,9 @@ const FooterWrapper = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-between;
+    @media (max-width: ${breakpoints.md}px) {
+      height: 45vw;
+    }
 
     > div {
       flex: 1;

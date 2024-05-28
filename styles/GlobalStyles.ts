@@ -26,9 +26,10 @@ const GlobalStyles = createGlobalStyle`
     }
     html,
     body {
-        height: 100%;
+        //height: 100%;
         transition: none;
     }
+    
     img,
     picture,
     video,
@@ -37,14 +38,17 @@ const GlobalStyles = createGlobalStyle`
         display: block;
         max-width: 100%;
     }
+    
     button {
         background: none;
         border: 0;
         cursor: pointer;
     }
+    
     a {
         text-decoration: none;
     }
+    
     table {
         border-collapse: collapse;
         border-spacing: 0;
