@@ -53,7 +53,7 @@ const NaviComponent = () => {
           >
             HOME
           </Link>
-          <Link className="navi" href={"/"}>
+          <Link className="navi" href={"/work"}>
             WORK
           </Link>
           <Link className="navi" href={"/about"}>

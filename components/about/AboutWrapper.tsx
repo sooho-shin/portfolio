@@ -925,14 +925,14 @@ const AboutLeft = styled.div`
     bottom: 0;
     left: 0;
     width: 100%;
-    padding: 10px;
-    padding-right: 50px;
+    padding: 10px 50px 10px 10px;
     box-sizing: border-box;
 
     > p {
       &.title {
         font-size: 1.875vw;
       }
+
       &.mail {
         font-size: 3vw;
         text-decoration: underline;
