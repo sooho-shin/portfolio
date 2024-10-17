@@ -8,6 +8,7 @@ import styled, { css, keyframes } from "styled-components";
 import { breakpoints } from "@/config/breakboint";
 import { Playfair_Display } from "next/font/google";
 import classNames from "classnames";
+import { useCommonStore } from "@/stores/useCommon";
 const playfair = Playfair_Display({
   subsets: ["latin"],
   weight: ["400", "700", "900"],
@@ -17,6 +18,8 @@ const playfair = Playfair_Display({
 const NaviComponent = () => {
   const [naviState, setNaviState] = useState<boolean>(false);
   const pathname = usePathname();
+
+  const { setRoute } = useCommonStore();
 
   useEffect(() => {
     setNaviState(false);
@@ -47,18 +50,18 @@ const NaviComponent = () => {
               setNaviState(false);
             }}
           ></button>
-          <Link
+          <button
             className={classNames("navi", "home", playfair.className)}
-            href={"/"}
+            onClick={() => setRoute("/")}
           >
             HOME
-          </Link>
-          <Link className="navi" href={"/work"}>
+          </button>
+          <button className="navi" onClick={() => setRoute("/work")}>
             WORK
-          </Link>
-          <Link className="navi" href={"/about"}>
+          </button>
+          <button className="navi" onClick={() => setRoute("/about")}>
             ABOUT
-          </Link>
+          </button>
         </div>
       </div>
     </NaviWrapper>
@@ -69,7 +72,7 @@ const NaviWrapper = styled.div<{ $navistate: boolean }>`
   position: fixed;
   top: 20px;
   right: 20px;
-  z-index: 100;
+  z-index: 150;
 
   @media (max-width: ${breakpoints.md}px) {
     position: inherit;
@@ -110,6 +113,8 @@ const NaviWrapper = styled.div<{ $navistate: boolean }>`
     border-radius: 2.8vw;
     background-color: #fff;
     box-shadow: 0 3px 6px 0 rgb(0 0 0 / 16%);
+    z-index: 150;
+    position: relative;
     .content {
       width: 100%;
       height: 100%;

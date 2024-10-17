@@ -10,6 +10,7 @@ import EffectComponent from "@/components/EffectBox";
 import styled from "styled-components";
 import { breakpoints } from "@/config/breakboint";
 import GalleryBox from "@/components/GalleryBox";
+import Link from "next/link";
 
 type memberType = {
   user_idx: number;
@@ -34,36 +35,8 @@ const clientArrayData: string[] = [
 
 const WorkWrapper = () => {
   const [effectTitle, setEffectTitle] = useState("work");
-  const [effectRollingText, setEffectRollingText] = useState("SOOHO about");
+  const [effectRollingText, setEffectRollingText] = useState("SOOHO work");
 
-  const memberArrayData: memberType[] = [
-    {
-      user_idx: 1,
-      name: "sooho",
-      job: "web front developer",
-    },
-    {
-      user_idx: 2,
-      name: "gildong",
-      job: "web server developer",
-    },
-    {
-      user_idx: 3,
-      name: "sunsin",
-      job: "designer",
-    },
-    {
-      user_idx: 4,
-      name: "LeeJaeYong",
-      job: "ceo",
-    },
-  ];
-
-  const [currentMemberIdx, setCurrentMemberIdx] = useState<number>(1);
-  const [clientArray] = useState(clientArrayData);
-  // const sliderRef = useRef<any>();
-  const sliderJobRef = useRef<any>();
-  const sliderImgRef = useRef<any>();
   const mainContainer = useRef<any>();
   const infoText = useRef<any>();
   const { x: scrollX, y: scrollY } = useWindowScroll();
@@ -83,6 +56,29 @@ const WorkWrapper = () => {
       }
     }
   }, [scrollY, windowHeight, windowWidth]);
+
+  // {/*  text={"catch catch"}*/}
+  // {/*  imgFirst={}*/}
+  // {/*  imgSecond={}*/}
+  // {/*  imgThird={}*/}
+  const workArray = [
+    {
+      text: "yummygame",
+      images: ["/yummygame/1.png", "/yummygame/2.png", "/yummygame/3.png"],
+    },
+    {
+      text: "yummy yummy",
+      images: ["/yummygame/1.png", "/yummygame/2.png", "/yummygame/3.png"],
+    },
+    {
+      text: "yummy yummy",
+      images: ["/yummygame/1.png", "/yummygame/2.png", "/yummygame/3.png"],
+    },
+    {
+      text: "yummy yummy",
+      images: ["/yummygame/1.png", "/yummygame/2.png", "/yummygame/3.png"],
+    },
+  ];
 
   return (
     <MainWrapper>
@@ -106,12 +102,18 @@ const WorkWrapper = () => {
         </LeftWrapperComponent>
         <RightWrapperComponent>
           <GalleryContainer>
-            <GalleryBox
-              text={"catch catch"}
-              imgFirst={}
-              imgSecond={}
-              imgThird={}
-            />
+            {workArray.map(c => {
+              return (
+                <Link href={"/"} key={c.text}>
+                  <GalleryBox
+                    text={c.text}
+                    imgFirst={"/images/work" + c.images[0]}
+                    imgSecond={"/images/work" + c.images[1]}
+                    imgThird={"/images/work" + c.images[2]}
+                  />
+                </Link>
+              );
+            })}
           </GalleryContainer>
         </RightWrapperComponent>
       </Section>
@@ -124,6 +126,34 @@ const WorkWrapper = () => {
 const GalleryContainer = styled.div`
   width: 100%;
   margin-top: calc(84px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  border-top: 4px solid #000;
+  @media (max-width: ${breakpoints.sm}px) {
+    margin-top: 0;
+  }
+  > a {
+    width: 50%;
+    border-bottom: 4px solid #000;
+    font-size: 0;
+    aspect-ratio: 1/ 1;
+    @media (max-width: ${breakpoints.sm}px) {
+      width: 100%;
+    }
+    &:nth-child(odd) {
+      border-right: 4px solid #000;
+      @media (max-width: ${breakpoints.sm}px) {
+        border-right: none;
+      }
+    }
+
+    &:nth-last-child(2),
+    &:last-child {
+      border-bottom: none;
+    }
+  }
 `;
 
 const AboutLeft = styled.div`

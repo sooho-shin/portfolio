@@ -4,7 +4,6 @@ import styled, { css, keyframes } from "styled-components";
 
 type Props = {
   text: string;
-  border?: boolean;
   imgFirst: any;
   imgSecond: any;
   imgThird: any;
@@ -12,35 +11,18 @@ type Props = {
 
 const GalleryComponent = ({
   text = "text text",
-  border = true,
   imgFirst,
   imgSecond,
   imgThird,
 }: Props) => {
-  // const [pageState,setPageState] = useState<string | null>(text);
-  // const [rollingTextState,setRollingTextState] = useState(rollingText);
-  // const router = useRouter()
-
-  // useEffect( ()  => {
-  //   async function test(){
-  //     // await setPageState(null)
-  //     // await setPageState(text);
-  //     await router.push('about');
-  //   }
-  //   test();
-  //   console.log(text);
-  //   setRollingTextState(rollingText);
-
-  // },[text])
-
   return (
     <ProjectWrapper
-      borderState={border}
       imgFirst={imgFirst}
       imgSecond={imgSecond}
       imgThird={imgThird}
     >
       <div className="content">
+        <p className="title">{text}</p>
         <div className="project-box">
           <div className="project first"></div>
           <div className="project second"></div>
@@ -72,7 +54,6 @@ const GalleryComponent = ({
             <span>{text}</span>
           </div>
         </div>
-
         <div className="text-loop-container right">
           <div className="loop-box">
             <span>{text}</span>
@@ -126,7 +107,6 @@ const GalleryComponent = ({
             <span>{text}</span>
           </div>
         </div>
-
         <div className="text-loop-container bottom">
           <div className="loop-box">
             <span>{text}</span>
@@ -177,7 +157,6 @@ const textLoopAniVertical = keyframes`
 `;
 
 const ProjectWrapper = styled.div<{
-  borderState: boolean;
   imgFirst: any;
   imgSecond: any;
   imgThird: any;
@@ -185,26 +164,11 @@ const ProjectWrapper = styled.div<{
   background-color: #fff;
   display: inline-block;
   z-index: 100;
-  flex: 50% 0 0;
-
-  height: 49.5vw;
+  width: 100%;
+  height: 100%;
   left: -4px;
   cursor: pointer;
-  border-bottom: 4px solid #000;
-  border-right: 4px solid #000;
-  ${props => css`
-    ${props.borderState
-      ? css`
-          border-bottom: 4px solid #000;
-        `
-      : css`
-          border-bottom: none;
-        `}
-  `}
-  box-sizing:border-box;
-  &:nth-child(2n) {
-    border-right: none;
-  }
+  box-sizing: border-box;
   &:hover {
     .loop-box {
       display: inline-flex !important;
@@ -237,6 +201,15 @@ const ProjectWrapper = styled.div<{
     height: 100%;
     position: relative;
     padding: 8vw;
+
+    > p.title {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      text-transform: uppercase;
+      font-size: 1rem;
+      font-weight: 500;
+    }
 
     .project-box {
       width: 100%;

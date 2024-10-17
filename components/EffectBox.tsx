@@ -4,6 +4,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useWindowSize } from "react-use";
 import styled, { css, keyframes } from "styled-components";
 import { breakpoints } from "@/config/breakboint";
+import { usePathname } from "next/navigation";
 
 type Props = {
   text: string;
@@ -15,6 +16,7 @@ const EffectComponent = ({ text, rollingText = "text text" }: Props) => {
   const [rollingTextState, setRollingTextState] = useState(rollingText);
   const effectRef = useRef<any>();
   const { width: windowWidth, height: windowHeight } = useWindowSize();
+  const pathname = usePathname();
 
   useEffect(() => {
     effectRef.current.style.width = `40px`;
