@@ -130,23 +130,14 @@ const AboutWrapper = () => {
           <CenterInfo>
             <div>
               <p>
-                WE ARE NO AUSTRIAN AESTETHICS STUDIO WITH A FOCUS ON EDITORIAL
-                AND CONTEMPORARY ART.
+                최신 기술과 창의적 사고로 아이디어를 현실로 구현하는 개발자.
               </p>
               <div className="flex">
                 <p>
-                  {`But maybe you are! If that's the case go and buy this
-                                        website. Your company will immediately look awesome. All of
-                                        your competitors will be mad because they bought Wordpress
-                                        templates and can't buy this limited beauty anymore. That's
-                                        the magic of 'Limited by Spatzek'.`}
+                  {`저는 시각디자인 전공 후 개발로 전향한, 책임감과 도전정신이 강한 사람입니다. 직접 무언가를 만들고 배우는 과정에서 큰 즐거움을 느끼며, ‘교통데이터 활용 공모전’에서 앱 개발로 두 번 수상했습니다. 지금은 프론트엔드에 집중하지만, 머지않아 백엔드까지 섭렵해 모든 분야를 아우르는 개발자가 될 것입니다.`}
                 </p>
                 <p>
-                  {`Your are not sure? Well, a site like this usually costs
-                  between 20-30k EUR. But now you can actually buy it for 6k!
-                  And you won't even have to wait for 3 months - it can be
-                  online within a few days! Plus you know exactly what you'll
-                  get. Let's go!`}
+                  {`저는 지금 프론트엔드에 집중하고 있지만, 곧 백엔드까지 섭렵해 풀스택 개발자가 될 겁니다. 그리고 좋은 소식은, 그 성장 속도를 3년 기다릴 필요도 없다는 거죠. 이미 빠르게 배우고 만들며 증명해왔으니까요. 준비됐습니다, 이제 시작하죠!`}
                 </p>
               </div>
             </div>
@@ -331,7 +322,7 @@ const AboutWrapper = () => {
               <span className="sec-font">YOU</span> won't{" "}
               <span className="sec-font">FIND ME HERE</span>
             </p>
-            <a href="https://www.naver.com/" target="_blank">
+            <a>
               <span>Twitter</span>
               <span className="arrow">
                 <svg
@@ -365,7 +356,7 @@ const AboutWrapper = () => {
               </span>
               <div className="mask"></div>
             </a>
-            <a href="https://www.naver.com/" target="_blank">
+            <a href="https://www.facebook.com/sooho.shin.16" target="_blank">
               <span>facebook</span>
               <span className="arrow">
                 <svg
@@ -400,7 +391,7 @@ const AboutWrapper = () => {
               <div className="mask"></div>
             </a>
             <a
-              href="https://www.naver.com/"
+              href="https://www.instagram.com/iamnotsooho"
               target="_blank"
               className="no-border"
             >

@@ -130,7 +130,7 @@ const MainWrapper = () => {
           </div>
           <div className="info-right">
             <p>
-              Blumenkopf kein Studio
+              Sooho&rsquo;s Studio
               <br />
               Burgring 123
               <br />
@@ -538,14 +538,14 @@ const ProjectWrapper = styled.div<{ $hover: boolean }>`
         top: 50%;
 
         &.first {
-          background-image: url("/images/img_product_first.jpg");
+          background-image: url("/images/img_product_first.png");
           background-size: cover;
           background-position: center;
           background-repeat: no-repeat;
           transform: translate(-50%, -50%);
         }
         &.second {
-          background-image: url("/images/img_product_second.jpg");
+          background-image: url("/images/img_product_second.png");
           background-size: cover;
           background-position: center;
           background-repeat: no-repeat;
@@ -553,7 +553,7 @@ const ProjectWrapper = styled.div<{ $hover: boolean }>`
           opacity: 0;
         }
         &.third {
-          background-image: url("/images/img_product_third.jpg");
+          background-image: url("/images/img_product_third.png");
           background-size: cover;
           background-position: center;
           background-repeat: no-repeat;

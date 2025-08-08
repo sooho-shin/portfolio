@@ -9,6 +9,7 @@ import { breakpoints } from "@/config/breakboint";
 import { Playfair_Display } from "next/font/google";
 import classNames from "classnames";
 import { useCommonStore } from "@/stores/useCommon";
+import { useRouter } from "next/navigation";
 const playfair = Playfair_Display({
   subsets: ["latin"],
   weight: ["400", "700", "900"],
@@ -20,6 +21,7 @@ const NaviComponent = () => {
   const pathname = usePathname();
 
   const { setRoute } = useCommonStore();
+  const router = useRouter();
 
   useEffect(() => {
     setNaviState(false);
@@ -52,14 +54,19 @@ const NaviComponent = () => {
           ></button>
           <button
             className={classNames("navi", "home", playfair.className)}
-            onClick={() => setRoute("/")}
+            onClick={() => router.push("/")}
           >
             HOME
           </button>
-          <button className="navi" onClick={() => setRoute("/work")}>
+          <button
+            className="navi"
+            onClick={() => {
+              window.open("https://github.com/sooho-shin", "_blank");
+            }}
+          >
             WORK
           </button>
-          <button className="navi" onClick={() => setRoute("/about")}>
+          <button className="navi" onClick={() => router.push("/about")}>
             ABOUT
           </button>
         </div>
