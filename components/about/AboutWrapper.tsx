@@ -43,18 +43,18 @@ const AboutWrapper = () => {
     },
     {
       user_idx: 2,
-      name: "gildong",
-      job: "web server developer",
+      name: "amazoncar",
+      job: "렌트 및 리스 전문 웹 서비스",
     },
     {
       user_idx: 3,
-      name: "sunsin",
-      job: "designer",
+      name: "catcatch",
+      job: "인형뽑기를 집에서 즐길 수 있는 블록체인을 이용한 서비스",
     },
     {
       user_idx: 4,
-      name: "LeeJaeYong",
-      job: "ceo",
+      name: "yummygame",
+      job: "블록체인 온라인 게임 서비스",
     },
   ];
   const [currentMemberIdx, setCurrentMemberIdx] = useState<number>(1);
@@ -144,7 +144,7 @@ const AboutWrapper = () => {
           </CenterInfo>
           <SwipeWrppaer>
             <div className="swipe-info-box">
-              <div className="title">Team</div>
+              <div className="title">Work</div>
               <div className="pagenation">
                 <span>{currentMemberIdx}</span>
                 <span className="border"></span>
