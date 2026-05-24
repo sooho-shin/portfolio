@@ -1820,3 +1820,97 @@
 
 - Review visual QA and responsive layout risk: mobile nav overlay, text overflow, large fixed rails, blackhole SVG masking, gallery grid behavior, and whether key text remains readable across breakpoints.
 - Consider fixing contact links early, because actionable email and trusted social destinations are low-risk, high-impact improvements.
+
+## 2026-05-26 01:00 KST - Review 24
+
+### Scope
+
+- Visual QA and responsive layout risk
+- Mobile navigation overlay
+- Text overflow and readability
+- Fixed rails and blackhole SVG masking
+- Gallery grid behavior across breakpoints
+
+### Findings
+
+1. Breakpoint coverage is too coarse.
+   - Evidence: `config/breakboint.ts` defines common breakpoints, but most layout changes pivot only at `md` or `sm`.
+   - Current impact: tablet and narrow desktop states can inherit desktop assumptions such as fixed rails and large viewport typography.
+   - Recommended action: define tested viewport targets and add styles for high-risk ranges such as 768-1024px and small mobile widths.
+
+2. Mobile navigation uses a full-screen fixed panel with horizontal offset hiding.
+   - Evidence: `components/NaviBox.tsx` sets `.navi-group` to fixed, `width: 100%`, `height: 100%`, and toggles `left: 0` / `left: -100%`.
+   - Current impact: off-canvas state can still create focus/scroll issues and is sensitive to viewport width calculations.
+   - Recommended action: use transform-based off-canvas motion, focus trapping, and `aria-hidden`/inert behavior when closed.
+
+3. Mobile nav text is very large.
+   - Evidence: `components/NaviBox.tsx:191` sets `.navi` font size to `16vw` and line-height to `0.85em`.
+   - Current impact: long labels or future Korean labels can collide or clip on narrow screens.
+   - Recommended action: constrain nav font with `clamp()` and test 320px/360px widths.
+
+4. Mobile nav header dimensions are tied to viewport width.
+   - Evidence: `.mobile-navi` uses `height: 12vw`, `border-radius: 8vw`, and padding in vw units.
+   - Current impact: touch target sizes can become too small or too large depending on device width.
+   - Recommended action: use `clamp()` for height, padding, and icon sizes so the hamburger remains a stable target.
+
+5. The main blackhole SVG mixes fixed positioning, viewport units, and min dimensions.
+   - Evidence: `BlackholePositioner` is fixed on desktop, becomes absolute on mobile, and `.blackhole` uses `min-height: 100.1vh` and `min-width: 100.1vh`.
+   - Current impact: the mask can crop, overrun, or frame differently across viewport aspect ratios.
+   - Recommended action: replace min-vh sizing with explicit aspect-ratio containers and verify across portrait/landscape.
+
+6. Main project gallery uses negative margin on desktop.
+   - Evidence: `ProjectWrapper` has `height: 49.5vw` and `margin-top: -10vw`, then resets the margin on mobile.
+   - Current impact: the gallery can overlap preceding content at intermediate widths.
+   - Recommended action: avoid negative layout offsets or isolate the overlap in a predictable positioned container.
+
+7. Main gallery dimensions are not tied to a stable aspect-ratio.
+   - Evidence: `.gallery` uses `width: 37vw` and `height: 49.5vw`, then `width: 50vw` and `height: 70vw` on mobile.
+   - Current impact: image framing and marquee bands can change unpredictably with viewport width.
+   - Recommended action: use `aspect-ratio` and max/min constraints for the gallery card.
+
+8. Vertical marquee bands use fixed viewport-width band sizes.
+   - Evidence: Main gallery uses `height: 3vw` and vertical band `width: 3vw`, while text uses `font-size: 1.5vw`.
+   - Current impact: marquee text can become unreadable on small screens and oversized on wide screens.
+   - Recommended action: use `clamp()` and pause/hide decorative marquee bands below a threshold.
+
+9. About/Work local fixed rails do not share the same mobile hiding logic as `LeftWrapper`.
+   - Evidence: page-local `AboutLeft` in About and Work sets `width: 25vw`, `height: 100vh`, and `position: fixed`, while shared `LeftWrapper` hides at `md`.
+   - Current impact: the fixed rail content can behave differently than the layout wrapper that contains it.
+   - Recommended action: move rail behavior into one shared component with a single responsive policy.
+
+10. Long email/contact text relies on viewport-sized type.
+    - Evidence: About/Work `.mail` uses `font-size: 3vw` and `word-break: break-all`.
+    - Current impact: email readability changes sharply by viewport and can break awkwardly.
+    - Recommended action: use `clamp()` and allow better wrapping with a real `mailto` link.
+
+11. About center content uses fixed text widths.
+    - Evidence: `CenterInfo > div` uses `width: 47vw` on desktop and only switches to `100%` under `md`.
+    - Current impact: medium-width layouts can produce narrow columns or awkward line breaks.
+    - Recommended action: use `max-width` and container-relative spacing rather than hard `vw` widths.
+
+12. About slider mobile square depends on `calc(100vw - 40px)`.
+    - Evidence: `.swipe-gallery-box` sets both width and height to `calc(100vw - 40px)` under `md`.
+    - Current impact: this is tied to the left mobile gutter and can break if the shared layout offset changes.
+    - Recommended action: derive gallery size from its container with `aspect-ratio: 1 / 1`.
+
+13. Work grid border logic assumes an even number of cards.
+    - Evidence: `GalleryContainer` removes border-bottom from `:nth-last-child(2)` and `:last-child`.
+    - Current impact: odd card counts can leave inconsistent borders.
+    - Recommended action: use CSS grid gap/borders or data-independent border rules.
+
+14. Visual QA is not automated.
+    - Evidence: there is no Playwright, Storybook, screenshot test, or viewport test script.
+    - Current impact: layout regressions can only be caught manually after browsing.
+    - Recommended action: add a small Playwright smoke test for `/`, `/about`, and `/work` at 360px, 768px, 1024px, and desktop widths after build stability improves.
+
+### Verification
+
+- Checked current worktree with `git status --short --branch`.
+- Searched responsive and visual-risk patterns with `rg` for media queries, viewport units, fixed positioning, overflow, word-break, font sizing, z-index, blackhole, gallery, and aspect-ratio usage.
+- Inspected `NaviBox`, relevant `MainWrapper` styles, About slider/rail styles, Work gallery styles, and `config/breakboint.ts`.
+- Checked disk state with `Get-PSDrive -Name C` before verification work.
+
+### Next Review Angle
+
+- Review state/effects lifecycle safety: unused state setters, timeout cleanup, ref null guards, scroll effects, Zustand usage, and whether effects can run after unmount.
+- Consider adding browser screenshot QA once the build/dev server path is stable and disk space remains sufficient.
