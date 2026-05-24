@@ -423,3 +423,76 @@
 
 - Review content consistency across About and Work now that the homepage is positioned around verification-oriented AI development.
 - Consider implementing the deployment hygiene fixes as separate commits: package manager declaration, `.nvmrc`, `typecheck` script, and PM2 env cleanup.
+
+## 2026-05-25 09:00 KST - Review 8
+
+### Scope
+
+- Content consistency between Home, About, and Work
+- Portfolio positioning around verification-oriented AI development
+- Information architecture for proof, evidence, and case studies
+- Remaining placeholder/parody copy that weakens credibility
+
+### Findings
+
+1. The homepage now positions the portfolio around verified AI systems, but About still introduces a generic frontend/developer story.
+   - Evidence: `components/about/AboutWrapper.tsx:137` describes a visual-design-to-development transition, frontend focus, and future backend learning.
+   - Current impact: the first page promises AI validation expertise, while About explains a different career narrative.
+   - Recommended action: rewrite About around validation workflow: problem framing, dataset/testset design, LLM/RAG evaluation, automation, failure analysis, and user-facing implementation.
+
+2. About effect copy still says `SOOHO about`.
+   - Evidence: `components/about/AboutWrapper.tsx:36`.
+   - Current impact: page transition text does not reinforce the current positioning.
+   - Recommended action: change it to a phrase such as `VERIFIED AI ABOUT`, `AI EVALUATION`, or another concise verification-focused label.
+
+3. Work effect copy still says `SOOHO work`.
+   - Evidence: `components/works/WorkWrapper.tsx:38`.
+   - Current impact: Work page branding does not match homepage's `VERIFIED AI SYSTEMS`.
+   - Recommended action: use `VERIFIED AI WORK` or a project-specific label.
+
+4. About uses fictional or joke-like contact/place copy.
+   - Evidence: `components/about/AboutWrapper.tsx:105` shows `Inquiries:`, and `components/about/AboutWrapper.tsx:108` through `components/about/AboutWrapper.tsx:112` show `CONTACT:`, `Blumenkopf kein Studio`, `Burgring 123`, and `1010 Wien, Korea`.
+   - Current impact: credibility drops for a portfolio trying to sell rigorous validation work.
+   - Recommended action: replace with real contact channels, location/timezone if useful, and a short project inquiry statement.
+
+5. Work page repeats the same contact placeholder from About.
+   - Evidence: `components/works/WorkWrapper.tsx:89` through `components/works/WorkWrapper.tsx:96`.
+   - Current impact: the Work page starts with unrelated/fake contact context instead of helping users inspect proof of work.
+   - Recommended action: change the left rail to a Work-specific summary such as "검증 기준, 자동화, 결과" or remove the left rail content.
+
+6. About still contains fake-client parody copy.
+   - Evidence: `components/about/AboutWrapper.tsx:288` renders `Clients i wish i had WORKED FOR:` and the data includes `Netflix`, `Apple`, `Nike`, and other brands.
+   - Current impact: the joke competes with the intended serious AI validation positioning.
+   - Recommended action: replace with "검증 경험 영역", "다뤄본 문제 유형", or "관심 도메인" backed by real or honest labels.
+
+7. About skillset is generic web stack only.
+   - Evidence: `components/about/AboutWrapper.tsx:300` through `components/about/AboutWrapper.tsx:315` list `REACT`, `NEXT JS`, `NODE JS`, `EXPRESS`, `HTML`, `JAVASCRIPT`, `CSS / SCSS`, and `SQL`.
+   - Current impact: the page does not communicate AI evaluation ability after the homepage foregrounds it.
+   - Recommended action: add categories like `Evaluation`, `Prompt/RAG Testing`, `LLM Integration`, `Automation`, `Observability`, and keep web stack as implementation tools.
+
+8. About project carousel labels do not explain evidence or outcomes.
+   - Evidence: `memberArrayData` entries in `components/about/AboutWrapper.tsx:38` through `components/about/AboutWrapper.tsx:58` have project names and short service descriptions, but no role, metric, validation method, or result.
+   - Current impact: viewers cannot evaluate what was built or how quality was verified.
+   - Recommended action: remodel items with `role`, `problem`, `validation`, `result`, and `stack` fields.
+
+9. Work page is still a visual gallery with repeated dummy cards.
+   - Evidence: `components/works/WorkWrapper.tsx:64` through `components/works/WorkWrapper.tsx:80` repeats `yummygame` images and `"yummy yummy"` titles.
+   - Current impact: there is no credible case-study structure for an AI validation portfolio.
+   - Recommended action: define real case-study cards, even if initially brief: `title`, `problem`, `verification approach`, `artifact`, and `link/status`.
+
+10. Social section says `YOU won't FIND ME HERE`.
+    - Evidence: `components/about/AboutWrapper.tsx:322` through `components/about/AboutWrapper.tsx:323`.
+    - Current impact: the copy discourages contact/verification instead of directing users to credible channels.
+    - Recommended action: replace with straightforward labels like `Contact`, `GitHub`, `Instagram`, or `Project Links`, and ensure each link is real.
+
+### Verification
+
+- Inspected `components/about/AboutWrapper.tsx`, `components/works/WorkWrapper.tsx`, and the current homepage copy.
+- Searched for leftover placeholder/brand terms with `Select-String` over About and Work.
+- Checked actual UTF-8 contents with Python because PowerShell displays Hangul as mojibake in this environment.
+- `node ./node_modules/typescript/bin/tsc --noEmit`: passed.
+
+### Next Review Angle
+
+- Review CSS/layout maintainability: repeated section/wrapper styles, typo-prone names, hard-coded viewport units, and mobile layout risks.
+- Consider a content refactor before visual polish: About and Work should prove the same verification-focused story that Home now promises.
