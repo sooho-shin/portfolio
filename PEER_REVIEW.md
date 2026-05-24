@@ -2434,3 +2434,109 @@
 
 - Review security and dependency risk: outdated packages, peer dependency mismatches, unused dependencies, external links, third-party runtime surface, and whether dependency upgrades need a controlled plan.
 - Consider stabilizing installs before production work: pick npm or Yarn, fix/remove `react-textfit`, add `packageManager` or `engines`, and rebuild from a clean clone.
+
+## 2026-05-25 08:00 KST - Review 30
+
+### Scope
+
+- Security and dependency risk
+- Audit findings and upgrade pressure
+- Lockfile trust boundaries
+- External link hygiene
+- Third-party runtime surface
+
+### Findings
+
+1. `npm audit` reports a critical direct dependency issue through Next.
+   - Evidence: `npm audit --json` reports `next` as a direct critical vulnerability with a non-major fix available at `14.2.35`.
+   - Current impact: the deployed framework version has known advisories affecting cache, middleware, image optimization, server components, and request handling.
+   - Recommended action: plan an immediate patch upgrade from `next@14.2.3` to a safe 14.2.x version, then rerun typecheck, lint, build, and visual smoke checks.
+
+2. Audit output contains 18 total vulnerabilities.
+   - Evidence: audit metadata reports 7 moderate, 10 high, and 1 critical vulnerability across 325 dependencies.
+   - Current impact: even if many are transitive or dev-only, the project has no clean security baseline.
+   - Recommended action: create a dependency remediation pass that separates production runtime fixes from dev tooling fixes.
+
+3. `eslint-config-next` is directly vulnerable through its transitive chain.
+   - Evidence: `npm audit --json` reports `eslint-config-next` as a direct high severity finding through `@next/eslint-plugin-next` and `glob`.
+   - Current impact: lint tooling introduces high-severity dev dependency risk.
+   - Recommended action: upgrade Next lint tooling in a controlled branch and be ready for semver-major ESLint/Next lint changes.
+
+4. `package-lock.json` is stale relative to `package.json`.
+   - Evidence: the root package in `package-lock.json` lists only `next`, `react`, and `react-dom` as dependencies, while `package.json` also lists Lenis, styled-components, Zustand, classnames, react-use, and react-textfit.
+   - Current impact: npm audit/install evidence is incomplete for the declared package manifest.
+   - Recommended action: regenerate the chosen lockfile from a clean install after deciding npm vs Yarn.
+
+5. Several declared runtime dependencies are absent from `package-lock.json`.
+   - Evidence: `node_modules/react-textfit`, `node_modules/@studio-freight/react-lenis`, `node_modules/lenis`, `node_modules/react-use`, `node_modules/styled-components`, `node_modules/zustand`, and `node_modules/classnames` are missing from the lockfile package map.
+   - Current impact: npm-based environments may not install the same runtime surface as the current workspace expects.
+   - Recommended action: do not treat the npm lockfile as authoritative until it is regenerated or removed.
+
+6. `react-textfit` is both incompatible and security-maintenance risky.
+   - Evidence: npm install checks report `react-textfit@1.1.1` has React peer support only for React 15/16, while this project uses React 18.
+   - Current impact: future React or Next upgrades can break around an unmaintained layout dependency.
+   - Recommended action: replace `react-textfit` with CSS clamp/container sizing or a maintained fit-text utility.
+
+7. Next is pinned, but React is range-based.
+   - Evidence: `package.json` pins `next` to `14.2.3` but uses `react: "^18"` and `react-dom: "^18"`.
+   - Current impact: React can move within the major while Next stays old, creating unplanned compatibility combinations.
+   - Recommended action: pin React/ReactDOM to a tested patch version or update the full Next/React stack together.
+
+8. `npm outdated` shows the framework is far behind current major versions.
+   - Evidence: `npm outdated --json` reports `next` current/wanted `14.2.3` and latest `16.2.6`.
+   - Current impact: a future upgrade will likely involve multiple migration steps, not just a patch.
+   - Recommended action: first apply the latest safe 14.2 patch, then plan a separate major upgrade path.
+
+9. Some dependencies are likely unused or redundant.
+   - Evidence: `styled` is declared in `package.json` but no `from "styled"` import was found; `zustand` is only used by a route store with no active consumer; `@studio-freight/react-lenis` is declared while runtime code imports from `lenis/react`.
+   - Current impact: unused packages expand install and audit surface without product value.
+   - Recommended action: remove unused dependencies after confirming imports and lockfiles in a clean branch.
+
+10. The project has two Lenis-related packages.
+    - Evidence: dependencies include both `@studio-freight/react-lenis` and `lenis`, but `lib/smoothScrolling.tsx` imports `ReactLenis` from `lenis/react`.
+    - Current impact: scroll behavior ownership is unclear and may carry old package surface unnecessarily.
+    - Recommended action: keep one Lenis integration path and remove the unused package.
+
+11. External links still miss safe new-tab attributes.
+    - Evidence: Footer and About links use `target="_blank"` without `rel="noopener noreferrer"`.
+    - Current impact: opened pages can access `window.opener`, and security audits will flag the pattern.
+    - Recommended action: add a shared external link component or helper that always sets `rel`.
+
+12. Footer links to a generic external site under a social icon.
+    - Evidence: `components/Footer.tsx` renders the Facebook icon link with `href="https://www.naver.com/"`.
+    - Current impact: users can be sent to an unexpected destination, which weakens trust and can look like a phishing or placeholder link.
+    - Recommended action: remove placeholder links or replace them with verified profile URLs.
+
+13. There is no security header configuration.
+    - Evidence: `next.config.mjs` has no `headers()` configuration for CSP, frame protections, referrer policy, or permissions policy.
+    - Current impact: the site relies on platform defaults for browser security controls.
+    - Recommended action: add a conservative baseline header set after confirming image/font/script needs.
+
+14. The app does not use dangerous HTML APIs today.
+    - Evidence: searches found no `dangerouslySetInnerHTML`, `eval`, `Function`, `document.cookie`, `innerHTML`, `outerHTML`, `window.open`, or `postMessage` usage in app/components/lib.
+    - Current impact: direct XSS and arbitrary execution risk from local code is currently lower than the dependency/runtime risk.
+    - Recommended action: keep this invariant and add lint rules or review checks before introducing rich text or embedded content.
+
+15. Public image paths are local, but image optimization risk still follows Next version.
+    - Evidence: project visuals are local CSS backgrounds and plain `<img>` icons; audit still reports multiple Next image optimization advisories for the installed Next version.
+    - Current impact: current usage may reduce exposure, but framework advisories still matter if `next/image` or optimizer routes are added later.
+    - Recommended action: patch Next before expanding image optimization usage.
+
+16. There is no automated dependency policy.
+    - Evidence: no CI workflow, Renovate, Dependabot, audit script, or package manager policy file was found.
+    - Current impact: security updates are manual and easy to miss.
+    - Recommended action: add Dependabot or Renovate, plus a CI audit/typecheck/build gate after lockfile stabilization.
+
+### Verification
+
+- Checked current worktree with `git status --short --branch`.
+- Searched app and config code for external links, unsafe HTML APIs, storage/cookie APIs, environment usage, router imports, image patterns, and dependency imports.
+- Ran `npm audit --json` and recorded the critical Next finding plus total vulnerability counts.
+- Ran `npm outdated --json` and recorded outdated framework, React, tooling, and utility packages.
+- Inspected `package.json`, `package-lock.json`, and `yarn.lock` dependency evidence.
+- Confirmed the npm lockfile root dependency set does not match the current package manifest.
+
+### Next Review Angle
+
+- Review maintainability and refactor sequencing: which fixes should be batched first, dependency cleanup order, component extraction order, risk of touching large wrappers, and a practical stabilization roadmap.
+- Consider the first security fix to be a clean dependency baseline: pick one lockfile, remove unused packages, replace `react-textfit`, patch Next within 14.2.x, and add CI.
