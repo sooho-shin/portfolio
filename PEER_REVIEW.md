@@ -1535,3 +1535,98 @@
 
 - Review data modeling and content-source design: project configs, profile/capability schemas, social/contact config, image metadata, and how to make copy edits safer.
 - Consider deleting dead scaffold components before larger refactors, because it immediately reduces search noise.
+
+## 2026-05-25 22:00 KST - Review 21
+
+### Scope
+
+- Data modeling and content-source design
+- Portfolio proof schema
+- Contact/social configuration
+- Image metadata
+- Safer copy edits across pages
+
+### Findings
+
+1. Portfolio content is embedded directly in components.
+   - Evidence: main copy is in `components/main/MainWrapper.tsx`, About biography/project/client content is in `components/about/AboutWrapper.tsx`, Work cards are in `components/works/WorkWrapper.tsx`, and footer copy/social links are in `components/Footer.tsx`.
+   - Current impact: changing positioning requires editing multiple component files instead of one content source.
+   - Recommended action: introduce typed content modules such as `config/profile.ts`, `config/projects.ts`, `config/capabilities.ts`, and `config/socialLinks.ts`.
+
+2. Contact information is duplicated with inconsistent casing and behavior.
+   - Evidence: `components/main/MainWrapper.tsx` includes `soojoon92@gmail.com` and `SOOJOON92@GMAIL.COM`; About and Work repeat `soojoon92@gmail.com`; Footer repeats `SOOJOON92@GMAIL.COM`.
+   - Current impact: copy drift is likely, and the main email link still uses placeholder behavior.
+   - Recommended action: define one `profile.email` value and derive display text, `mailto`, and footer labels from it.
+
+3. Capability keywords are duplicated as raw strings.
+   - Evidence: `Eval`, `RAG`, `Agent`, `AUTOMATION`, `LLM`, and `QA` appear in Main and Footer markup.
+   - Current impact: adding or renaming a capability requires manual edits in separate sections.
+   - Recommended action: define a `capabilities` array with `id`, `label`, `description`, and optional `proofProjectIds`.
+
+4. Work data is too shallow for an AI validation portfolio.
+   - Evidence: `components/works/WorkWrapper.tsx` models work items as `{ text, images }`.
+   - Current impact: there is no place to express problem, AI role, validation method, evaluation metric, stack, failure mode, or result.
+   - Recommended action: define `ProjectCaseStudy` with fields like `id`, `slug`, `title`, `summary`, `problem`, `role`, `stack`, `validation`, `metrics`, `result`, `links`, and `images`.
+
+5. Work items have no stable ids or slugs.
+   - Evidence: Work cards use `key={c.text}` and several entries share `text: "yummy yummy"`.
+   - Current impact: React keys are unstable and future detail routes cannot be derived safely.
+   - Recommended action: add explicit `id` and `slug` to every project item.
+
+6. Image data lacks metadata.
+   - Evidence: Work images are arrays of string paths, About user images are inferred from `user_idx`, and GalleryBox accepts `imgFirst`, `imgSecond`, `imgThird`.
+   - Current impact: there is no alt text, dimensions, priority/lazy hint, role, or caption in the data model.
+   - Recommended action: define `PortfolioImage = { src: string; alt: string; width?: number; height?: number; priority?: boolean }`.
+
+7. The About project model uses template-era naming.
+   - Evidence: `memberType`, `memberArrayData`, `user_idx`, `name`, and `job` are used for portfolio project cards.
+   - Current impact: the model obscures the fact that these are projects/proof points, not team members.
+   - Recommended action: rename to `ProjectSummary` or `ProofPoint` and model it around portfolio evidence.
+
+8. Fictional client data is not tagged as fictional or aspirational in the model.
+   - Evidence: `clientArrayData` includes brands such as Netflix, Apple, Samsung, Nike, Google, Gucci, and Tesla.
+   - Current impact: trust-sensitive content is represented as plain strings with no source, status, or display rule.
+   - Recommended action: remove the list, or model it explicitly as `aspirationalBrands` with copy that cannot be mistaken for actual clients.
+
+9. Social links have no central source of truth.
+   - Evidence: Footer links SoundCloud, Naver, and Instagram; About has Twitter text without an `href`, Facebook, and a different Instagram URL.
+   - Current impact: link destinations and labels diverge between pages.
+   - Recommended action: define `socialLinks` with `id`, `label`, `href`, `icon`, `enabled`, and `opensInNewTab`.
+
+10. External link safety cannot be enforced by data.
+    - Evidence: multiple `target="_blank"` anchors are written inline without a shared link component or metadata flag.
+    - Current impact: `rel="noopener noreferrer"` and accessible labels must be remembered manually.
+    - Recommended action: create a `SocialLink` or `ExternalLink` component that consumes link config and applies safe defaults.
+
+11. Contact rail data is duplicated in About and Work.
+    - Evidence: both About and Work render `Inquiries`, email, `CONTACT`, `Blumenkopf kein Studio`, `Burgring 123`, and `1010 Wien, Korea`.
+    - Current impact: placeholder address content persists in multiple files.
+    - Recommended action: define a `contact` object and one `ContactRail` component; remove fake address fields from production content.
+
+12. Content copy and metadata are separate, so SEO can drift.
+    - Evidence: root metadata lives in `app/layout.tsx`, while main positioning copy lives in `MainWrapper` and footer text lives in `Footer`.
+    - Current impact: visible AI-developer copy can change without updating search/social snippets.
+    - Recommended action: source `metadata` title/description from the same profile/positioning config used by visible components.
+
+13. There is no schema-level validation for content completeness.
+    - Evidence: content is plain local arrays and JSX strings with inferred types or weak custom types.
+    - Current impact: missing links, duplicate ids, empty alt text, or placeholder routes are not caught.
+    - Recommended action: use TypeScript `satisfies` with readonly arrays, tuple image requirements, and explicit project/social/contact types.
+
+14. Content should be extractable before major visual refactors.
+    - Evidence: current visual components mix layout, animation, and content values in the same files.
+    - Current impact: refactors risk changing copy accidentally or preserving stale placeholder data.
+    - Recommended action: first move content to typed configs, then refactor UI components to consume those configs.
+
+### Verification
+
+- Checked current worktree with `git status --short --branch`.
+- Searched content/data patterns with `rg` for local arrays, custom types, project names, email strings, social links, image paths, capabilities, and metadata-like fields.
+- Inspected `WorkWrapper`, `AboutWrapper`, `Footer`, and `MainWrapper` directly.
+- Counted repeated contact/capability strings across Main, About, Work, and Footer using Python.
+- Confirmed `config` currently only contains `breakboint.ts`, with no profile/project/social content source.
+
+### Next Review Angle
+
+- Review routing and navigation architecture: App Router route structure, placeholder links, router button usage, prefetch behavior, missing work detail routes, and URL design for case studies.
+- Consider creating typed content config before fixing copy again, because it would reduce repeated manual edits across pages.
