@@ -887,3 +887,88 @@
 
 - Review SEO and metadata: page titles, descriptions, Open Graph data, sitemap/robots, semantic headings, and whether the AI-developer positioning appears in crawlable metadata.
 - Consider a content-source refactor before more copy changes so profile, work, footer, and social data stay consistent.
+
+## 2026-05-25 15:00 KST - Review 14
+
+### Scope
+
+- SEO metadata and crawlable positioning
+- Open Graph / Twitter card readiness
+- Robots and sitemap coverage
+- Semantic document structure
+- Image discoverability and accessible alternatives
+
+### Findings
+
+1. Only the root layout exports metadata.
+   - Evidence: `app/layout.tsx:7` exports `metadata`; `app/page.tsx`, `app/about/page.tsx`, and `app/work/page.tsx` do not export page-specific metadata.
+   - Current impact: Home, About, and Work share the same generic title/description even though they serve different search intents.
+   - Recommended action: add route-level metadata for `/`, `/about`, and `/work`, with titles/descriptions that reinforce the AI validation portfolio angle.
+
+2. The global metadata is a good start but too thin for sharing.
+   - Evidence: `app/layout.tsx:8` defines `title`, and `app/layout.tsx:9` defines `description`; no `openGraph`, `twitter`, `alternates`, `metadataBase`, `creator`, or `authors` entries were found.
+   - Current impact: shared links may show generic or missing previews, and canonical URL generation is not explicit.
+   - Recommended action: add `metadataBase`, canonical alternates, author/creator fields, Open Graph, and Twitter card metadata.
+
+3. The AI-developer positioning is not represented in Open Graph or Twitter card text.
+   - Evidence: searching `openGraph` and `twitter` across `app`, `public`, and `next.config.mjs` returned no matches.
+   - Current impact: the strongest positioning exists in rendered copy, but social previews do not carry it.
+   - Recommended action: define preview copy such as "검증하는 AI 개발자" and "Eval / RAG / Agent 품질을 기준과 자동화로 증명합니다" in metadata.
+
+4. There is no sitemap route.
+   - Evidence: no `app/sitemap.ts` file was found.
+   - Current impact: search engines must discover `/about` and `/work` only through links and crawl heuristics.
+   - Recommended action: add `app/sitemap.ts` with `/`, `/about`, and `/work`, including `lastModified` and priorities.
+
+5. There is no robots route.
+   - Evidence: no `app/robots.ts` or `public/robots.txt` file was found.
+   - Current impact: crawl policy is implicit and cannot advertise the sitemap URL.
+   - Recommended action: add `app/robots.ts` with allowed crawling and a sitemap reference once the canonical site URL is known.
+
+6. The app lacks a dedicated social preview image.
+   - Evidence: no `opengraph-image.*`, `twitter-image.*`, or obvious `og`/`social` preview asset was found; only regular images and icons exist under `public`.
+   - Current impact: previews may use an arbitrary image or no strong visual at all.
+   - Recommended action: create an Open Graph image that directly states the AI validation positioning and includes the portfolio name/email.
+
+7. Primary page headings are not semantic headings.
+   - Evidence: `Select-String` found no `<h1>`, `<h2>`, or `<h3>` usage in `MainWrapper`, `AboutWrapper`, `WorkWrapper`, or `GalleryBox`; titles are rendered as `<p className="title">`, `<div className="title">`, and `Textfit` content.
+   - Current impact: crawlers and assistive technology cannot infer the main outline from the visual hierarchy.
+   - Recommended action: render the first major page title as `h1`, section labels as `h2`, and card titles as `h3` while preserving the existing styled-components visuals.
+
+8. The layout does not expose a real `<main>` landmark.
+   - Evidence: page wrappers return styled `div` components such as `MainWrapper` and `Section`; no `<main>` usage was found.
+   - Current impact: keyboard and screen-reader users have weaker page landmarks, and search engines receive less semantic structure.
+   - Recommended action: change top-level page wrappers to `main` or wrap page content in a semantic `<main>`.
+
+9. Core visual content is mostly CSS background images.
+   - Evidence: `components/main/MainWrapper.tsx:342`, `components/main/MainWrapper.tsx:538`, `components/main/MainWrapper.tsx:545`, `components/main/MainWrapper.tsx:553`, `components/about/AboutWrapper.tsx:263`, and `components/GalleryBox.tsx:229` through `components/GalleryBox.tsx:249`.
+   - Current impact: important portfolio images do not have alt text, intrinsic sizing, or easy indexing as content images.
+   - Recommended action: use `next/image` for meaningful images and keep CSS backgrounds only for decorative treatment.
+
+10. Social icon alt text is generic and not destination-specific.
+    - Evidence: `components/Footer.tsx:60`, `components/Footer.tsx:64`, and `components/Footer.tsx:68` use `alt="icoSoundcloud"`, `alt="icoFacebook"`, and `alt="icoInsta"`.
+    - Current impact: screen readers hear implementation-style labels instead of the link purpose.
+    - Recommended action: either use empty alt text when the anchor has an accessible label, or set descriptive labels such as "SoundCloud profile" and "Instagram profile".
+
+11. Metadata and visible copy can drift because they live in separate places.
+    - Evidence: metadata lives in `app/layout.tsx`, while main/footer/About/Work copy lives directly inside component files.
+    - Current impact: future copy changes can update the visible UI but leave search snippets stale.
+    - Recommended action: centralize profile positioning strings in a typed content config and import them into both metadata and rendered components.
+
+12. The current `next.config.mjs` is minimal and does not document deployment URL assumptions.
+    - Evidence: `next.config.mjs` only enables the styled-components compiler.
+    - Current impact: sitemap, canonical URLs, and metadataBase will require a site URL decision that is not captured anywhere.
+    - Recommended action: introduce a `NEXT_PUBLIC_SITE_URL` convention or a small `config/site.ts` module used by metadata, sitemap, and robots.
+
+### Verification
+
+- Searched metadata and SEO-related symbols with `rg -n "metadata|Metadata|title|description|openGraph|twitter|robots|sitemap|viewport|manifest|canonical|alternates|keywords|icons|themeColor" app components config public next.config.* package.json`.
+- Inspected `app/layout.tsx`, `app/page.tsx`, `app/about/page.tsx`, `app/work/page.tsx`, and `next.config.mjs` directly.
+- Confirmed route-level metadata only exists in `app/layout.tsx` with `rg -n -F "export const metadata" app`.
+- Checked semantic headings and landmarks with `Select-String` for `<h1`, `<h2`, `<h3`, `<main`, `<section`, `<article`, and title-class patterns.
+- Checked SEO preview assets by searching `app` and `public` for robots, sitemap, manifest, Open Graph, and Twitter image files.
+
+### Next Review Angle
+
+- Review accessibility more deeply: focus order, button labels, keyboard navigation, link semantics, color contrast, reduced motion, and screen-reader names.
+- Consider implementing metadata/sitemap/robots as a low-risk improvement after the content source is consolidated.
