@@ -569,3 +569,76 @@
 
 - Review data/type safety: `any` refs, image prop types, untyped work arrays, duplicated domain data, and opportunities for shared TypeScript models.
 - Consider a layout-token cleanup before larger redesign work to reduce future edit risk.
+
+## 2026-05-25 11:00 KST - Review 10
+
+### Scope
+
+- TypeScript type safety
+- `any` usage and DOM ref typing
+- Image prop and work-item data modeling
+- Duplicated domain arrays across pages
+- Strictness gaps that are hidden by current patterns
+
+### Findings
+
+1. `GalleryBox` uses `any` for image props in both public props and styled props.
+   - Evidence: `components/GalleryBox.tsx:7`, `components/GalleryBox.tsx:8`, `components/GalleryBox.tsx:9`, `components/GalleryBox.tsx:160`, `components/GalleryBox.tsx:161`, and `components/GalleryBox.tsx:162`.
+   - Current impact: callers can pass non-string image values and still satisfy TypeScript, even though the values are interpolated into CSS `url(...)`.
+   - Recommended action: type these props as `string`, or define `type GalleryImageSet = { imgFirst: string; imgSecond: string; imgThird: string }`.
+
+2. Ref types use `any` across interactive pages.
+   - Evidence: `components/about/AboutWrapper.tsx:62` through `components/about/AboutWrapper.tsx:66`, `components/works/WorkWrapper.tsx:40` through `components/works/WorkWrapper.tsx:41`, and `components/EffectBox.tsx:17`.
+   - Current impact: TypeScript cannot catch invalid `.style`, `.offsetHeight`, or `.current` usage.
+   - Recommended action: use concrete refs such as `useRef<HTMLDivElement | null>(null)` and add null guards before style/layout reads.
+
+3. Work page declares a `memberType` and `clientArrayData` that are not used for Work rendering.
+   - Evidence: `components/works/WorkWrapper.tsx:15` through `components/works/WorkWrapper.tsx:31`.
+   - Current impact: stale copied types/data make it harder to see the actual Work model.
+   - Recommended action: remove unused copied declarations and introduce a real `WorkItem` type.
+
+4. `workArray` is inferred from a local anonymous array and lacks stable identity fields.
+   - Evidence: `components/works/WorkWrapper.tsx:64` through `components/works/WorkWrapper.tsx:80`.
+   - Current impact: there is no enforced `id`, `href`, or image tuple length; key usage falls back to duplicated `text`.
+   - Recommended action: define `type WorkItem = { id: string; title: string; href: string; images: readonly [string, string, string] }`.
+
+5. About page uses `memberType`, but the shape is too generic for portfolio work.
+   - Evidence: `components/about/AboutWrapper.tsx:13` through `components/about/AboutWrapper.tsx:17`.
+   - Current impact: `user_idx`, `name`, and `job` do not encode project-specific proof such as role, stack, validation method, or result.
+   - Recommended action: replace `memberType` with a domain type such as `ProjectSummary` or `CaseStudySummary`.
+
+6. Naming does not follow TypeScript conventions.
+   - Evidence: `type memberType` and `type CommonStoreType`.
+   - Current impact: lowercase type names blend into value identifiers and reduce readability.
+   - Recommended action: rename to `Member`, `ProjectSummary`, or `CommonStoreState` depending on intent.
+
+7. `clientArrayData` is duplicated between About and Work even though Work does not use it.
+   - Evidence: `components/about/AboutWrapper.tsx:19` and `components/works/WorkWrapper.tsx:21`.
+   - Current impact: copied page scaffolding increases stale data and review noise.
+   - Recommended action: keep page-specific data close to the page only when used; shared data should live in a typed config module.
+
+8. State is used for immutable data.
+   - Evidence: `components/about/AboutWrapper.tsx:61` stores `clientArrayData` with `useState` but never updates it.
+   - Current impact: it suggests mutability where there is none and adds unnecessary React state.
+   - Recommended action: use `clientArrayData` directly or memoize only if a computed transformation is expensive.
+
+9. `tsconfig.json` allows JavaScript files while the codebase is effectively TypeScript.
+   - Evidence: `tsconfig.json` has `"allowJs": true`.
+   - Current impact: stray JavaScript files can enter the project without TypeScript checking expectations matching TS files.
+   - Recommended action: set `allowJs` to `false` unless there is a concrete migration reason.
+
+10. `skipLibCheck` hides dependency type issues, including older library compatibility.
+    - Evidence: `tsconfig.json` has `"skipLibCheck": true`; dependency review already found `react-textfit` peer compatibility issues.
+    - Current impact: type checking is faster but can mask stale dependency type problems.
+    - Recommended action: keep it if build speed matters, but track it as a conscious tradeoff and prioritize replacing outdated packages.
+
+### Verification
+
+- Searched type patterns with `rg -n "\\bany\\b|type .*Type|type Props|useRef<|useState<|const .*Data|workArray|memberArrayData|clientArrayData|imgFirst|imgSecond|imgThird|ReactNode|Record<|interface" app components lib stores config styles`.
+- Inspected `tsconfig.json`, `components/GalleryBox.tsx`, `components/about/AboutWrapper.tsx`, and `components/works/WorkWrapper.tsx` directly.
+- `node ./node_modules/typescript/bin/tsc --noEmit`: passed.
+
+### Next Review Angle
+
+- Review dependency health and library choices: `react-textfit`, `react-use`, `styled`, Lenis package duplication, and unused packages.
+- Consider creating shared `types/portfolio.ts` or `config/works.ts` before more page content changes.
