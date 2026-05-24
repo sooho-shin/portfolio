@@ -2857,3 +2857,108 @@
 
 - Review routing and information architecture: current route set, missing project detail routes, navigation semantics, conversion paths, page hierarchy, and how the portfolio should scale beyond three routes.
 - Consider adding `typecheck`, `verify`, and a minimal CI workflow after package manager cleanup restores script reliability.
+
+## 2026-05-25 12:00 KST - Review 34
+
+### Scope
+
+- Routing and information architecture
+- Current route inventory and navigation semantics
+- Project proof paths and conversion paths
+- Page hierarchy for portfolio scalability
+- Crawler-readable route exposure
+
+### Findings
+
+1. The public route tree is too flat for a proof-driven portfolio.
+   - Evidence: the only app routes are `app/page.tsx`, `app/about/page.tsx`, and `app/work/page.tsx`.
+   - Current impact: the site can introduce positioning, but it cannot route visitors into case-study evidence, validation artifacts, or project-specific reasoning.
+   - Recommended action: define a target route map before more copy edits, for example `/`, `/work`, `/work/[slug]`, `/about`, and a contact path.
+
+2. Work cards do not lead to work.
+   - Evidence: `components/works/WorkWrapper.tsx` wraps every gallery card in `<Link href={"/"} key={c.text}>`.
+   - Current impact: clicking a project returns to the home page, so the main proof surface becomes a dead end.
+   - Recommended action: route each card to a stable slug such as `/work/yummygame` after project data is centralized.
+
+3. Project identity is not modeled as route data.
+   - Evidence: `workArray` stores only `text` and `images`, with no `slug`, `title`, `summary`, `role`, `problem`, `validation`, `metrics`, or external link fields.
+   - Current impact: adding dynamic project pages would require another refactor instead of simply rendering existing structured data.
+   - Recommended action: create a typed `projects` config that includes route slugs, display copy, image metadata, and validation proof fields.
+
+4. Duplicate project labels break URL and React-key readiness.
+   - Evidence: three work entries use the same `text: "yummy yummy"`, and that same text is used as the React key.
+   - Current impact: the list cannot safely become a slug-based route list, and duplicate keys can hide rendering bugs.
+   - Recommended action: use unique project IDs or slugs as keys and keep display labels separate.
+
+5. Navigation is implemented as button-driven route mutation instead of links.
+   - Evidence: `components/NaviBox.tsx` imports `Link` but uses `router.push("/")`, `router.push("/work")`, and `router.push("/about")` inside buttons.
+   - Current impact: the primary IA is less crawlable, less copyable from markup, and less consistent with the rest of the app.
+   - Recommended action: render primary navigation as `next/link` anchors, then reserve buttons for menu open and close actions.
+
+6. The global navigation lacks semantic navigation markup.
+   - Evidence: the nav shell is a styled `div`, and source search found no active `<nav>` markup in `app` or primary components.
+   - Current impact: assistive technology and automated scanners cannot identify the main site navigation reliably.
+   - Recommended action: wrap the link group in `<nav aria-label="Primary">` and keep the mobile overlay behavior inside that landmark.
+
+7. There is no direct conversion route or consistent contact action.
+   - Evidence: the main page uses `<a href="#">soojoon92@gmail.com</a>`, while About and Work render the email as plain text.
+   - Current impact: visitors see contact copy but do not get a reliable action path.
+   - Recommended action: use one shared contact component with `mailto:soojoon92@gmail.com` or add a focused `/contact` route if a form or intake flow is planned.
+
+8. Contact information is repeated across route wrappers.
+   - Evidence: About and Work each render an `Inquiries` block with the same email and placeholder address text.
+   - Current impact: future edits can drift across pages, and the IA hides whether contact is global site chrome or page content.
+   - Recommended action: centralize contact data and render it from a shared component or shell region.
+
+9. The page hierarchy is visually strong but structurally weak.
+   - Evidence: source search found no active `<main>` or `<h1>` in the route wrappers; important headings are mostly `p`, `div`, or `Textfit` output.
+   - Current impact: screen readers, search engines, and automated tests cannot infer the page outline that the visual design implies.
+   - Recommended action: give each route one `<main>` and one route-level `<h1>`, then style those elements to match the current visual system.
+
+10. Route metadata is only defined globally.
+    - Evidence: `app/layout.tsx` exports a single `metadata` object, and no route-level `metadata` or `generateMetadata` was found.
+    - Current impact: `/about` and `/work` cannot describe their distinct purpose in search results or social previews.
+    - Recommended action: add page-level metadata for About, Work, and future project detail routes.
+
+11. The route graph is not exposed through sitemap or robots files.
+    - Evidence: no tracked `app/sitemap.ts`, `app/robots.ts`, `sitemap.*`, or `robots.*` file was found.
+    - Current impact: crawlers must infer the small route set from page links, and future dynamic project pages will have no explicit discovery path.
+    - Recommended action: add `app/sitemap.ts` and `app/robots.ts` once canonical production URL and project slugs are defined.
+
+12. There is no custom not-found path for future dynamic project routes.
+    - Evidence: the app currently relies on Next's default not-found output, and no `app/not-found.tsx` exists.
+    - Current impact: invalid project slugs would fall out of the portfolio's visual and content language.
+    - Recommended action: add `app/not-found.tsx` before shipping `/work/[slug]`.
+
+13. The About page contains a work carousel that is not connected to Work routing.
+    - Evidence: `AboutWrapper` has a `memberArrayData` carousel labeled `Work`, but it does not link to `/work` or any project detail route.
+    - Current impact: the same project concepts appear in multiple IA locations without a navigable relationship.
+    - Recommended action: drive both the About carousel and Work gallery from the same project config, then link each item to its project route.
+
+14. Social and external paths are not part of a coherent IA.
+    - Evidence: Footer links point to SoundCloud, Naver under a Facebook icon, and Instagram; About has another set of social links including an unlinked Twitter anchor.
+    - Current impact: outbound paths feel like inherited template content rather than intentional portfolio affordances.
+    - Recommended action: decide whether social links support the AI developer portfolio; remove or correct any that do not.
+
+15. `useCommonStore` appears to preserve a route abstraction that is not used.
+    - Evidence: `NaviBox` reads `setRoute` from `useCommonStore`, but no call updates it in the active code path.
+    - Current impact: there are two implied routing systems, Next Router and Zustand state, but only one is actually authoritative.
+    - Recommended action: remove the unused store route state or explicitly define why it exists before adding route-aware UI.
+
+16. The route IA should be fixed before adding more portfolio claims.
+    - Evidence: current copy positions the site around verified AI systems, but there is no route where a visitor can inspect the verification method per project.
+    - Current impact: stronger claims can increase skepticism if the navigation still blocks the evidence trail.
+    - Recommended action: prioritize a single high-quality case-study route with problem, system, eval method, failure cases, and measured result before broadening the work grid.
+
+### Verification
+
+- Checked current worktree and recent commit history before starting the review.
+- Listed all files under `app` and confirmed the active route set is `/`, `/about`, and `/work`.
+- Searched for dynamic route files, sitemap, robots, custom not-found, contact route, route metadata, and slug handling.
+- Inspected `app/layout.tsx`, route page files, `components/NaviBox.tsx`, `components/main/MainWrapper.tsx`, `components/works/WorkWrapper.tsx`, `components/about/AboutWrapper.tsx`, and `components/Footer.tsx`.
+- Searched for semantic landmarks, mailto links, hash contact links, route pushes, `next/link` usage, and route-related Zustand state.
+
+### Next Review Angle
+
+- Review content credibility and proof architecture: project claims, validation evidence, metric placement, failure-case disclosure, and whether each AI developer claim has an inspectable artifact.
+- Consider creating a typed `projects` config before implementing `/work/[slug]`, so route, content, image, and metadata ownership are solved together.
