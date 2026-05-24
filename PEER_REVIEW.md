@@ -2645,3 +2645,108 @@
 
 - Review visual asset and media strategy: image sizes, background images vs semantic images, optimization path, public asset hygiene, alt text readiness, and how asset choices affect performance and portfolio proof.
 - Consider turning the accumulated findings into an implementation roadmap before touching the 900-line wrappers.
+
+## 2026-05-25 10:00 KST - Review 32
+
+### Scope
+
+- Visual asset and media strategy
+- Image size and format risk
+- CSS background images vs semantic images
+- Optimization path and public asset hygiene
+- Portfolio proof readability
+
+### Findings
+
+1. The public image payload is large for a portfolio.
+   - Evidence: `public/images` contains 20 files totaling about 20.9 MB.
+   - Current impact: even a small portfolio can become slow if large images are requested early or repeatedly.
+   - Recommended action: set an image budget and compress/resize assets before broader visual work.
+
+2. The largest single asset is oversized.
+   - Evidence: `public/images/img_user_1.jpg` is 3543x3543 and about 6.98 MB.
+   - Current impact: the About slider can require a multi-megabyte transfer for one image.
+   - Recommended action: generate responsive derivatives and use a smaller display-size source.
+
+3. Product PNGs are heavy for animated previews.
+   - Evidence: `img_product_second.png` is 1150x1558 at about 2.89 MB and `img_product_third.png` is 1228x1628 at about 3.54 MB.
+   - Current impact: the homepage hover preview can load large transparent/raster assets for decorative animation.
+   - Recommended action: convert to optimized WebP/AVIF or right-size PNGs after checking alpha-channel needs.
+
+4. Work gallery images are repeated across multiple cards.
+   - Evidence: `WorkWrapper` repeats the same `/images/work/yummygame/{1,2,3}.png` set for four cards.
+   - Current impact: the UI looks like it has multiple projects but relies on the same asset proof.
+   - Recommended action: make project image ownership data-driven and avoid duplicate placeholder cards.
+
+5. Meaningful project images are rendered as CSS backgrounds.
+   - Evidence: `GalleryBox` uses `background-image` for all three project screenshots.
+   - Current impact: project proof images cannot carry alt text, dimensions, loading policy, or priority hints.
+   - Recommended action: render meaningful screenshots with `next/image` or semantic `<img>` elements using typed `alt` data.
+
+6. Homepage product images are also CSS backgrounds.
+   - Evidence: `MainWrapper` uses background images for `img_product_first.png`, `img_product_second.png`, and `img_product_third.png`.
+   - Current impact: the browser cannot get explicit width/height metadata from markup, and assistive tech cannot identify the visual proof.
+   - Recommended action: decide whether these are decorative; if proof, render semantic images; if decorative, reduce size and mark the container hidden from accessibility.
+
+7. About slider profile/work images are CSS backgrounds from inline style.
+   - Evidence: `AboutWrapper` builds `backgroundImage: url('/images/img_user_${user.user_idx}.jpg')`.
+   - Current impact: the image path is tied to a numeric id convention and has no alt/caption data.
+   - Recommended action: model each slide image as `{ src, alt, width, height }` and render through a component.
+
+8. The app does not use `next/image` at all.
+   - Evidence: searches found no `next/image` import or `<Image>` usage.
+   - Current impact: the project misses built-in sizing, lazy loading, format negotiation, and responsive image generation.
+   - Recommended action: introduce `next/image` only after patching Next to a safe version and defining image data.
+
+9. Image loading policy is absent.
+   - Evidence: reviewed image usage has no `priority`, `loading`, or `sizes` attributes.
+   - Current impact: above-the-fold and below-the-fold images are not intentionally prioritized.
+   - Recommended action: mark the true hero image as priority and lazy-load gallery/work images.
+
+10. Footer icons use plain `<img>` with weak alt text.
+    - Evidence: `Footer` icon alt values are implementation names like `icoSoundcloud`, `icoFacebook`, and `icoInsta`.
+    - Current impact: icons do not provide clear destination semantics.
+    - Recommended action: put labels on the links and use empty alt for decorative icons, or use descriptive alt text matching the destination.
+
+11. An icon asset is much larger than necessary.
+    - Evidence: `ico_soundcloud.png` is a 512x512 JPEG at about 23 KB while displayed at 20x20 CSS pixels.
+    - Current impact: a tiny icon carries avoidable bytes and format mismatch.
+    - Recommended action: replace social icons with SVGs or a small icon component.
+
+12. There are unused public assets.
+    - Evidence: searches found no current source references to `img_main.jpg`, `ico_twitter.png`, `ico_arrow_left.svg`, `ico_arrow_right.svg`, `public/next.svg`, or `public/vercel.svg`.
+    - Current impact: unused assets add repository noise and can confuse future asset ownership.
+    - Recommended action: confirm manually and remove unused assets in a cleanup pass.
+
+13. The project lacks an asset manifest or ownership data.
+    - Evidence: image paths are hard-coded in components and assembled by string concatenation.
+    - Current impact: it is hard to know which images are proof, decoration, placeholders, or social icons.
+    - Recommended action: create typed `media` or project image data with role, source, alt, dimensions, and usage notes.
+
+14. There is no clear OG/social preview asset.
+    - Evidence: no `opengraph-image.*` or `twitter-image.*` was found during the SEO review, and current public images are not shaped as a share card.
+    - Current impact: social previews cannot present the AI validation portfolio positioning consistently.
+    - Recommended action: create a dedicated 1200x630 social image rather than reusing arbitrary gallery assets.
+
+15. Image dimensions are not encoded near render sites.
+    - Evidence: CSS backgrounds and inline style URLs do not include intrinsic dimensions in component props.
+    - Current impact: layout sizing is controlled by CSS boxes, making crop and aspect-ratio regressions harder to test.
+    - Recommended action: store dimensions with image metadata and use aspect-ratio containers consistently.
+
+16. Asset optimization should happen before screenshot QA.
+    - Evidence: current largest files and background usage can affect load timing and perceived layout state.
+    - Current impact: visual QA snapshots may capture slow-loading or inconsistently framed images.
+    - Recommended action: normalize image formats/sizes before adding Playwright screenshot baselines.
+
+### Verification
+
+- Checked current worktree with `git status --short --branch`.
+- Listed `public/images` recursively by file size and grouped asset bytes by extension.
+- Used Pillow to inspect image dimensions and formats where possible.
+- Searched source for `next/image`, `<Image>`, `<img>`, `background-image`, `backgroundImage`, image paths, alt text, priority/loading/sizes attributes, and unused public asset references.
+- Inspected `MainWrapper`, `AboutWrapper`, `WorkWrapper`, `GalleryBox`, `Footer`, and `next.config.mjs`.
+
+### Next Review Angle
+
+- Review testing strategy and QA automation: typecheck/lint/build reliability, Playwright feasibility, visual regression points, route smoke tests, and how to verify fixes before touching visual-heavy components.
+- Consider starting media work by creating typed image metadata and deleting confirmed unused starter assets after a clean import search.
