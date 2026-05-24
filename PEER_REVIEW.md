@@ -3302,3 +3302,128 @@
 
 - Review dependency and package hygiene: unused dependencies, mismatched router imports, stale package manager state, missing `.bin` shims, lockfile reliability, and what must be cleaned before implementing new routes.
 - Consider pruning unused imports before introducing a server-rendered project detail route.
+
+## 2026-05-25 16:00 KST - Review 38
+
+### Scope
+
+- Dependency and package hygiene
+- Lockfile and package-manager reliability
+- Missing binary shim state
+- Unused and mismatched dependencies
+- Security and upgrade readiness before adding new routes
+
+### Findings
+
+1. Two package-manager lockfiles are tracked.
+   - Evidence: both `package-lock.json` and `yarn.lock` are present and tracked.
+   - Current impact: installs can resolve differently depending on whether a contributor uses npm or Yarn.
+   - Recommended action: choose npm or Yarn as the only supported package manager, then regenerate and commit one lockfile from a clean install.
+
+2. The local `.bin` directory is effectively broken.
+   - Evidence: `node_modules/.bin` contains 0 entries, and `Test-Path node_modules\.bin\next`, `tsc`, `eslint`, and `prettier` all returned `False`.
+   - Current impact: package scripts such as `next build`, `next lint`, and `tsc --noEmit` are not reliable through normal script execution.
+   - Recommended action: reinstall dependencies in a clean workspace and confirm `.bin` shims are restored before adding more automation.
+
+3. Direct package binaries still exist.
+   - Evidence: `node_modules\next\dist\bin\next` and `node_modules\typescript\bin\tsc` both exist.
+   - Current impact: current verification can still run through direct binary paths, but that is a workaround rather than a project-standard workflow.
+   - Recommended action: keep using direct binaries for review verification until package-manager cleanup is complete.
+
+4. `npm ls --depth=0` succeeds despite missing `.bin` shims.
+   - Evidence: npm reports installed top-level dependencies without an unmet dependency error.
+   - Current impact: dependency presence and executable readiness are not equivalent in this workspace.
+   - Recommended action: include a binary-shim check in the package cleanup checklist.
+
+5. The project declares both legacy and current Lenis packages.
+   - Evidence: `package.json` declares `@studio-freight/react-lenis` and `lenis`, but source imports only `lenis/react`.
+   - Current impact: a deprecated or unused package remains in the install graph.
+   - Recommended action: remove `@studio-freight/react-lenis` if a clean install confirms `lenis/react` is sufficient.
+
+6. `useLenis` is imported but unused.
+   - Evidence: `lib/smoothScrolling.tsx` imports `{ ReactLenis, useLenis }` from `lenis/react`, but only `ReactLenis` is used.
+   - Current impact: the import suggests scroll state may exist when it does not.
+   - Recommended action: remove `useLenis` from the import.
+
+7. `styled` appears unused.
+   - Evidence: `package.json` declares `"styled": "^1.0.0"`, and source search found no `from "styled"` or `from 'styled'` import.
+   - Current impact: the dependency increases install surface without runtime value.
+   - Recommended action: remove `styled` after the single-lockfile reinstall path is chosen.
+
+8. `zustand` currently supports unused route state.
+   - Evidence: `stores/useCommon.ts` imports `create` from `zustand`, while `NaviBox` reads `setRoute` but never calls it.
+   - Current impact: the dependency may be unnecessary unless future UI state is planned.
+   - Recommended action: remove the route store, then reevaluate whether `zustand` is still needed.
+
+9. `classnames` has a tiny current use, but the use is optional.
+   - Evidence: `NaviBox` uses `classNames("navi", "home", playfair.className)` once.
+   - Current impact: the dependency is not harmful, but it exists for one simple class join.
+   - Recommended action: replace the one call with a template string if dependency minimization is a priority.
+
+10. `react-textfit` is used on three pages and affects migration cost.
+    - Evidence: `Textfit` appears in `MainWrapper`, `AboutWrapper`, and `WorkWrapper`, and `@types/react-textfit` is also installed.
+    - Current impact: removing or upgrading it requires visual QA, not a blind dependency cleanup.
+    - Recommended action: keep it for now, but avoid using it on the new evidence/detail route.
+
+11. `react-use` is used but includes unnecessary imports.
+    - Evidence: `NaviBox` imports `useWindowSize` without using it; `EffectBox`, `AboutWrapper`, and `WorkWrapper` do use `useWindowSize` or `useWindowScroll`.
+    - Current impact: some dependency usage is real, but import hygiene is weaker than it needs to be.
+    - Recommended action: remove unused `react-use` imports first, then evaluate replacing simple window hooks with local hooks later.
+
+12. A Pages Router import remains in an App Router codebase.
+    - Evidence: `GalleryBox` imports `useRouter` from `next/router`.
+    - Current impact: the import is unused and can confuse future dynamic route work under `app`.
+    - Recommended action: delete the import before creating `/work/[slug]`.
+
+13. `npm audit` currently reports security issues.
+    - Evidence: `npm audit --audit-level=low` reported 18 vulnerabilities: 7 moderate, 10 high, and 1 critical.
+    - Current impact: the dependency baseline is not acceptable for a portfolio that is meant to demonstrate engineering rigor.
+    - Recommended action: schedule a controlled update pass, starting with Next patch upgrades and lockfile normalization.
+
+14. The Next.js version is pinned to an old 14.2 patch.
+    - Evidence: `package.json` pins `"next": "14.2.3"`, and `npm outdated` reports a newer 14.2 patch path while latest is 16.x.
+    - Current impact: security fixes in the 14.2 line are not being consumed.
+    - Recommended action: update within the compatible 14.2 patch line first, then consider larger framework upgrades separately.
+
+15. React is behind the latest 18 patch.
+    - Evidence: `npm outdated` reports `react` and `react-dom` current 18.3.0, wanted 18.3.1, latest 19.x.
+    - Current impact: a small compatible patch is available without jumping to React 19.
+    - Recommended action: include React 18.3.1 in the safe maintenance update batch.
+
+16. Tooling versions are also stale.
+    - Evidence: `npm outdated` reports older `typescript`, `prettier`, `eslint`, `@types/node`, `@types/react`, and `@types/react-dom` versions.
+    - Current impact: type and lint behavior may diverge from current ecosystem defaults.
+    - Recommended action: update tooling after the app dependencies are stabilized and `.bin` shims are restored.
+
+17. `eslint-config-next` cannot be safely force-upgraded alone.
+    - Evidence: `npm audit` suggests `npm audit fix --force` may install `eslint-config-next@16.2.6`, a breaking change relative to Next 14.2.3.
+    - Current impact: blindly running force fixes can mix framework upgrades with lint config changes.
+    - Recommended action: avoid `npm audit fix --force`; plan framework and lint updates deliberately.
+
+18. PM2 startup depends on local binary resolution.
+    - Evidence: `ecosystem.config.js` uses `script: "next"` and `args: "start"`, while `.bin` is empty.
+    - Current impact: production start behavior may fail unless the execution environment provides `next` globally or fixes local shims.
+    - Recommended action: verify PM2 startup after reinstall, or point the script to an explicit local binary.
+
+19. The script model still hides verification commands.
+    - Evidence: `package.json` exposes `dev`, `build`, `start`, `lint`, and `only-start`, but no `typecheck`, `verify`, or `audit` script.
+    - Current impact: recurring review verification relies on direct commands instead of a documented project command.
+    - Recommended action: after dependency repair, add `typecheck`, `verify`, and `audit` scripts.
+
+20. Package cleanup should precede new route implementation.
+    - Evidence: the next feature requires adding dynamic route files, metadata generation, and build verification, while the current install state has missing shims and known advisories.
+    - Current impact: route work can be harder to verify if install reliability remains damaged.
+    - Recommended action: perform a dependency hygiene pass before building `/work/[slug]`.
+
+### Verification
+
+- Checked current worktree and latest commits before starting the review.
+- Inspected `package.json`, lockfile presence, `ecosystem.config.js`, and `.gitignore`.
+- Checked local `.bin` shim presence for `next`, `tsc`, `eslint`, and `prettier`.
+- Ran `npm ls --depth=0`, `npm audit --audit-level=low`, and `npm outdated --depth=0`.
+- Searched dependency usage for Lenis, `classnames`, `react-textfit`, `react-use`, `styled-components`, `styled`, `zustand`, `next/router`, `useLenis`, and `setRoute`.
+
+### Next Review Angle
+
+- Review lint and static-analysis cleanup opportunities: unused imports, wrong router imports, hook dependency quality, avoidable `any` refs, and low-risk changes that can reduce noise before the first proof route.
+- Consider a small cleanup commit before the next feature branch: remove unused imports and clarify client boundaries without changing runtime behavior.
