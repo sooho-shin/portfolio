@@ -2222,3 +2222,108 @@
 
 - Review SEO and metadata readiness: per-route metadata, Open Graph/Twitter cards, canonical URLs, sitemap/robots, semantic headings, content language, and whether portfolio proof is indexable.
 - Consider an early accessibility fix pass: convert nav items to `Link`, make footer top a button, add `rel` to external links, and add labels for icon-only controls.
+
+## 2026-05-25 06:00 KST - Review 28
+
+### Scope
+
+- SEO and metadata readiness
+- Route-level metadata
+- Indexable portfolio proof
+- Social preview metadata
+- Sitemap, robots, and canonical URL coverage
+
+### Findings
+
+1. Only root metadata is defined.
+   - Evidence: `app/layout.tsx` is the only source file with `export const metadata`.
+   - Current impact: `/`, `/about`, and `/work` share the same generic title and description.
+   - Recommended action: add route-level `metadata` or `generateMetadata` in `app/page.tsx`, `app/about/page.tsx`, and `app/work/page.tsx`.
+
+2. There is no `metadataBase`.
+   - Evidence: `app/layout.tsx` metadata has `title` and `description`, but no `metadataBase`.
+   - Current impact: absolute canonical and social URLs cannot be generated reliably by Next metadata helpers.
+   - Recommended action: define `metadataBase` from the production domain once the deployment URL is known.
+
+3. Canonical URLs are not configured.
+   - Evidence: no `alternates.canonical` was found in `app/`.
+   - Current impact: crawlers have no explicit canonical signal for the homepage, About page, or Work page.
+   - Recommended action: add canonical URLs per route through metadata `alternates`.
+
+4. Open Graph metadata is missing.
+   - Evidence: searches found no `openGraph` metadata in `app/`.
+   - Current impact: portfolio links shared in chat, social feeds, and recruiting tools may render with weak or generic previews.
+   - Recommended action: define Open Graph title, description, URL, site name, locale, type, and preview image.
+
+5. Twitter card metadata is missing.
+   - Evidence: searches found no `twitter` metadata in `app/`.
+   - Current impact: shared links on Twitter/X-like previews will not have a controlled card.
+   - Recommended action: add `twitter.card`, title, description, and image metadata once an OG image exists.
+
+6. There is no sitemap route or static sitemap file.
+   - Evidence: neither `app/sitemap.ts` nor `public/sitemap.xml` exists.
+   - Current impact: crawlers have to discover the small route set only through links.
+   - Recommended action: add `app/sitemap.ts` with `/`, `/about`, `/work`, and future project detail URLs.
+
+7. There is no robots route or static robots file.
+   - Evidence: neither `app/robots.ts` nor `public/robots.txt` exists.
+   - Current impact: crawler policy is implicit and cannot point to a sitemap.
+   - Recommended action: add `app/robots.ts` with allow rules and sitemap location.
+
+8. The route pages do not expose visible semantic headlines.
+   - Evidence: scans found no `<h1>` or `<h2>` in `app/page.tsx`, `app/about/page.tsx`, `app/work/page.tsx`, or their main wrappers.
+   - Current impact: search engines and assistive tools get weak page topic signals.
+   - Recommended action: add one meaningful `h1` per route while preserving the current visual style.
+
+9. The Work page has no indexable project detail routes.
+   - Evidence: `app/work/page.tsx` only renders `WorkWrapper`; no `app/work/[slug]/page.tsx` exists.
+   - Current impact: each project cannot have its own title, description, canonical URL, or share preview.
+   - Recommended action: add typed project data and generate static detail routes from project slugs.
+
+10. Work cards link to the homepage.
+    - Evidence: `components/works/WorkWrapper.tsx:107` renders `<Link href={"/"} key={c.text}>`.
+    - Current impact: crawlers and visitors cannot reach project-specific proof from the Work grid.
+    - Recommended action: link cards to `/work/{slug}` and expose project summaries in semantic text.
+
+11. Project proof is largely visual and not indexable.
+    - Evidence: `GalleryBox` renders screenshots as CSS `background-image` divs and only exposes the project title text.
+    - Current impact: search engines cannot understand the work proof, role, stack, challenge, validation method, or result.
+    - Recommended action: render project summaries, stack, and verification outcomes as text near each project.
+
+12. The homepage primary signal is rendered through visual components, not semantic metadata or headings.
+    - Evidence: `components/main/MainWrapper.tsx` uses `Textfit`, paragraphs, styled divs, and background images for the main message.
+    - Current impact: the intended AI validation positioning is less machine-readable than it should be.
+    - Recommended action: make the main "AI validation engineer" proposition an `h1` and align it with route metadata.
+
+13. Metadata is not sourced from shared content data.
+    - Evidence: `app/layout.tsx` hard-codes metadata separately from visible homepage copy.
+    - Current impact: SEO snippets can drift from the portfolio copy during future AI-developer messaging edits.
+    - Recommended action: export site profile fields from a typed config and import them into metadata and UI.
+
+14. There is no social preview image asset.
+    - Evidence: no `opengraph-image.*`, `twitter-image.*`, or obvious OG preview asset was found in `app/` or `public/`.
+    - Current impact: link previews will not show a controlled portfolio card.
+    - Recommended action: create a 1200x630 OG image focused on the AI validation positioning and register it in metadata.
+
+15. The site still ships default public assets.
+    - Evidence: `public/next.svg` and `public/vercel.svg` remain in the project.
+    - Current impact: default starter assets are harmless but add noise and can accidentally be referenced later.
+    - Recommended action: remove unused starter assets once confirmed unused.
+
+16. Language is set globally to Korean, but some visible labels are English-only or placeholder-style.
+    - Evidence: `app/layout.tsx` sets `<html lang="ko">`, while navigation, work labels, social labels, and skill labels are mostly English.
+    - Current impact: language metadata is broadly correct for Korean copy but does not fully describe mixed-language content.
+    - Recommended action: keep `lang="ko"` for the page, but use `lang="en"` on substantial English labels only if pronunciation or screen-reader output matters.
+
+### Verification
+
+- Checked current worktree with `git status --short --branch`.
+- Listed `app`, `public`, `config`, and component files to verify SEO-related route/file coverage.
+- Searched for `metadata`, `generateMetadata`, Open Graph, Twitter, canonical, robots, sitemap, manifest, headings, and image patterns.
+- Inspected `app/layout.tsx`, the three route page files, `MainWrapper`, `WorkWrapper`, and `GalleryBox`.
+- Counted route metadata and heading markers with a UTF-8 Python scan.
+
+### Next Review Angle
+
+- Review deployment and production runtime readiness: build/start scripts, PM2 config, environment assumptions, lockfile consistency, Next config, static asset serving, and whether the project can be deployed repeatably.
+- Consider adding route-level metadata and `app/sitemap.ts` first; they are low-risk SEO improvements once the production domain is known.
