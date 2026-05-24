@@ -2013,3 +2013,108 @@
 
 - Review data modeling and content ownership: project data, profile/contact data, repeated literals, typed content configs, and whether portfolio copy can be maintained without editing layout components.
 - Consider making the first implementation pass small and safe: remove unused hooks/imports, add ref guards, and clear the `EffectBox` timeout.
+
+## 2026-05-25 04:00 KST - Review 26
+
+### Scope
+
+- Data modeling and content ownership
+- Portfolio copy maintainability
+- Project/contact/social data duplication
+- Typed content config gaps
+- Data-driven rendering risks
+
+### Findings
+
+1. There is no content configuration layer.
+   - Evidence: `config/` only contains `breakboint.ts`; profile copy, project data, contact data, skills, and social links live inside components.
+   - Current impact: changing portfolio positioning requires editing layout components instead of content files.
+   - Recommended action: add typed content modules such as `config/profile.ts`, `config/projects.ts`, `config/contact.ts`, and `config/social.ts`.
+
+2. Main page portfolio copy is embedded directly in a large layout component.
+   - Evidence: `components/main/MainWrapper.tsx` contains hero copy, service copy, skill labels, CTA labels, email text, and marquee text.
+   - Current impact: copy iteration for the AI validation positioning is mixed with layout and animation code.
+   - Recommended action: extract homepage copy into a typed object and render from that object.
+
+3. Desktop and mobile homepage copy are duplicated.
+   - Evidence: `MainWrapper` has separate desktop and tablet/mobile sections for the same hero and contact concepts.
+   - Current impact: copy can drift between responsive variants, especially while changing Korean messaging.
+   - Recommended action: render both responsive layouts from the same content constants.
+
+4. Contact data is repeated across multiple components.
+   - Evidence: the email appears in `MainWrapper`, `Footer`, `AboutWrapper`, and `WorkWrapper`; About and Work also repeat the same inquiry/address block.
+   - Current impact: correcting the email or replacing placeholder address text requires several edits.
+   - Recommended action: centralize contact data and pass it into shared contact/rail/footer components.
+
+5. Social links are inconsistent across surfaces.
+   - Evidence: `Footer` links SoundCloud, Naver, and Instagram; About links Facebook and a different Instagram handle, plus a Twitter label without `href`.
+   - Current impact: the site cannot present a trustworthy professional identity until social data has a single source of truth.
+   - Recommended action: create one typed social link list with label, url, icon, visibility, and `rel` policy.
+
+6. Project data is local to the Work page.
+   - Evidence: `components/works/WorkWrapper.tsx:64` defines `workArray` inside the component.
+   - Current impact: project cards cannot be reused for homepage previews, SEO metadata, detail pages, or tests without duplicating data.
+   - Recommended action: move projects into `config/projects.ts` with fields for slug, title, summary, role, stack, proof, images, and links.
+
+7. Work project keys are not stable because data titles repeat.
+   - Evidence: `WorkWrapper` maps `workArray` with `key={c.text}`, while three entries use `text: "yummy yummy"`.
+   - Current impact: React reconciliation can behave incorrectly when duplicate keys are rendered.
+   - Recommended action: add unique project `id` or `slug` fields and use them as keys and route params.
+
+8. Work image paths are assembled by string concatenation.
+   - Evidence: `WorkWrapper` stores image paths like `"/yummygame/1.png"` and renders `"/images/work" + c.images[0]`.
+   - Current impact: path ownership is split between data and renderer, making broken image paths easier to create.
+   - Recommended action: store full public image paths or model images as typed objects with `src` and `alt`.
+
+9. Project images have no data-level alt text.
+   - Evidence: `GalleryBox` receives only three image paths and uses CSS background images.
+   - Current impact: project visuals cannot expose accessible text, audit notes, or proof labels.
+   - Recommended action: model each image with `src`, `alt`, and optional caption; render inspectable images where content is meaningful.
+
+10. About page slide data is defined inside the component.
+    - Evidence: `memberArrayData` is declared inside `AboutWrapper`.
+    - Current impact: the array is recreated on each render and mixes content with slider state logic.
+    - Recommended action: move it to module scope or a typed content config; rename it from member data to project/case-study data if it represents work.
+
+11. The About "client" list is aspirational placeholder content but is treated like data.
+    - Evidence: `clientArrayData` contains brand names under "Clients i wish i had worked for".
+    - Current impact: a portfolio reviewer can confuse placeholder aspirational data with real client proof.
+    - Recommended action: remove it or model it explicitly as a playful placeholder, separate from professional proof sections.
+
+12. Skills are hard-coded as repeated boxes.
+    - Evidence: `SkillWrapper` renders React, Next JS, Node JS, Express, HTML, JavaScript, CSS/SCSS, and SQL as static JSX.
+    - Current impact: adding AI evaluation, RAG testing, observability, or QA automation skills requires editing layout markup.
+    - Recommended action: define a `skills` array grouped by domain and render rows from data.
+
+13. Footer copy is duplicated between mobile and desktop blocks.
+    - Evidence: `Footer` renders the same headline/email concept in `InfoMobile` and `.info.pc`.
+    - Current impact: future copy updates can diverge by breakpoint.
+    - Recommended action: extract a footer copy component or data object used by both responsive branches.
+
+14. Metadata is not derived from the same content source as visible page copy.
+    - Evidence: `app/layout.tsx` defines `metadata.title` and `metadata.description` separately from homepage copy.
+    - Current impact: SEO snippets can drift from the visible portfolio positioning.
+    - Recommended action: export site title and description from a profile config and import them into metadata and UI.
+
+15. Repeated decorative text is manually generated in multiple places.
+    - Evidence: homepage project marquee repeats `VERIFY AI` across several `Array.from({ length: 10 })` blocks; `GalleryBox` manually repeats `text` spans many times.
+    - Current impact: visual repetition logic is embedded in content-heavy components.
+    - Recommended action: create a small marquee component that accepts `label`, `repeat`, and direction props.
+
+16. Contact CTA data lacks typed intent.
+    - Evidence: email and inquiry labels are plain strings or `href="#"`; there is no model for contact reason, CTA type, or mailto subject.
+    - Current impact: the portfolio cannot tailor CTAs for recruiters, consulting leads, or AI QA project inquiries.
+    - Recommended action: model contact CTAs with `label`, `href`, `intent`, and optional `mailtoSubject`.
+
+### Verification
+
+- Checked current worktree with `git status --short --branch`.
+- Listed app, component, and config files to confirm there are no existing content config modules beyond breakpoints.
+- Searched repeated literals and data structures with `rg` for emails, contact labels, social labels, project arrays, client arrays, skill labels, metadata, and image path construction.
+- Inspected `MainWrapper`, `Footer`, `AboutWrapper`, `WorkWrapper`, `GalleryBox`, and `app/layout.tsx`.
+- Counted repeated email and marquee literals with a UTF-8 Python scan.
+
+### Next Review Angle
+
+- Review accessibility and semantic HTML in detail: buttons vs links, missing labels, image alt text, heading order, focus management, keyboard paths, target blank safety, and decorative SVG handling.
+- Consider implementing `config/contact.ts` and `config/projects.ts` first because they would remove repeated high-risk portfolio data without changing visual behavior.
