@@ -1061,3 +1061,100 @@
 
 - Review build and CI reliability again with fresh eyes: package-manager consistency, lint/build memory failures, TypeScript-only checks, and which automated gates should block deployment.
 - Consider fixing low-risk accessibility issues first: button labels, mailto link, `rel` attributes, and the clickable footer div.
+
+## 2026-05-25 17:00 KST - Review 16
+
+### Scope
+
+- Build and CI reliability
+- Package-manager consistency
+- Install reproducibility
+- Lint/type/build gate coverage
+- Deployment script assumptions and local environment risk
+
+### Findings
+
+1. The repository still has two package-manager lockfiles.
+   - Evidence: both `package-lock.json` and `yarn.lock` exist at the project root.
+   - Current impact: contributors and CI can install different dependency trees depending on whether they use npm or Yarn.
+   - Recommended action: choose one package manager, delete the other lockfile, and document the expected install command in `README.md`.
+
+2. npm installation is not reproducible with the current dependency graph.
+   - Evidence: `npm ci --dry-run` fails because `react-textfit@1.1.1` requires React `^15.0.0 || ^16.0.0`, while the project resolves React 18.
+   - Current impact: any npm-based CI, hosting provider, or new contributor install will fail before tests or builds run.
+   - Recommended action: replace `react-textfit` first, then regenerate the chosen lockfile from a clean install.
+
+3. Yarn lint currently passes but only reports warnings.
+   - Evidence: `corepack yarn lint` exits successfully and reports three `@next/next/no-img-element` warnings in `components/Footer.tsx:60`, `components/Footer.tsx:64`, and `components/Footer.tsx:68`.
+   - Current impact: performance/accessibility warnings are visible but do not block changes.
+   - Recommended action: decide which warnings should fail CI, or convert footer icons to `next/image`.
+
+4. Production build is not stable in the current local environment.
+   - Evidence: `corepack yarn build` compiles successfully, then fails during static page generation with `ENOSPC: no space left on device` and V8 `Fatal process out of memory: Zone`.
+   - Current impact: the build cannot be trusted as a local release gate until disk and memory conditions are controlled.
+   - Recommended action: free disk space, clear `.next/cache` when needed, and run the build again in a clean environment before release.
+
+5. The current machine has effectively no free space on the C drive.
+   - Evidence: `Get-PSDrive -Name C` first reported `Free : 0`; after removing ignored `.next` output, only about 9 MB was free.
+   - Current impact: Next cache writes, build traces, package installs, and generated artifacts can fail unpredictably.
+   - Recommended action: treat disk capacity as a blocker for reliable build verification, not as an application-level failure.
+
+6. There is no project CI workflow.
+   - Evidence: no root `.github/workflows` workflow was found; CI/deploy searches only produced package-internal files under `node_modules`.
+   - Current impact: pushes can land without an automated install, typecheck, lint, and build gate.
+   - Recommended action: add a GitHub Actions workflow that runs the chosen install command, `tsc --noEmit`, lint, and production build.
+
+7. The scripts do not expose an explicit typecheck command.
+   - Evidence: `package.json` has `dev`, `build`, `start`, `lint`, and `only-start`, but no `typecheck`.
+   - Current impact: the most reliable passing gate is currently a manually invoked TypeScript binary command.
+   - Recommended action: add `"typecheck": "tsc --noEmit"` and use it in CI.
+
+8. `start` performs a build before starting the server.
+   - Evidence: `package.json` defines `"start": "next build && next start"`.
+   - Current impact: production process startup can fail or become slow because it recompiles on launch.
+   - Recommended action: split release lifecycle into `build` and `start`, with `start` running only `next start`.
+
+9. PM2 deployment configuration is not fully wired to dependencies.
+   - Evidence: `package.json` defines `"only-start": "pm2 start ecosystem.config.js --env production"`, but `pm2` is not listed in dependencies or devDependencies.
+   - Current impact: `only-start` only works on machines with a global PM2 installation.
+   - Recommended action: either document the global runtime requirement or add PM2 to the deployment environment explicitly.
+
+10. PM2 production environment values are commented out.
+    - Evidence: `ecosystem.config.js` has `env_production` and port settings commented out.
+    - Current impact: `--env production` does not visibly configure `NODE_ENV` or `PORT`, despite the script implying it.
+    - Recommended action: either restore concrete production env settings or remove the misleading `--env production` flag.
+
+11. Generated build artifacts can be left behind after failed builds.
+    - Evidence: `.next` contained build manifests, cache, server output, static output, and trace files after the failed `yarn build`.
+    - Current impact: local verification can be affected by stale cache or partial outputs if builds are retried without cleanup.
+    - Recommended action: add a clean-build instruction for release verification, or ensure CI always builds from a fresh checkout.
+
+12. TypeScript configuration still allows JavaScript files.
+    - Evidence: `tsconfig.json` has `"allowJs": true`.
+    - Current impact: JavaScript files can enter the project without the same type-safety expectations as existing TS/TSX source.
+    - Recommended action: set `allowJs` to `false` unless a JavaScript migration path is intentional.
+
+13. Prettier line-ending behavior is environment-sensitive.
+    - Evidence: `.prettierrc` uses `"endOfLine": "auto"`, and `git diff --check` repeatedly warns that `PEER_REVIEW.md` line endings will be converted by Git.
+    - Current impact: formatting diffs can vary by OS and Git settings.
+    - Recommended action: use a committed `.gitattributes` and a fixed Prettier `endOfLine` policy if cross-machine consistency matters.
+
+14. The README does not describe the actual verification workflow.
+    - Evidence: root `README.md` exists but is very small, while the project relies on manually remembered commands such as `node .\node_modules\typescript\bin\tsc --noEmit`.
+    - Current impact: future maintainers cannot quickly know which commands are expected to pass before pushing.
+    - Recommended action: document install, dev, typecheck, lint, build, and deployment commands after the package manager is settled.
+
+### Verification
+
+- Checked current worktree with `git status --short --branch`.
+- Inspected `package.json`, `.eslintrc.json`, `.prettierrc`, `tsconfig.json`, `next.config.mjs`, and `ecosystem.config.js`.
+- Confirmed both `package-lock.json` and `yarn.lock` exist at the repository root.
+- Ran `corepack yarn lint`: passed with three `@next/next/no-img-element` warnings.
+- Ran `npm ci --dry-run`: failed on the `react-textfit` React peer dependency conflict.
+- Ran `corepack yarn build`: failed after successful compilation due to `ENOSPC` and V8 out-of-memory during static generation.
+- Checked drive capacity with `Get-PSDrive -Name C`: reported no free space before removing ignored `.next` output.
+
+### Next Review Angle
+
+- Review repository hygiene and generated files: `.next`, `tsconfig.tsbuildinfo`, lockfile policy, ignore rules, README accuracy, and which artifacts should never be committed.
+- Consider fixing the package-manager decision before adding CI, because CI should enforce one install path rather than preserve the current split.
