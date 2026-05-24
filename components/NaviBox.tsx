@@ -61,7 +61,7 @@ const NaviComponent = () => {
           <button
             className="navi"
             onClick={() => {
-              window.open("https://github.com/sooho-shin", "_blank");
+              router.push("/work");
             }}
           >
             WORK

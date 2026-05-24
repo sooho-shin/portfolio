@@ -8,14 +8,13 @@ import Link from "next/link";
 import FooterComponent from "@/components/Footer";
 import EffectComponent from "@/components/EffectBox";
 import { Playfair_Display } from "next/font/google";
-import classNames from "classnames";
 const playfair = Playfair_Display({
   subsets: ["latin"],
   weight: ["400", "700", "900"],
 });
 const MainWrapper = () => {
   const [effectTitle] = useState("home");
-  const [effectRollingText] = useState("SOOHO ZZANG");
+  const [effectRollingText] = useState("AI DEVELOPER");
   const [hoverState, setHoverState] = useState<boolean>(false);
 
   return (
@@ -25,16 +24,16 @@ const MainWrapper = () => {
           <InfoBox>
             <div className="info-left">
               <p>
-                Contact details on the home page are a good idea, we were told:
+                AI 기능 개발과 업무 자동화 프로젝트를 함께 고민합니다.
               </p>
             </div>
             <div className="info-right">
               <p>
-                _soooho
+                프로젝트 문의
                 <br />
-                😇😇😇😇
+                AI 서비스 개발
                 <br />
-                1010 8080
+                업무 자동화
               </p>
               <a href="#">soojoon92@gmail.com</a>
             </div>
@@ -44,28 +43,28 @@ const MainWrapper = () => {
           <TopRightInfo>
             <div className="left">
               <span>
-                We do little
+                주로 다루는
                 <br />
-                to none:
+                기술:
               </span>
               <span>
-                NODEJS
+                LLM
                 <br />
-                REACT
+                RAG
+                <br />
+                AI AGENT
                 <br />
                 NEXTJS
                 <br />
-                SQL
-                <br />
-                EXPRESS
+                NODEJS
               </span>
             </div>
             <div className="right">
               <span>
-                Sooho is not just
+                AI를 제품으로
                 <br />
-                developer. with everything{" "}
-                <span className={playfair.className}>you need</span>
+                구현하는{" "}
+                <span className={playfair.className}>개발자</span>
               </span>
             </div>
           </TopRightInfo>
@@ -95,28 +94,28 @@ const MainWrapper = () => {
         <CenterTextMobile>
           <div className="info-left">
             <p>
-              I do little to none:
+              주로 다루는 기술:
               <br />
             </p>
             <p>
-              NODEJS
-              <br /> REACT
+              LLM
+              <br /> RAG
+              <br /> AI AGENT
               <br /> NEXTJS
-              <br /> SQL
-              <br /> EXPRESS
+              <br /> NODEJS
             </p>
           </div>
           <div className="info-right">
             <p>
-              Sooho
+              AI를
               <br />
-              is not just
+              제품으로
               <br />
-              developer
+              구현하는
               <br />
-              with everything
+              개발자
               <br />
-              <span className={playfair.className}>you need.</span>
+              <span className={playfair.className}>Sooho.</span>
             </p>
           </div>
         </CenterTextMobile>
@@ -125,18 +124,18 @@ const MainWrapper = () => {
         <InfoBoxMobile>
           <div className="info-left">
             <p>
-              Contact details on the home page are a good idea, we were told:
+              AI 기능 개발과 업무 자동화 프로젝트를 함께 고민합니다.
             </p>
           </div>
           <div className="info-right">
             <p>
-              Sooho&rsquo;s Studio
+              프로젝트 문의
               <br />
-              Burgring 123
+              AI 서비스 개발
               <br />
-              1010 Wien, Austria
+              업무 자동화
               <br />
-              <span className={playfair.className}>BLUMENKOPF@GMAIL.COM</span>
+              <span className={playfair.className}>SOOJOON92@GMAIL.COM</span>
             </p>
           </div>
         </InfoBoxMobile>
@@ -144,53 +143,51 @@ const MainWrapper = () => {
       <Section className="no-border home-about">
         <LeftWrapperComponent>
           <AboutLeft>
-            <p className="title">Clients i have not worked for at all:</p>
+            <p className="title">관심 있게 다루는 영역:</p>
             <ul className="brand-list">
-              <li>Adidas</li>
-              <li>Nike</li>
-              <li>Gucci</li>
-              <li>Apple</li>
-              <li>Versace</li>
-              <li>Netflix</li>
+              <li>LLM</li>
+              <li>RAG</li>
+              <li>Agent</li>
+              <li>Automation</li>
+              <li>Frontend</li>
+              <li>Backend</li>
             </ul>
           </AboutLeft>
         </LeftWrapperComponent>
         <RightWrapperComponent>
           <AboutRight>
             <div className="left tablet">
-              <p className="title">Clients i have not worked for at all:</p>
+              <p className="title">관심 있게 다루는 영역:</p>
               <ul className="brand-list">
-                <li>Adidas</li>
-                <li>Nike</li>
-                <li>Gucci</li>
-                <li>Apple</li>
-                <li>Versace</li>
-                <li>Netflix</li>
+                <li>LLM</li>
+                <li>RAG</li>
+                <li>Agent</li>
+                <li>Automation</li>
+                <li>Frontend</li>
+                <li>Backend</li>
               </ul>
             </div>
             <div className="right">
               <div className="top-text">
                 <p>
-                  Some minds seem almost to create themselves,
+                  아이디어를 실험에서 끝내지 않고,
                   <span className={playfair.className}>
                     {" "}
-                    springing up under{" "}
+                    실제 사용하는 제품으로{" "}
                   </span>
-                  every disadvantage and working their
+                  연결하는 개발을 합니다.
                 </p>
-                <p>solitary but irresistible</p>
+                <p>문제를 정의하고 흐름을 설계합니다.</p>
               </div>
               <div className="bottom-text">
                 <p>
-                  way through a thousand obstacles.
+                  필요한 데이터를 연결하고,
                   <span className={playfair.className}>
                     {" "}
-                    The Legend of the Sleepy Hollow{" "}
+                    반복 가능한 자동화와 인터페이스로{" "}
                   </span>
+                  구현합니다.
                 </p>
-                {/*몇몇 사람들은 고독하지만 결코 외면할 수 없는 수많은 장애물들과*/}
-                {/*싸우고, 모든 불이익을 이겨내면서 자신의 길을 개척해 나간다.*/}
-                {/*슬리피 할로우의 전설 (The Legend of the Sleepy Hollow)*/}
               </div>
               <Link prefetch href={"/about"} passHref>
                 <StyledButton>About</StyledButton>
@@ -206,7 +203,7 @@ const MainWrapper = () => {
           mode="single"
           forceSingleModeWidth={true}
         >
-          SooHoZZANG
+          AI PORTFOLIO
         </Textfit>
         <div className="text-right">
           <Link prefetch href={"/work"} passHref>
@@ -231,12 +228,12 @@ const MainWrapper = () => {
               <div className="text-loop-container top">
                 <div className="loop-box">
                   {Array.from({ length: 10 }).map((_, i) => (
-                    <span key={i}>test</span>
+                    <span key={i}>AI PROJECT</span>
                   ))}
                 </div>
                 <div className="loop-box">
                   {Array.from({ length: 10 }).map((_, i) => (
-                    <span key={i}>test</span>
+                    <span key={i}>AI PROJECT</span>
                   ))}
                 </div>
               </div>
@@ -244,12 +241,12 @@ const MainWrapper = () => {
               <div className="text-loop-container right">
                 <div className="loop-box">
                   {Array.from({ length: 10 }).map((_, i) => (
-                    <span key={i}>test</span>
+                    <span key={i}>AI PROJECT</span>
                   ))}
                 </div>
                 <div className="loop-box">
                   {Array.from({ length: 10 }).map((_, i) => (
-                    <span key={i}>test</span>
+                    <span key={i}>AI PROJECT</span>
                   ))}
                 </div>
               </div>
@@ -257,12 +254,12 @@ const MainWrapper = () => {
               <div className="text-loop-container left">
                 <div className="loop-box">
                   {Array.from({ length: 10 }).map((_, i) => (
-                    <span key={i}>test</span>
+                    <span key={i}>AI PROJECT</span>
                   ))}
                 </div>
                 <div className="loop-box">
                   {Array.from({ length: 10 }).map((_, i) => (
-                    <span key={i}>test</span>
+                    <span key={i}>AI PROJECT</span>
                   ))}
                 </div>
               </div>
@@ -270,12 +267,12 @@ const MainWrapper = () => {
               <div className="text-loop-container bottom">
                 <div className="loop-box">
                   {Array.from({ length: 10 }).map((_, i) => (
-                    <span key={i}>test</span>
+                    <span key={i}>AI PROJECT</span>
                   ))}
                 </div>
                 <div className="loop-box">
                   {Array.from({ length: 10 }).map((_, i) => (
-                    <span key={i}>test</span>
+                    <span key={i}>AI PROJECT</span>
                   ))}
                 </div>
               </div>

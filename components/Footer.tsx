@@ -1,14 +1,10 @@
 "use client";
 
-import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
-import styled, { css, keyframes } from "styled-components";
+import React from "react";
+import styled from "styled-components";
 import LeftWrapperComponent from "./LeftWrapper";
 import RightWrapperComponent from "./RightWrapper";
 import { breakpoints } from "@/config/breakboint";
-import IcoTwitter from "../public/images/ico_twitter.png";
-import IcoFacebook from "../public/images/ico_facebook.png";
-import IcoInsta from "../public/images/ico_insta.png";
 
 function FooterComponent() {
   return (
@@ -34,11 +30,11 @@ function FooterComponent() {
       <RightWrapperComponent>
         <InfoMobile className="tablet">
           <p>
-            Sooho zzang
+            AI 개발자 포트폴리오
             <br />
-            show me the money
+            서비스와 자동화를 만듭니다
             <br />
-            black sheep wall
+            LLM / RAG / Agent
             <br />
             <span className="sec-font">SOOJOON92@GMAIL.COM</span>
           </p>
@@ -47,11 +43,11 @@ function FooterComponent() {
         <div className="footer-info-group">
           <div className="info pc">
             <p>
-              Sooho zzang
+              AI 개발자 포트폴리오
               <br />
-              show me the money
+              서비스와 자동화를 만듭니다
               <br />
-              black sheep wall
+              LLM / RAG / Agent
               <br />
               <span className="sec-font">SOOJOON92@GMAIL.COM</span>
             </p>
