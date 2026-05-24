@@ -273,3 +273,77 @@
 
 - Review state management and client-component boundaries: unnecessary `"use client"` usage, Zustand store value, and direct DOM mutation patterns.
 - Consider making the accessibility fixes in small commits because several are low-risk and user-facing.
+
+## 2026-05-25 07:00 KST - Review 6
+
+### Scope
+
+- Client component boundaries and hydration cost
+- Zustand store usage
+- Direct DOM mutation patterns
+- Scroll/window hooks and derived state
+- Server/client split opportunities in the App Router structure
+
+### Findings
+
+1. `app/page.tsx` is marked `"use client"` even though it only returns `<MainWrapper />`.
+   - Evidence: `app/page.tsx:1`.
+   - Current impact: the route entrypoint is forced into the client boundary without local state or effects.
+   - Recommended action: remove `"use client"` from `app/page.tsx`; keep client behavior inside `MainWrapper` where the hover state exists.
+
+2. Layout wraps the whole app in a client smooth-scroll provider.
+   - Evidence: `app/layout.tsx` renders `<SmoothScrolling>` around `StyledComponentsRegistry`, navigation, and all route children; `lib/smoothScrolling.tsx` is a client component using `ReactLenis`.
+   - Current impact: every page goes through a client scroll provider even if a route does not need custom scroll behavior, increasing hydration surface and making native scroll semantics harder to reason about.
+   - Recommended action: evaluate whether Lenis should be route-level or optional. If kept globally, document why and ensure accessibility/reduced-motion behavior is handled.
+
+3. `lib/smoothScrolling.tsx` imports `useLenis` but never uses it.
+   - Evidence: `lib/smoothScrolling.tsx:4`.
+   - Current impact: small bundle/review noise and another example of stale code.
+   - Recommended action: remove `useLenis` from the import.
+
+4. `components/LeftWrapper.tsx` and `components/RightWrapper.tsx` are client components without client-only behavior.
+   - Evidence: both files start with `"use client"` and only render styled wrappers.
+   - Current impact: static layout wrappers become client components unnecessarily.
+   - Recommended action: test whether the directive can be removed. If styled-components SSR requires a specific pattern, keep it documented; otherwise move them back to server-compatible components.
+
+5. `components/NaviBox.tsx` reads from `useCommonStore` but does not use the value or call `setRoute`.
+   - Evidence: `components/NaviBox.tsx:11` and `components/NaviBox.tsx:23`.
+   - Current impact: Zustand is pulled into navigation for no behavior, and `stores/useCommon.ts` appears to be unused state infrastructure.
+   - Recommended action: remove `useCommonStore` from `NaviBox` and delete the store if no other component uses it.
+
+6. `stores/useCommon.ts` has an unused `get` argument and only stores route state that is already available through `usePathname`.
+   - Evidence: `stores/useCommon.ts:8`.
+   - Current impact: duplicated route state can drift from Next router state if it is revived later.
+   - Recommended action: prefer `usePathname` for route reads. If global route state is needed, synchronize it explicitly in one place.
+
+7. `components/EffectBox.tsx` stores props in state but never updates that state.
+   - Evidence: `components/EffectBox.tsx:15` and `components/EffectBox.tsx:16`.
+   - Current impact: `pageState` and `rollingTextState` are redundant and can become stale if props change.
+   - Recommended action: use `text` and `rollingText` directly unless there is a planned transition state machine.
+
+8. `components/EffectBox.tsx` imports `usePathname`, reads `windowHeight`, and defines `toggleAni`, but none of them affect rendering.
+   - Evidence: `components/EffectBox.tsx:18`, `components/EffectBox.tsx:19`, and `components/EffectBox.tsx:96`.
+   - Current impact: unnecessary subscriptions and dead code around a component that already animates heavily.
+   - Recommended action: remove unused hook values and dead keyframes.
+
+9. Several components mutate DOM styles through refs instead of representing transforms in React state/style.
+   - Evidence: `components/about/AboutWrapper.tsx:75`, `components/about/AboutWrapper.tsx:80`, `components/about/AboutWrapper.tsx:87`, `components/about/AboutWrapper.tsx:90`, `components/about/AboutWrapper.tsx:93`, `components/works/WorkWrapper.tsx:50`, `components/works/WorkWrapper.tsx:55`, and `components/EffectBox.tsx:22`.
+   - Current impact: behavior is harder to test, null-safety is weaker, and future concurrent rendering/layout changes are riskier.
+   - Recommended action: compute transform strings and pass them via `style` props, or encapsulate imperative animation in a well-scoped hook with null guards.
+
+10. `useWindowScroll` destructures `x: scrollX` in About and Work but `scrollX` is unused.
+    - Evidence: `components/about/AboutWrapper.tsx:67` and `components/works/WorkWrapper.tsx:42`.
+    - Current impact: minor noise; more importantly, it shows broad hook usage without a clear dependency budget.
+    - Recommended action: destructure only `y: scrollY`.
+
+### Verification
+
+- Searched client/state patterns with `rg -n '"use client"|useState|useEffect|useRef|useWindow|usePathname|useRouter|useCommonStore|\\.current\\.style|document\\.|window\\.|setTimeout|ReactLenis|create\\(' app components lib stores styles config`.
+- Inspected `app/layout.tsx`, `lib/smoothScrolling.tsx`, `lib/registry.tsx`, and `stores/useCommon.ts` directly.
+- `node ./node_modules/typescript/bin/tsc --noEmit`: passed.
+- Checked UTF-8 integrity using a Python scan for CJK compatibility/han mojibake candidates in critical source and review files.
+
+### Next Review Angle
+
+- Review deployment/runtime configuration: `ecosystem.config.js`, scripts, Node version assumptions, package-manager consistency, and PM2 behavior.
+- Consider implementing low-risk cleanup from this review: remove unused imports/state from `smoothScrolling`, `EffectBox`, `NaviBox`, and the route page.
