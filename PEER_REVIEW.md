@@ -3562,3 +3562,137 @@
 
 - Review the safest behavior-preserving cleanup batch: rank unused imports, wrong router import, typed image props, immutable state-to-constant changes, and ref typing by risk and expected verification effort.
 - Consider applying the smallest cleanup batch after confirming whether the user wants review-only continuation or code cleanup commits as part of the recurring process.
+
+## 2026-05-25 18:00 KST - Review 40
+
+### Scope
+
+- Safest behavior-preserving cleanup batch
+- Cleanup risk ranking before feature work
+- Verification cost for small refactors
+- Static-analysis improvements that do not change UI behavior
+- First cleanup commit boundaries
+
+### Findings
+
+1. The safest first cleanup batch is import-only.
+   - Evidence: `lib/smoothScrolling.tsx` imports unused `useLenis`; `GalleryBox` imports unused `useRouter`, `useEffect`, and `useState`; `RightWrapper` imports unused `css`.
+   - Current impact: these lines add noise but do not appear to participate in runtime behavior.
+   - Recommended action: remove only those unused imports in the first cleanup commit.
+
+2. Removing the `next/router` import should be the first App Router cleanup.
+   - Evidence: `GalleryBox` imports `useRouter` from `next/router`, and no code references it.
+   - Current impact: this is a wrong-router signal in an App Router codebase.
+   - Recommended action: delete that import before any `/work/[slug]` route work.
+
+3. `GalleryBox` image prop typing is low risk.
+   - Evidence: callers pass string paths like `"/images/work" + c.images[0]`, while `GalleryBox` types those props as `any`.
+   - Current impact: the component accepts values it cannot render correctly.
+   - Recommended action: change `imgFirst`, `imgSecond`, and `imgThird` to `string` in both the component props and styled props.
+
+4. `RightWrapper` can drop `css` without behavior change.
+   - Evidence: `RightWrapper` imports `styled, { css }`, but its template does not use `css`.
+   - Current impact: the file carries unnecessary styled-components API surface.
+   - Recommended action: remove the `css` import.
+
+5. `LeftWrapper` simplification is slightly less safe than `RightWrapper`.
+   - Evidence: `LeftWrapper` wraps a media query in `${props => css``}` even though it does not use props.
+   - Current impact: this can probably be simplified, but it touches the generated CSS form.
+   - Recommended action: leave `LeftWrapper` for a second cleanup commit after import-only cleanup passes.
+
+6. `NaviBox` has several import-only candidates, but one is mixed with future nav semantics.
+   - Evidence: `useRef`, `useWindowSize`, and `keyframes` are unused, while imported `Link` is unused because nav currently uses `router.push`.
+   - Current impact: removing all of them is likely safe, but `Link` also points toward a planned semantic navigation change.
+   - Recommended action: remove `useRef`, `useWindowSize`, and `keyframes` first; handle `Link` together with a nav anchor conversion decision.
+
+7. `useCommonStore` removal should be a separate commit.
+   - Evidence: `NaviBox` reads `setRoute` but never calls it, and `stores/useCommon.ts` only models route state.
+   - Current impact: the read is unused, but removing the store dependency may lead to deleting a file and dependency later.
+   - Recommended action: split store cleanup from import-only cleanup so dependency decisions stay reviewable.
+
+8. `EffectBox` prop-state cleanup is not import-only.
+   - Evidence: `pageState` and `rollingTextState` are state values initialized from props and used in render.
+   - Current impact: replacing them with direct props likely preserves current behavior, but it changes component state structure.
+   - Recommended action: do this after import-only cleanup and verify route transition visuals manually.
+
+9. `EffectBox` `usePathname` removal is low-to-medium risk.
+   - Evidence: `pathname` is assigned but not used.
+   - Current impact: removing it should not affect behavior, but the component may have intended route-transition semantics.
+   - Recommended action: remove it only with a short visual smoke check on route changes.
+
+10. `EffectBox` ref typing is safe but should be guarded carefully.
+    - Evidence: `effectRef` is `useRef<any>()` and `effectRef.current.style.width` is accessed without an initial null guard.
+    - Current impact: stronger typing will reveal where null checks are missing.
+    - Recommended action: change to `useRef<HTMLDivElement | null>(null)` in a dedicated typed-ref cleanup.
+
+11. Work page copied scaffolding is safe to remove if scoped.
+    - Evidence: `WorkWrapper` declares `memberType` and `clientArrayData`, but neither is used.
+    - Current impact: copied About-page data increases noise around the actual Work grid.
+    - Recommended action: remove these two declarations in the same low-risk cleanup batch as unused imports.
+
+12. Work effect labels can become constants.
+    - Evidence: `setEffectTitle` and `setEffectRollingText` are declared in `WorkWrapper` but never used.
+    - Current impact: immutable values are represented as state.
+    - Recommended action: replace those two `useState` calls with constants after the import-only cleanup.
+
+13. About effect labels can also become constants but need visual regression awareness.
+    - Evidence: About has the same unused setter pattern as Work.
+    - Current impact: likely behavior-preserving, but About has more slider logic and larger component surface.
+    - Recommended action: update About after Work so the smaller page proves the pattern.
+
+14. Removing unused `scrollX` is low risk.
+    - Evidence: About and Work both destructure `x: scrollX` from `useWindowScroll`, but neither uses it.
+    - Current impact: code suggests horizontal scroll logic that does not exist.
+    - Recommended action: destructure only `y: scrollY` in the same commit as state-to-constant cleanup.
+
+15. Typed refs in About should be delayed.
+    - Evidence: About mutates `sliderRef`, `sliderJobRef`, `sliderImgRef`, `mainContainer`, and `infoText` directly.
+    - Current impact: stronger ref types can require several null guards and may touch multiple slider effects.
+    - Recommended action: do typed-ref cleanup after the smaller Work ref case is handled.
+
+16. Typed refs in Work are the safer ref pilot.
+    - Evidence: Work has only `mainContainer` and `infoText` refs.
+    - Current impact: this is the smallest place to prove the typed DOM-ref pattern.
+    - Recommended action: start ref typing in `WorkWrapper` before applying the pattern to About.
+
+17. External-link `rel` cleanup is behavior-adjacent.
+    - Evidence: Footer and About use `target="_blank"` links.
+    - Current impact: adding `rel="noopener noreferrer"` is safe, but it touches rendered anchor attributes.
+    - Recommended action: group external link cleanup separately from import/type cleanup and verify link behavior.
+
+18. The inline ESLint disable should be removed in a copy cleanup, not the first batch.
+    - Evidence: About has a suppression for `react/no-unescaped-entities` around `won't`.
+    - Current impact: changing the text escape is safe, but it is content-adjacent.
+    - Recommended action: handle it with other copy/semantic cleanup rather than import cleanup.
+
+19. Enabling `noUnusedLocals` is not a first cleanup step.
+    - Evidence: current source still has many unused import and variable candidates.
+    - Current impact: enabling the option immediately would create a larger failure set.
+    - Recommended action: land cleanup batches first, then enable stricter TypeScript unused checks.
+
+20. The first cleanup commit should be small enough to verify with direct binaries.
+    - Evidence: `.bin` shims are still missing, but direct `tsc` and direct `next lint` work.
+    - Current impact: cleanup work can be verified without solving package-manager repair first.
+    - Recommended action: use direct `tsc`, direct `next lint`, and optionally direct `next build` after import/type cleanup.
+
+21. Suggested cleanup order is clear.
+    - Evidence: import-only changes are isolated; prop typing is local; state/ref changes touch behavior structure; nav/store changes affect architecture.
+    - Current impact: cleanup can be sequenced without mixing risk levels.
+    - Recommended action: order cleanup as `unused imports`, `GalleryBox string props`, `Work unused scaffolding`, `Work constants/scrollX`, `Work typed refs`, `Navi/store`, `EffectBox`, `About`, then `strict TS options`.
+
+22. The cleanup work should not be mixed with proof-route implementation.
+    - Evidence: the proof route will add new files and data model decisions, while cleanup changes modify existing shared components.
+    - Current impact: mixing both would make regressions harder to attribute.
+    - Recommended action: land cleanup first, verify, then implement `config/projects.ts` and `/work/[slug]`.
+
+### Verification
+
+- Checked current worktree and latest commits before starting the review.
+- Inspected `GalleryBox`, `NaviBox`, `EffectBox`, `smoothScrolling`, `LeftWrapper`, `RightWrapper`, `WorkWrapper`, and `AboutWrapper`.
+- Searched focused patterns for `useRouter`, `useLenis`, unused hooks, `css`, `useCommonStore`, unused setters, unused copied Work data, `scrollX`, `useRef<any>`, image props, and external link attributes.
+- Ranked cleanup candidates by whether they are import-only, type-only, state-structure changes, DOM-ref changes, rendered-attribute changes, or architecture changes.
+
+### Next Review Angle
+
+- Review first proof-route data model in detail: exact TypeScript types for `Project`, `Metric`, `FailureCase`, `Artifact`, `ProjectImage`, lookup helpers, and which fields should be required for the first public AI validation case.
+- Consider keeping cleanup and feature implementation in separate commits so verification remains attributable.
