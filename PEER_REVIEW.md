@@ -1158,3 +1158,94 @@
 
 - Review repository hygiene and generated files: `.next`, `tsconfig.tsbuildinfo`, lockfile policy, ignore rules, README accuracy, and which artifacts should never be committed.
 - Consider fixing the package-manager decision before adding CI, because CI should enforce one install path rather than preserve the current split.
+
+## 2026-05-25 18:00 KST - Review 17
+
+### Scope
+
+- Repository hygiene and tracked artifacts
+- Ignore rules versus actually tracked files
+- Editor/IDE configuration policy
+- README accuracy
+- Line-ending and package-manager consistency
+
+### Findings
+
+1. IDE project files are committed.
+   - Evidence: `git ls-files .idea -s` shows `.idea/.gitignore`, `.idea/inspectionProfiles/Project_Default.xml`, `.idea/modules.xml`, `.idea/portfolio.iml`, `.idea/prettier.xml`, and `.idea/vcs.xml`.
+   - Current impact: personal JetBrains workspace state can leak into repository history and create noisy diffs across machines.
+   - Recommended action: decide whether IDE settings are intentionally shared; if not, remove `.idea` from git and add `.idea/` to `.gitignore`.
+
+2. VS Code local settings are committed.
+   - Evidence: `git ls-files -s .vscode` shows `.vscode/settings.json`, whose content only adds a cSpell word.
+   - Current impact: editor-local preferences are mixed into application source even though they do not affect runtime.
+   - Recommended action: either keep a deliberate team `.vscode/settings.json` with meaningful shared defaults, or ignore `.vscode/`.
+
+3. `.gitignore` does not ignore editor directories.
+   - Evidence: `.gitignore` covers `/node_modules`, `/.next/`, `/out/`, `/build`, env files, and TypeScript generated files, but not `.idea/` or `.vscode/`.
+   - Current impact: future editor-generated files can be accidentally staged.
+   - Recommended action: add `.idea/` and a scoped `.vscode/*` policy, while allowing only intentional shared files if needed.
+
+4. The repository has both npm and Yarn lockfiles under version control.
+   - Evidence: `git ls-files` includes `package-lock.json` and `yarn.lock`.
+   - Current impact: dependency review, CI, and onboarding cannot know which lockfile is authoritative.
+   - Recommended action: choose npm or Yarn, remove the other lockfile, and add a `packageManager` field to `package.json`.
+
+5. README install instructions contradict the lockfile state.
+   - Evidence: `README.md` suggests `npm run dev`, `yarn dev`, `pnpm dev`, and `bun dev`.
+   - Current impact: it encourages four install/runtime paths even though the repository contains only npm and Yarn lockfiles and npm install currently fails.
+   - Recommended action: document exactly one supported workflow, plus the known Node version.
+
+6. README still contains mojibake in a section heading.
+   - Evidence: `README.md` displays a garbled Korean heading for the reference-site section in PowerShell output.
+   - Current impact: project documentation looks corrupted and undermines the care expected from a portfolio repo.
+   - Recommended action: rewrite the heading in valid Korean or English and clarify whether the linked site is a design reference.
+
+7. README does not mention the actual verification gates.
+   - Evidence: it only explains how to run the dev server and lists Node `v20.12.2`.
+   - Current impact: contributors do not know to run `tsc --noEmit`, lint, or build before pushing.
+   - Recommended action: add a "Verification" section with `typecheck`, `lint`, and `build` commands after scripts are normalized.
+
+8. `.editorconfig` and Prettier disagree on line-ending policy.
+   - Evidence: `.editorconfig` sets `end_of_line = lf`, while `.prettierrc` sets `"endOfLine": "auto"`.
+   - Current impact: formatting behavior can vary by operating system and editor.
+   - Recommended action: align Prettier with `.editorconfig`, likely by setting `"endOfLine": "lf"`.
+
+9. There is no `.gitattributes` file.
+   - Evidence: no `.gitattributes` exists at the root.
+   - Current impact: Git's line-ending normalization is left to developer/global settings, which is why Markdown diffs repeatedly warn about CRLF conversion.
+   - Recommended action: add `.gitattributes` with explicit text normalization such as `* text=auto eol=lf`.
+
+10. Generated Next/TypeScript files are ignored, but the cleanup process is not documented.
+    - Evidence: `.gitignore` ignores `/.next/`, `*.tsbuildinfo`, and `next-env.d.ts`; `git status --ignored --short` showed `next-env.d.ts` and `node_modules/` as ignored.
+    - Current impact: failed builds can leave large ignored artifacts that consume disk until manually removed.
+    - Recommended action: document a cleanup command for `.next`, `out`, and TypeScript build info, especially because local disk pressure already broke builds.
+
+11. `next-env.d.ts` is ignored.
+    - Evidence: `.gitignore:36` lists `next-env.d.ts`.
+    - Current impact: Next can regenerate it, but many Next projects commit this file to keep type references explicit across fresh clones.
+    - Recommended action: choose a policy intentionally; either commit it like the Next default or document that it is generated.
+
+12. `node_modules` dominates operational risk but is correctly untracked.
+    - Evidence: `git status --ignored --short` shows `!! node_modules/`; `git ls-files` does not include `node_modules`.
+    - Current impact: source control is clean, but local disk pressure can still be severe on this machine.
+    - Recommended action: keep it ignored, but ensure CI uses a fresh cache/install strategy instead of relying on local node_modules state.
+
+13. The repo currently has only 62 tracked files, so hygiene fixes are low blast radius.
+    - Evidence: `git ls-files | Measure-Object` reports `62`.
+    - Current impact: removing editor files and normalizing docs/lockfiles should be a contained cleanup rather than a risky refactor.
+    - Recommended action: make repository hygiene a small dedicated PR before changing application behavior.
+
+### Verification
+
+- Checked worktree and disk state with `git status --short --branch` and `Get-PSDrive -Name C`.
+- Cleared npm/Yarn caches to recover local disk space after previous build failures; no tracked project source was removed.
+- Inspected tracked files with `git ls-files`, including `.idea`, `.vscode`, lockfiles, README, and ignore-related files.
+- Inspected `.gitignore`, `.editorconfig`, `.prettierrc`, `README.md`, and `.vscode/settings.json`.
+- Confirmed no `.gitattributes` file exists.
+- Confirmed ignored generated/local paths with `git status --ignored --short`.
+
+### Next Review Angle
+
+- Review deployment/runtime architecture: App Router static generation, PM2 startup, Next standalone/export assumptions, environment variables, and production process ownership.
+- Consider a dedicated hygiene cleanup after package-manager selection: editor files, line endings, README, and lockfile policy.
