@@ -3187,3 +3187,118 @@
 
 - Review server/client rendering boundaries and hydration risk: current `"use client"` spread, styled-components registry behavior, browser-only hooks, and how a new server-rendered project detail route should avoid avoidable client JavaScript.
 - Consider implementing the first proof path only after the data model and route boundary are explicit.
+
+## 2026-05-25 15:00 KST - Review 37
+
+### Scope
+
+- Server/client rendering boundaries
+- Hydration and browser-only hook risk
+- App Router compatibility for a future project detail route
+- Global client shell cost
+- Safe reuse rules for proof-page components
+
+### Findings
+
+1. The root layout wraps the whole app in a client scrolling provider.
+   - Evidence: `app/layout.tsx` wraps all children with `SmoothScrolling`, and `lib/smoothScrolling.tsx` is a `"use client"` component using `ReactLenis`.
+   - Current impact: even a simple server-rendered project detail route will sit under a client provider.
+   - Recommended action: decide whether smooth scrolling must be global, or move it into route/page shells that actually need animated scrolling.
+
+2. The styled-components registry is necessarily client-marked but should stay infrastructure-only.
+   - Evidence: `lib/registry.tsx` uses `"use client"`, `useServerInsertedHTML`, `ServerStyleSheet`, and `StyleSheetManager`.
+   - Current impact: this is a valid Next/styled-components pattern, but it should not become a place for app state or browser behavior.
+   - Recommended action: keep the registry limited to style injection and global styles.
+
+3. Many layout primitives are client components only because they use styled-components.
+   - Evidence: `LeftWrapper`, `RightWrapper`, and `Footer` are `"use client"` components even though most of their markup is static.
+   - Current impact: a future proof page that reuses these primitives inherits client boundaries even for static layout.
+   - Recommended action: for the case-study route, prefer simple server-rendered markup or create dedicated static components before reusing visual shell primitives.
+
+4. `MainWrapper` has hook usage but no explicit client directive.
+   - Evidence: `components/main/MainWrapper.tsx` imports `useState`, `Textfit`, and styled-components, but the file does not start with `"use client"`.
+   - Current impact: it works because `app/page.tsx` is client-marked, but the component is unsafe to import from a server route by mistake.
+   - Recommended action: either add `"use client"` to `MainWrapper` for clarity or split static content from interactive home-only behavior.
+
+5. `GalleryBox` also has client-only signals without an explicit client boundary.
+   - Evidence: `GalleryBox` imports `next/router`, `useEffect`, and `useState`, while the file does not start with `"use client"`.
+   - Current impact: importing it into a server-rendered detail page could introduce confusing build or bundling behavior.
+   - Recommended action: remove unused imports and mark it as client-only only if the hover animation truly needs client behavior.
+
+6. `GalleryBox` imports the Pages Router API inside an App Router project.
+   - Evidence: `components/GalleryBox.tsx` imports `useRouter` from `next/router`.
+   - Current impact: the import is unused today, but it is the wrong router API for App Router and can mislead future work.
+   - Recommended action: delete the unused `next/router` import before reusing gallery code near dynamic routes.
+
+7. Browser-only scroll code is embedded in shared footer UI.
+   - Evidence: `Footer` calls `window.scrollTo` directly inside an `onClick` handler.
+   - Current impact: the footer must remain client-side even though most footer content is static.
+   - Recommended action: split `BackToTopButton` into a tiny client component and keep footer content server-safe where possible.
+
+8. Scroll-position logic is duplicated in About and Work wrappers.
+   - Evidence: both wrappers use `useWindowScroll`, `useWindowSize`, refs, and `useEffect` to translate fixed inquiry text near page bottom.
+   - Current impact: new pages are likely to copy browser-only layout behavior instead of using static content sections.
+   - Recommended action: avoid this pattern in `/work/[slug]`; use CSS layout or a small route-specific client island only if measurement is necessary.
+
+9. Hydration output may differ around viewport-dependent components.
+   - Evidence: `react-use` window hooks and `react-textfit` are used in key visual sections.
+   - Current impact: first paint and hydrated layout can differ based on viewport measurement, which increases visual QA risk.
+   - Recommended action: keep proof content outside `Textfit` and viewport-measured wrappers so technical text is stable during hydration.
+
+10. `EffectBox` performs imperative DOM writes after hydration.
+    - Evidence: it mutates `effectRef.current.style.width`, `left`, and `transition` inside `useEffect`.
+    - Current impact: route transitions and initial render can visibly shift after hydration.
+    - Recommended action: keep `EffectBox` off the first proof page until the content route is proven stable.
+
+11. `EffectBox` reads `pathname` but does not use it.
+    - Evidence: `const pathname = usePathname();` is declared in `EffectBox`, but no active logic references it.
+    - Current impact: the component subscribes to route state without clear behavior.
+    - Recommended action: remove unused route subscriptions or implement the intended transition logic explicitly.
+
+12. `NaviBox` imports client utilities that are unused.
+    - Evidence: `useWindowSize`, `useRef`, `keyframes`, imported `Link`, and `setRoute` are present but not used in the active render path.
+    - Current impact: the primary navigation carries extra client surface and makes route-boundary review noisier.
+    - Recommended action: prune unused imports and replace router buttons with `Link` anchors before adding more routes.
+
+13. Global navigation forces client JavaScript on every route.
+    - Evidence: `NaviComponent` is rendered in `app/layout.tsx` and uses client state, `usePathname`, and `useRouter`.
+    - Current impact: every future proof route inherits navigation JS even if its content is static.
+    - Recommended action: split static nav links into a server component and isolate only the mobile menu toggle as a client island.
+
+14. The Zustand route store is incompatible with server ownership of routing.
+    - Evidence: `stores/useCommon.ts` defines route state while Next Router is already authoritative, and `setRoute` is unused.
+    - Current impact: future dynamic route work may accidentally duplicate URL state into client state.
+    - Recommended action: remove the route store or reserve Zustand only for UI state that cannot live in the URL.
+
+15. Client-only visual components should not import project data helpers.
+    - Evidence: current visual components hold local arrays, and many of them are client components.
+    - Current impact: if `projects` data is first imported into these components, metadata and sitemap generation may later import client-only dependencies by accident.
+    - Recommended action: make `config/projects.ts` pure and import it from both server routes and client wrappers, never the other way around.
+
+16. The first proof page should be designed as mostly server-rendered text.
+    - Evidence: current proof needs are headings, sections, metrics, failure cases, captions, and artifact links; none require browser APIs by default.
+    - Current impact: using the current animated shell would add hydration risk before the credibility content is useful.
+    - Recommended action: render case-study content as server HTML first, then add optional client islands for image galleries or interactions.
+
+17. The current root shell makes bundle improvements harder to measure.
+    - Evidence: global Lenis, global navigation, styled-components registry, and client footer patterns affect every route.
+    - Current impact: after adding `/work/[slug]`, first-load JS may not reflect the detail page's own complexity.
+    - Recommended action: record build route sizes before and after adding the detail route, and avoid importing home/work wrappers into it.
+
+18. A safe boundary rule is needed before implementation.
+    - Evidence: existing files mix static content, browser effects, route state, styled components, and local data.
+    - Current impact: without a boundary rule, the new proof path can inherit the same coupling.
+    - Recommended action: define the rule as `server owns data, metadata, routing, and text; client islands own menu toggles, animated cards, and browser measurement`.
+
+### Verification
+
+- Checked current worktree and latest commits before starting the review.
+- Searched source for `"use client"`, browser APIs, React hooks, `react-use`, `react-textfit`, Lenis, styled-components registry APIs, router hooks, and route-state stores.
+- Listed all files that start with `"use client"`.
+- Inspected `app/layout.tsx`, `lib/registry.tsx`, `lib/smoothScrolling.tsx`, `EffectBox`, `NaviBox`, `MainWrapper`, `WorkWrapper`, `AboutWrapper`, `Footer`, `GalleryBox`, `LeftWrapper`, `RightWrapper`, and `useCommon`.
+- Confirmed a future `/work/[slug]` route can be server-owned only if it avoids importing current large visual wrappers.
+
+### Next Review Angle
+
+- Review dependency and package hygiene: unused dependencies, mismatched router imports, stale package manager state, missing `.bin` shims, lockfile reliability, and what must be cleaned before implementing new routes.
+- Consider pruning unused imports before introducing a server-rendered project detail route.
