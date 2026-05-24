@@ -3427,3 +3427,138 @@
 
 - Review lint and static-analysis cleanup opportunities: unused imports, wrong router imports, hook dependency quality, avoidable `any` refs, and low-risk changes that can reduce noise before the first proof route.
 - Consider a small cleanup commit before the next feature branch: remove unused imports and clarify client boundaries without changing runtime behavior.
+
+## 2026-05-25 17:00 KST - Review 39
+
+### Scope
+
+- Lint and static-analysis cleanup opportunities
+- Unused imports and state
+- App Router import correctness
+- Avoidable `any` refs and prop types
+- Low-risk cleanup before adding the first proof route
+
+### Findings
+
+1. Current lint passes with only image warnings.
+   - Evidence: direct `next lint` exits successfully and reports only three `@next/next/no-img-element` warnings in `Footer.tsx`.
+   - Current impact: lint is not catching much of the code noise that will matter during route refactors.
+   - Recommended action: keep lint green, but add targeted cleanup and stricter compiler options after dependency shims are repaired.
+
+2. TypeScript also passes despite clear unused code.
+   - Evidence: direct `tsc --noEmit` exits successfully while searches show unused imports and state setters.
+   - Current impact: passing typecheck is not a strong signal of code cleanliness today.
+   - Recommended action: add `noUnusedLocals` and `noUnusedParameters` in a dedicated cleanup pass after resolving known unused items.
+
+3. `tsconfig.json` does not enable unused-code checks.
+   - Evidence: searches found no `noUnusedLocals` or `noUnusedParameters` option in `tsconfig.json`.
+   - Current impact: TypeScript will continue accepting unused imports, variables, and parameters that are type-valid.
+   - Recommended action: enable these options incrementally after a first import cleanup commit.
+
+4. `GalleryBox` has a wrong and unused router import.
+   - Evidence: `components/GalleryBox.tsx` imports `useRouter` from `next/router`, but no active code uses it.
+   - Current impact: this creates App Router confusion and may be copied into future `/work/[slug]` work.
+   - Recommended action: remove the import before adding any dynamic project routes.
+
+5. `GalleryBox` imports unused React hooks.
+   - Evidence: `GalleryBox` imports `useEffect` and `useState`, but the component is a CSS-hover renderer with no hook usage.
+   - Current impact: it appears client-stateful even though its current behavior is static plus CSS.
+   - Recommended action: remove the unused hooks and then decide whether the file needs an explicit `"use client"` marker.
+
+6. `GalleryBox` uses `any` for image props.
+   - Evidence: both `Props` and styled props type `imgFirst`, `imgSecond`, and `imgThird` as `any`.
+   - Current impact: invalid image values can flow through without type feedback.
+   - Recommended action: type these fields as `string` while the component expects CSS URL strings.
+
+7. `NaviBox` imports `Link` but does not use it.
+   - Evidence: `NaviBox` imports `Link` from `next/link`, while navigation is implemented with buttons and `router.push`.
+   - Current impact: the file hints at anchor navigation without actually using it.
+   - Recommended action: either remove the import now or convert the nav buttons to `Link` anchors in the same cleanup.
+
+8. `NaviBox` imports unused hook/utilities.
+   - Evidence: `NaviBox` imports `useRef`, `useWindowSize`, and `keyframes`, none of which are used by the active component.
+   - Current impact: client surface and review noise are higher than necessary.
+   - Recommended action: remove unused imports as a no-behavior-change cleanup.
+
+9. `NaviBox` reads an unused Zustand setter.
+   - Evidence: `const { setRoute } = useCommonStore();` exists, but `setRoute` is never called.
+   - Current impact: the route store appears necessary even though it does not drive behavior.
+   - Recommended action: remove the read and then decide whether `useCommonStore` can be deleted.
+
+10. `EffectBox` stores immutable props in state.
+    - Evidence: `pageState` and `rollingTextState` are initialized from props and their setters are never called.
+    - Current impact: the component looks stateful without needing state for current behavior.
+    - Recommended action: render from props directly, or implement the intended route transition state explicitly.
+
+11. `EffectBox` imports and reads route state without using it.
+    - Evidence: `usePathname` is imported and `pathname` is assigned, but no active logic references it.
+    - Current impact: the component subscribes to route changes for no visible behavior.
+    - Recommended action: remove `usePathname` until transition logic actually needs it.
+
+12. `EffectBox` has an avoidable `any` ref.
+    - Evidence: `const effectRef = useRef<any>();` is used to mutate element styles.
+    - Current impact: DOM access is untyped and null checks are inconsistent.
+    - Recommended action: use `useRef<HTMLDivElement | null>(null)` and guard before writes.
+
+13. `smoothScrolling` imports `useLenis` without using it.
+    - Evidence: `lib/smoothScrolling.tsx` imports `{ ReactLenis, useLenis }`, but only `ReactLenis` is referenced.
+    - Current impact: the import suggests behavior that does not exist.
+    - Recommended action: remove `useLenis`.
+
+14. About and Work store constant effect labels in state.
+    - Evidence: `setEffectTitle` and `setEffectRollingText` are declared in both wrappers but never used.
+    - Current impact: simple constants are disguised as mutable UI state.
+    - Recommended action: replace those state pairs with constants.
+
+15. About and Work destructure unused scroll values.
+    - Evidence: both wrappers destructure `x: scrollX` from `useWindowScroll`, but no code uses `scrollX`.
+    - Current impact: scroll logic looks broader than it is.
+    - Recommended action: destructure only `y: scrollY`.
+
+16. Work defines unused types and constants.
+    - Evidence: `WorkWrapper` declares `memberType` and `clientArrayData`, but neither is used by active render logic.
+    - Current impact: copied About-page scaffolding remains in the Work page.
+    - Recommended action: remove unused type and client array from `WorkWrapper`.
+
+17. About refs are broadly typed as `any`.
+    - Evidence: `sliderRef`, `sliderJobRef`, `sliderImgRef`, `mainContainer`, and `infoText` are all `useRef<any>()`.
+    - Current impact: direct DOM style mutation lacks element-type safety.
+    - Recommended action: type refs as `HTMLDivElement | null` and guard before `style` or `offsetHeight` access.
+
+18. Work refs are also broadly typed as `any`.
+    - Evidence: `mainContainer` and `infoText` are `useRef<any>()`.
+    - Current impact: the same untyped DOM mutation pattern is repeated.
+    - Recommended action: apply the same typed ref cleanup in Work after About.
+
+19. `LeftWrapper` and `RightWrapper` import `css` where plain template CSS may be enough.
+    - Evidence: both components import `css`; `RightWrapper` does not appear to need it, while `LeftWrapper` wraps a static media query in a callback.
+    - Current impact: small styling helpers add noise to simple layout primitives.
+    - Recommended action: remove unused `css` in `RightWrapper` and simplify `LeftWrapper` if behavior remains identical.
+
+20. External links need a static-analysis rule or cleanup.
+    - Evidence: earlier link review and current searches show multiple `target="_blank"` links in Footer/About.
+    - Current impact: missing `rel="noopener noreferrer"` can recur without a lint rule.
+    - Recommended action: add rel attributes and consider `react/jsx-no-target-blank` enforcement if Next lint does not cover all cases.
+
+21. The only inline ESLint disable is avoidable.
+    - Evidence: `AboutWrapper` has `eslint-disable-next-line react/no-unescaped-entities` for the text `won't`.
+    - Current impact: the file carries a suppression for one copy issue.
+    - Recommended action: use `won&apos;t` or rewrite the copy to remove the disable.
+
+22. The first cleanup commit can be behavior-preserving.
+    - Evidence: many findings are unused imports, unused variables, typed refs, or string prop types.
+    - Current impact: the project can reduce future route-review noise without changing user-facing behavior.
+    - Recommended action: make a small cleanup commit before implementing `config/projects.ts` or `/work/[slug]`.
+
+### Verification
+
+- Checked current worktree and latest commits before starting the review.
+- Ran direct `next lint` and direct `tsc --noEmit`.
+- Inspected `.eslintrc.json` and `tsconfig.json`.
+- Searched source for unused-import candidates, `next/router`, `useLenis`, `useWindowSize`, route-store usage, unused state setters, `useRef<any>`, `: any`, inline ESLint disables, `href="#"`, and external link patterns.
+- Confirmed the current automated checks pass even though cleanup candidates remain.
+
+### Next Review Angle
+
+- Review the safest behavior-preserving cleanup batch: rank unused imports, wrong router import, typed image props, immutable state-to-constant changes, and ref typing by risk and expected verification effort.
+- Consider applying the smallest cleanup batch after confirming whether the user wants review-only continuation or code cleanup commits as part of the recurring process.
