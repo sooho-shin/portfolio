@@ -200,3 +200,76 @@
 
 - Review accessibility and keyboard interaction: navigation buttons, carousel arrows, external links, hover-only gallery behavior, and reduced-motion handling.
 - Consider implementing the small unused-import cleanup from Reviews 1 and 3 before larger image refactors.
+
+## 2026-05-25 06:00 KST - Review 5
+
+### Scope
+
+- Keyboard accessibility for navigation, gallery, carousel, and footer controls
+- External link security and semantics
+- Motion/reduced-motion handling
+- Screen reader affordances for icon-only controls and decorative overlays
+
+### Findings
+
+1. The footer "top" control is a clickable `div`, not a button.
+   - Evidence: `components/Footer.tsx:71` uses `<div className="top" onClick={...}>`.
+   - Current impact: keyboard users cannot focus or activate the control reliably, and assistive tech does not receive button semantics.
+   - Recommended action: change it to `<button type="button" className="top" aria-label="맨 위로 이동">` and keep the existing SVG visuals inside.
+
+2. The mobile hamburger button has no accessible name.
+   - Evidence: `components/NaviBox.tsx:34` renders a button with only two empty `<div>` bars.
+   - Current impact: screen readers announce an unnamed button.
+   - Recommended action: add `aria-label="메뉴 열기"` to the hamburger button and `aria-expanded={naviState}`.
+
+3. The mobile menu dim/close button has no accessible name and the menu lacks dialog/navigation state.
+   - Evidence: `components/NaviBox.tsx:48` renders a full-screen `.dim` button with no label.
+   - Current impact: users may tab to an unnamed control; focus is not constrained while the menu is open.
+   - Recommended action: add `aria-label="메뉴 닫기"`, wrap links in a semantic `nav`, and consider focus management for the open mobile menu.
+
+4. Navigation uses buttons for route changes instead of links.
+   - Evidence: `components/NaviBox.tsx:55`, `components/NaviBox.tsx:61`, and `components/NaviBox.tsx:69` call `router.push`.
+   - Current impact: users cannot open routes in a new tab, copy link URLs, or get standard link semantics.
+   - Recommended action: use `Link` for internal navigation and reserve `button` for actions that do not navigate.
+
+5. External links opened with `target="_blank"` lack `rel="noopener noreferrer"`.
+   - Evidence: `components/Footer.tsx:58`, `components/Footer.tsx:63`, `components/Footer.tsx:67`, `components/about/AboutWrapper.tsx:359`, and `components/about/AboutWrapper.tsx:395`.
+   - Current impact: opened pages can access `window.opener`, and audits will flag the links.
+   - Recommended action: add `rel="noopener noreferrer"` to every external blank-target link.
+
+6. The About page has an anchor without `href`.
+   - Evidence: `components/about/AboutWrapper.tsx:325` renders `<a>` around the Twitter row.
+   - Current impact: it is not a real link, may not be keyboard-focusable as expected, and creates inconsistent social-link behavior.
+   - Recommended action: either provide a real `href` or render it as a disabled/non-link element with clear semantics.
+
+7. Carousel arrow buttons are icon-only without labels or disabled state.
+   - Evidence: `components/about/AboutWrapper.tsx:154` and `components/about/AboutWrapper.tsx:196` render arrow buttons with SVG only.
+   - Current impact: screen readers do not know what the controls do, and boundary conditions return `false` instead of communicating disabled state.
+   - Recommended action: add `aria-label="이전 작업 보기"` / `aria-label="다음 작업 보기"` and use `disabled={currentMemberIdx === 1}` or `disabled={currentMemberIdx === memberArrayData.length}`.
+
+8. The homepage gallery reveal is mouse-only.
+   - Evidence: `components/main/MainWrapper.tsx:219` and `components/main/MainWrapper.tsx:220` rely on `onMouseEnter` / `onMouseLeave`.
+   - Current impact: keyboard and touch users cannot trigger the same reveal interaction.
+   - Recommended action: add `onFocus`, `onBlur`, and a semantic focusable control or link around the gallery.
+
+9. The site has many continuous animations but no `prefers-reduced-motion` handling.
+   - Evidence: `components/EffectBox.tsx:191`, `components/EffectBox.tsx:203`, `components/EffectBox.tsx:205`, `components/GalleryBox.tsx:277`, and `components/main/MainWrapper.tsx:580` animate overlays/marquees continuously.
+   - Current impact: motion-sensitive users cannot opt out, and the UI may feel noisy during repeated visits.
+   - Recommended action: add a global `@media (prefers-reduced-motion: reduce)` rule that disables marquee/transition animations and uses static states.
+
+10. Decorative transition overlays may be announced as content.
+    - Evidence: `components/EffectBox.tsx` renders repeated rolling text and a fixed overlay without `aria-hidden`.
+    - Current impact: screen readers may encounter repeated non-essential words while navigating pages.
+    - Recommended action: mark the visual transition wrapper `aria-hidden="true"` unless it carries essential status information.
+
+### Verification
+
+- Searched interaction patterns with `rg -n "<button|<a|target=|onClick|onMouseEnter|onMouseLeave|hover|animation:|keyframes|scrollTo|aria-|role=|tabIndex|prefers-reduced-motion" app components styles lib`.
+- Inspected `components/NaviBox.tsx`, `components/Footer.tsx`, and `components/EffectBox.tsx` directly.
+- `node ./node_modules/typescript/bin/tsc --noEmit`: passed after verifying the restored source files.
+- Checked critical Korean strings via Python `unicode_escape` output because PowerShell display encoding renders Hangul as mojibake in this environment.
+
+### Next Review Angle
+
+- Review state management and client-component boundaries: unnecessary `"use client"` usage, Zustand store value, and direct DOM mutation patterns.
+- Consider making the accessibility fixes in small commits because several are low-risk and user-facing.
