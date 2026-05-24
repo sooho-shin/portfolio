@@ -642,3 +642,84 @@
 
 - Review dependency health and library choices: `react-textfit`, `react-use`, `styled`, Lenis package duplication, and unused packages.
 - Consider creating shared `types/portfolio.ts` or `config/works.ts` before more page content changes.
+
+
+## 2026-05-25 12:00 KST - Review 11
+
+### Scope
+
+- Dependency health and package surface area
+- React 18 compatibility risk
+- Declared packages that are unused or duplicated
+- Libraries that can be replaced by simpler local code
+- Package-manager reproducibility impact
+
+### Findings
+
+1. `react-textfit@1.1.1` is the highest-risk dependency in the current UI stack.
+   - Evidence: `package.json:19`, `components/main/MainWrapper.tsx:6`, `components/about/AboutWrapper.tsx:6`, and `components/works/WorkWrapper.tsx:6`.
+   - Current impact: the package is old and its peer dependency does not match React 18, which already causes `npm ci --dry-run` to fail in this repository.
+   - Recommended action: replace `Textfit` usage with CSS `clamp()`, container-aware layout, or a maintained fit-text package. Remove `@types/react-textfit` at the same time.
+
+2. Text sizing depends on JavaScript where CSS would be more predictable.
+   - Evidence: the main, about, and work pages import `Textfit` just to size display headings.
+   - Current impact: large hero copy depends on client-side measurement, increasing hydration/layout timing risk.
+   - Recommended action: define responsive typography tokens in CSS and reserve JavaScript measurement only for cases that cannot be expressed in layout rules.
+
+3. Lenis has a stale package declaration.
+   - Evidence: `package.json:13` declares `@studio-freight/react-lenis`, but the source import is `lib/smoothScrolling.tsx:4` from `lenis/react`.
+   - Current impact: two Lenis-era package names are represented in the dependency graph, making it unclear which wrapper is canonical.
+   - Recommended action: standardize on the current `lenis` package and remove `@studio-freight/react-lenis` if it is not required by runtime resolution.
+
+4. `useLenis` is imported but unused.
+   - Evidence: `lib/smoothScrolling.tsx:4`.
+   - Current impact: this is small, but it signals that smooth-scroll integration was copied from a broader example than the project needs.
+   - Recommended action: remove the unused import, then keep the wrapper limited to the single behavior currently required.
+
+5. `styled` appears to be an unused dependency.
+   - Evidence: `package.json:22` declares `styled`, while source imports consistently use `styled-components`; no `from "styled"` import was found.
+   - Current impact: it adds install surface and confusion next to `styled-components`, whose name is similar.
+   - Recommended action: remove `styled` unless there is a hidden runtime requirement.
+
+6. Zustand is present for a store that currently does not drive visible behavior.
+   - Evidence: `stores/useCommon.ts:1`, `stores/useCommon.ts:8`, and `components/NaviBox.tsx:23`.
+   - Current impact: `NaviBox` reads `setRoute`, but no route state consumer was found and the setter is not used for navigation state.
+   - Recommended action: either wire the store into real shared navigation behavior or remove Zustand until cross-component state is needed.
+
+7. `react-use` is broad for the current hook needs.
+   - Evidence: `components/EffectBox.tsx:4`, `components/NaviBox.tsx:6`, `components/about/AboutWrapper.tsx:7`, and `components/works/WorkWrapper.tsx:7`.
+   - Current impact: the project mainly uses window size and scroll hooks, which can be implemented as small local hooks or replaced with CSS/intersection observers in some areas.
+   - Recommended action: audit whether scroll/size values are still needed after typography and layout cleanup; then consider a local `useWindowSize`/`useScrollY` pair.
+
+8. Some `react-use` hook values are destructured more broadly than the UI needs.
+   - Evidence: About and Work read both `scrollX` and `scrollY`, and several components read full window dimensions.
+   - Current impact: broader subscriptions make components re-render for values they do not clearly use.
+   - Recommended action: keep only consumed values and prefer derived booleans such as `isMobile` when full dimensions are not needed.
+
+9. `classnames` is used for a single component.
+   - Evidence: `package.json:14` and `components/NaviBox.tsx:10`.
+   - Current impact: the package is stable and low risk, but the dependency exists for one class composition site.
+   - Recommended action: keep it only if class composition is expected to grow; otherwise replace the single call with a small local expression during navigation cleanup.
+
+10. React versions are declared with broad ranges while dependency compatibility is already fragile.
+    - Evidence: `package.json:17` and `package.json:18` use `^18`, while `next` is pinned to `14.2.3`.
+    - Current impact: installs can drift within React 18 even though older peer dependencies are already sensitive to the exact React major/version range.
+    - Recommended action: pin `react` and `react-dom` to exact versions after the package manager is settled, then update deliberately with a lockfile diff.
+
+11. Dependency cleanup should happen before larger UI refactors.
+    - Evidence: the current homepage relies on `Textfit`, Lenis, `react-use`, styled-components, and page-level client components together.
+    - Current impact: redesign work can accidentally preserve stale library choices because the page still compiles.
+    - Recommended action: first remove unused packages and replace `react-textfit`; then simplify component boundaries with fewer client-only dependencies.
+
+### Verification
+
+- Searched actual dependency usage with `rg -n -F` for `@studio-freight/react-lenis`, `lenis/react`, `react-textfit`, `from "styled"`, `classnames`, `zustand`, `useCommon`, `react-use`, `useWindowSize`, and `useWindowScroll`.
+- Confirmed `@studio-freight/react-lenis` and `styled` are declared without matching source imports.
+- Confirmed `react-textfit` is used in Main, About, and Work display sections.
+- Confirmed Zustand is only imported by `stores/useCommon.ts` and `components/NaviBox.tsx`.
+- Confirmed `react-use` usage is limited to window size and scroll hooks.
+
+### Next Review Angle
+
+- Review runtime motion and scroll behavior: Lenis provider placement, direct DOM mutation, resize listeners, scroll-triggered rendering cost, and reduced-motion handling.
+- Consider a dependency-removal branch that starts with `react-textfit`, `styled`, and `@studio-freight/react-lenis`.
