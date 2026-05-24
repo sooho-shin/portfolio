@@ -2118,3 +2118,107 @@
 
 - Review accessibility and semantic HTML in detail: buttons vs links, missing labels, image alt text, heading order, focus management, keyboard paths, target blank safety, and decorative SVG handling.
 - Consider implementing `config/contact.ts` and `config/projects.ts` first because they would remove repeated high-risk portfolio data without changing visual behavior.
+
+## 2026-05-25 05:00 KST - Review 27
+
+### Scope
+
+- Accessibility and semantic HTML
+- Links, buttons, and keyboard paths
+- Heading and landmark structure
+- Image and SVG labeling
+- Focus and overlay behavior
+
+### Findings
+
+1. Pages do not expose a semantic page structure.
+   - Evidence: scans found no `<main>`, `<nav>`, `<header>`, `<footer>`, `<h1>`, or `<h2>` in the primary app/page components.
+   - Current impact: screen readers and search crawlers receive mostly anonymous `div`/`p` structure.
+   - Recommended action: wrap route content in `<main>`, render navigation as `<nav>`, footer as `<footer>`, and promote the primary visual headline to an actual `h1`.
+
+2. Navigation links are implemented as buttons with imperative routing.
+   - Evidence: `components/NaviBox.tsx` renders HOME, WORK, and ABOUT as `<button>` elements that call `router.push`.
+   - Current impact: users lose normal link affordances such as open-in-new-tab, copied URL, link context, and expected screen-reader semantics.
+   - Recommended action: render these items as Next `Link` elements and keep buttons only for opening/closing the menu.
+
+3. The mobile hamburger button has no accessible name.
+   - Evidence: `components/NaviBox.tsx:34` renders a visual hamburger button containing only empty `div` bars.
+   - Current impact: assistive technology cannot announce what the control does.
+   - Recommended action: add `aria-label="Open navigation"` and expose expanded state with `aria-expanded={naviState}`.
+
+4. The mobile overlay close control is an unlabeled full-screen button.
+   - Evidence: `components/NaviBox.tsx:48` renders `.dim` as an empty button.
+   - Current impact: keyboard and screen-reader users can tab to a nameless control with unclear behavior.
+   - Recommended action: label it as "Close navigation", or make the backdrop inert and provide a visible close button.
+
+5. The mobile nav overlay is only visually hidden when closed.
+   - Evidence: `NaviBox` moves `.navi-group` to `left: -100%` while leaving its buttons mounted.
+   - Current impact: hidden menu controls may remain reachable in the accessibility tree or tab order.
+   - Recommended action: toggle `aria-hidden`, use `inert` where supported, manage focus on open/close, and return focus to the hamburger after closing.
+
+6. Footer "back to top" is a clickable `div`.
+   - Evidence: `components/Footer.tsx:71` attaches `onClick` to a `div.top`.
+   - Current impact: the control is not keyboard accessible by default and has no button semantics.
+   - Recommended action: replace it with `<button type="button" aria-label="Back to top">`.
+
+7. External links that open a new tab lack `rel`.
+   - Evidence: Footer and About external anchors use `target="_blank"` without `rel="noopener noreferrer"`.
+   - Current impact: opened pages keep an unnecessary `window.opener` relationship and audits will flag the links.
+   - Recommended action: add a shared external link helper that always applies safe `rel` values.
+
+8. The homepage email link is not actionable.
+   - Evidence: `components/main/MainWrapper.tsx:38` renders `<a href="#">soojoon92@gmail.com</a>`.
+   - Current impact: the element announces as a link but does not perform a useful contact action.
+   - Recommended action: use a real `mailto:` link with a clear subject, or render plain text if it is not meant to be a link.
+
+9. About has an anchor without `href`.
+   - Evidence: `components/about/AboutWrapper.tsx:325` renders `<a>` for Twitter without a destination.
+   - Current impact: the element looks like a link but is not a valid navigable anchor.
+   - Recommended action: provide a real `href`, remove the item, or render it as disabled text with an explicit reason.
+
+10. Icon-only social links rely on image alt text instead of link labels.
+    - Evidence: Footer social anchors contain only icon images such as `alt="icoSoundcloud"` and `alt="icoFacebook"`.
+    - Current impact: screen readers may announce implementation-oriented icon names rather than clear destinations.
+    - Recommended action: add `aria-label` to each anchor and use cleaner alt text, or mark the icon image as decorative with `alt=""`.
+
+11. Project images are implemented as CSS backgrounds.
+    - Evidence: `GalleryBox` renders project visuals through `background-image` on `.project` divs.
+    - Current impact: meaningful project screenshots are not discoverable by assistive technology and cannot carry alt text.
+    - Recommended action: use semantic images or `next/image` for meaningful screenshots, with project-specific alt text from data.
+
+12. Decorative SVGs are not marked as hidden.
+    - Evidence: large blackhole and arrow SVGs are rendered inline without `aria-hidden` or `focusable="false"`.
+    - Current impact: some assistive tech can include decorative SVGs in the accessibility tree.
+    - Recommended action: mark purely decorative SVGs with `aria-hidden="true"` and `focusable="false"`; use labels only for functional SVG controls.
+
+13. Slider arrow buttons have no accessible names.
+    - Evidence: About slider buttons contain only decorative SVG arrows and a circle `div`.
+    - Current impact: users cannot know whether a button moves to the previous or next project.
+    - Recommended action: add `aria-label="Previous project"` and `aria-label="Next project"` and disable buttons at bounds instead of returning `false`.
+
+14. Focus styling is not defined for custom controls.
+    - Evidence: searches found hover/cursor styling but no `:focus-visible` styling in the reviewed components.
+    - Current impact: keyboard users may not see which custom link or button is active.
+    - Recommended action: add global or component-level `:focus-visible` outlines that meet contrast requirements.
+
+15. The Work cards are links but the accessible name is weak and destinations are all `/`.
+    - Evidence: `components/works/WorkWrapper.tsx:107` wraps each `GalleryBox` in `<Link href={"/"} key={c.text}>`.
+    - Current impact: keyboard and screen-reader users get repeated links to the same destination, with duplicate labels when project titles repeat.
+    - Recommended action: link each card to a unique project slug and provide an accessible label such as `View project: {title}`.
+
+16. Visual section titles are mostly paragraphs or `Textfit`.
+    - Evidence: main and About headings such as `VERIFIED AI`, `INFO`, and section titles are rendered with `Textfit`, `p`, or styled `div` containers.
+    - Current impact: users cannot navigate by headings, and SEO has less reliable page hierarchy.
+    - Recommended action: use actual heading tags and style them visually through CSS/Textfit wrappers where needed.
+
+### Verification
+
+- Checked current worktree with `git status --short --branch`.
+- Searched semantic/accessibility patterns with `rg` for headings, landmarks, anchors, buttons, images, SVGs, ARIA attributes, `target`, `rel`, focus styles, and click handlers.
+- Inspected `NaviBox`, `Footer`, `MainWrapper`, `AboutWrapper`, `WorkWrapper`, and `GalleryBox`.
+- Counted key accessibility markers with a UTF-8 Python scan across the same components.
+
+### Next Review Angle
+
+- Review SEO and metadata readiness: per-route metadata, Open Graph/Twitter cards, canonical URLs, sitemap/robots, semantic headings, content language, and whether portfolio proof is indexable.
+- Consider an early accessibility fix pass: convert nav items to `Link`, make footer top a button, add `rel` to external links, and add labels for icon-only controls.
