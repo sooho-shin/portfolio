@@ -2962,3 +2962,113 @@
 
 - Review content credibility and proof architecture: project claims, validation evidence, metric placement, failure-case disclosure, and whether each AI developer claim has an inspectable artifact.
 - Consider creating a typed `projects` config before implementing `/work/[slug]`, so route, content, image, and metadata ownership are solved together.
+
+## 2026-05-25 13:00 KST - Review 35
+
+### Scope
+
+- Content credibility and proof architecture
+- AI developer positioning versus inspectable evidence
+- Project claim structure and validation artifacts
+- Metric, failure-case, and reproducibility signals
+- Portfolio trust model for technical reviewers
+
+### Findings
+
+1. The AI validation positioning is claim-led, not evidence-led.
+   - Evidence: `MainWrapper` and `Footer` include terms such as `VERIFIED AI SYSTEMS`, `VERIFY AI`, `EVALUATION`, `RAG`, `LLM`, `AGENT`, and `Eval / RAG / Agent`.
+   - Current impact: visitors understand the intended positioning, but they cannot inspect what was validated or how.
+   - Recommended action: pair every major AI claim with at least one linked proof artifact or case-study section.
+
+2. There is no structured case-study model.
+   - Evidence: repository search found no `content`, `data`, `projects`, `case`, or case-study source file other than local arrays inside visual components.
+   - Current impact: credibility content cannot scale beyond hard-coded decorative sections.
+   - Recommended action: create a typed case-study schema with `problem`, `role`, `system`, `evaluation`, `failureModes`, `metrics`, `artifacts`, and `links`.
+
+3. Project cards contain no proof fields.
+   - Evidence: `WorkWrapper` project entries contain only `text` and `images`.
+   - Current impact: the Work page can show thumbnails, but it cannot communicate why a project proves AI validation ability.
+   - Recommended action: expand project records to include a short claim, validation method, measurable result, and artifact links.
+
+4. The current Work page repeats placeholder evidence.
+   - Evidence: all four work cards use images from `/images/work/yummygame`, and three entries share the label `yummy yummy`.
+   - Current impact: repeated placeholder cards weaken trust because the page looks broader than the underlying evidence.
+   - Recommended action: show fewer projects with real proof, or clearly mark draft/private projects until evidence exists.
+
+5. The strongest homepage claim has no direct artifact path.
+   - Evidence: the homepage says the work is about trusting AI output only after validating it with criteria and evidence, then routes only to `/about` and `/work`.
+   - Current impact: a technical reviewer cannot jump from the claim to a validation report, benchmark, repo, demo, or trace.
+   - Recommended action: add a primary proof CTA such as `View validation case` that lands on the strongest project detail route.
+
+6. There are no measurable outcomes.
+   - Evidence: searches found no project metrics such as accuracy, latency, cost, pass rate, regression count, recall, precision, or benchmark results.
+   - Current impact: the portfolio sounds methodical but does not quantify impact.
+   - Recommended action: for each case, include at least one before/after metric and explain the measurement setup.
+
+7. Failure discovery is mentioned but not demonstrated.
+   - Evidence: homepage copy frames failure discovery as important, but no source data describes discovered failures, edge cases, or fixes.
+   - Current impact: the differentiating claim is not yet testable by the reader.
+   - Recommended action: add a `Failure cases found` section per case with examples, severity, root cause, and resulting mitigation.
+
+8. Evaluation criteria are named generically.
+   - Evidence: source text includes `EVALUATION` and `Eval`, but no criteria, rubric, thresholds, or acceptance rules are encoded.
+   - Current impact: readers cannot distinguish real evaluation design from branding language.
+   - Recommended action: publish representative rubrics such as groundedness, citation correctness, task success, latency budget, and fallback behavior.
+
+9. RAG and agent claims need domain-specific proof.
+   - Evidence: the skill list includes `RAG`, `LLM`, `AGENT`, and `AUTOMATION`, but no retrieved sources, tools, agent traces, or workflow diagrams appear in source content.
+   - Current impact: the terms read as tags rather than demonstrated engineering experience.
+   - Recommended action: include one RAG retrieval example and one agent/tool execution trace in a case-study page.
+
+10. There is no reproducibility story.
+    - Evidence: there are no scripts, fixtures, datasets, golden answers, or evaluation outputs tied to portfolio claims.
+    - Current impact: the portfolio cannot show that validation can be repeated by another engineer.
+    - Recommended action: add sanitized eval fixtures or a small public demo evaluation with command, dataset shape, and expected output.
+
+11. Visual proof is not labeled as evidence.
+    - Evidence: gallery components render screenshots as background images without captions, image roles, dates, or result context.
+    - Current impact: screenshots function as decoration rather than technical proof.
+    - Recommended action: attach captions to each image that explain what the viewer is seeing and why it matters.
+
+12. About page content still dilutes the AI validation narrative.
+    - Evidence: `AboutWrapper` still contains generic developer biography, broad frontend/backend skills, dream-client copy, and inherited social sections.
+    - Current impact: the portfolio identity competes with older template content.
+    - Recommended action: rewrite About around validation engineering: judgment, debugging process, quality gates, and examples of technical decisions.
+
+13. Skill claims are broad but not prioritized.
+    - Evidence: About lists `REACT`, `NEXT JS`, `NODE JS`, `EXPRESS`, `HTML`, `JAVASCRIPT`, `CSS / SCSS`, and `SQL`, while the home page emphasizes Eval, RAG, LLM, Agent, QA, and Frontend.
+    - Current impact: reviewers may not know whether the candidate is selling frontend delivery, full-stack work, or AI validation systems.
+    - Recommended action: group skills by evidence-backed capability instead of technology inventory.
+
+14. The README does not reinforce the portfolio thesis.
+    - Evidence: `README.md` is still a basic Next.js getting-started note with node version and reference-site link.
+    - Current impact: anyone reviewing the repo sees scaffolding notes rather than the intended technical identity.
+    - Recommended action: add a concise repo README describing the portfolio goal, architecture, validation-content plan, and verification commands.
+
+15. No portfolio content has ownership metadata.
+    - Evidence: project and about data are local constants inside components, with no source, date, client status, or confidentiality marker.
+    - Current impact: real versus placeholder content cannot be audited safely.
+    - Recommended action: add content metadata fields such as `status`, `source`, `lastReviewed`, `clientVisible`, and `publicEvidenceLevel`.
+
+16. There is no trust boundary for private or unreleased work.
+    - Evidence: work entries and copied client lists do not distinguish shipped work, experiments, private prototypes, or aspirational examples.
+    - Current impact: the portfolio can unintentionally overclaim.
+    - Recommended action: explicitly label each case as `production`, `prototype`, `internal`, `sanitized`, or `concept`.
+
+17. The next implementation step should be one strong proof path, not more general copy.
+    - Evidence: the site already has enough high-level AI validation language, but lacks a single complete example.
+    - Current impact: adding more slogans would increase the gap between claim and proof.
+    - Recommended action: build one detailed case-study data object and render it before expanding the work grid.
+
+### Verification
+
+- Checked current worktree and latest commits before starting the review.
+- Searched source for AI validation, evaluation, metric, benchmark, failure, trace, artifact, result, case-study, and project-proof terminology.
+- Listed project files and confirmed there is no dedicated content or project data directory.
+- Inspected `MainWrapper`, `WorkWrapper`, `AboutWrapper`, `GalleryBox`, `Footer`, `README.md`, and the small `CatchCatch` placeholder component.
+- Confirmed current proof-related content is embedded in visual components rather than modeled as reusable portfolio evidence.
+
+### Next Review Angle
+
+- Review implementation readiness for a first proof path: identify the smallest data model, route shape, and component split needed to add one credible AI validation case without destabilizing the current visual shell.
+- Consider drafting `config/projects.ts` and a single `/work/[slug]` case page before touching the rest of the Work grid.
