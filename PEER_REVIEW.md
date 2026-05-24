@@ -1914,3 +1914,102 @@
 
 - Review state/effects lifecycle safety: unused state setters, timeout cleanup, ref null guards, scroll effects, Zustand usage, and whether effects can run after unmount.
 - Consider adding browser screenshot QA once the build/dev server path is stable and disk space remains sufficient.
+
+## 2026-05-25 03:00 KST - Review 25
+
+### Scope
+
+- State and effect lifecycle safety
+- Ref null guards and direct DOM mutation
+- Route-change behavior
+- Scroll effect cost
+- Zustand and unused state
+
+### Findings
+
+1. `EffectBox` schedules a timeout without cleanup.
+   - Evidence: `components/EffectBox.tsx:28` calls `setTimeout` inside `useEffect`, but the effect does not return `clearTimeout`.
+   - Current impact: if the component unmounts or the route changes before the timeout fires, the callback can still run against a stale lifecycle.
+   - Recommended action: store the timer id and clear it in the effect cleanup.
+
+2. `EffectBox` mutates `effectRef.current.style` before proving the ref exists.
+   - Evidence: `components/EffectBox.tsx:22` writes `effectRef.current.style.width` immediately after the effect starts.
+   - Current impact: a render timing issue or conditional wrapper change could throw at runtime before the later guarded timeout block.
+   - Recommended action: assign `const el = effectRef.current; if (!el) return;` at the top of the effect and use `el` consistently.
+
+3. `EffectBox` stores props in state that never updates.
+   - Evidence: `pageState` and `rollingTextState` are initialized from `text` and `rollingText`, but `setPageState` and `setRollingTextState` are never called.
+   - Current impact: if the component stays mounted across a prop change, the visual transition can show stale copy.
+   - Recommended action: render directly from props, or add an explicit prop-sync effect if the transition needs local state.
+
+4. `EffectBox` subscribes to unused runtime values.
+   - Evidence: `windowHeight` from `useWindowSize` and `pathname` from `usePathname` are read but unused.
+   - Current impact: the component is coupled to resize and routing data it does not need, making future lifecycle debugging harder.
+   - Recommended action: remove unused subscriptions or intentionally wire pathname into the transition reset logic.
+
+5. About and Work scroll effects guard the ref object, not `.current`.
+   - Evidence: both `components/about/AboutWrapper.tsx:71` and `components/works/WorkWrapper.tsx:46` use `if (infoText)` before reading `mainContainer.current.offsetHeight` and `infoText.current.style`.
+   - Current impact: `useRef()` always returns a truthy object, so the guard does not prevent null dereferences.
+   - Recommended action: check `if (!mainContainer.current || !infoText.current) return;` before reading layout or mutating style.
+
+6. About slider refs have the same ineffective guard.
+   - Evidence: `components/about/AboutWrapper.tsx:85` uses `if (sliderRef)` before writing to `sliderRef.current`, `sliderJobRef.current`, and `sliderImgRef.current`.
+   - Current impact: a partial render or future conditional slide section can throw when one of the three refs is unavailable.
+   - Recommended action: guard all three `.current` values and consider deriving the slide position through state/className instead of imperative style writes.
+
+7. Scroll-driven style mutation runs on every scroll update.
+   - Evidence: About and Work subscribe to `useWindowScroll` and write `infoText.current.style.transform` whenever `scrollY`, `windowHeight`, or `windowWidth` changes.
+   - Current impact: direct DOM writes can happen at scroll frequency, causing layout reads and style writes outside React's scheduling.
+   - Recommended action: move this to CSS sticky behavior if possible; otherwise throttle with `requestAnimationFrame` and cache measured height with `ResizeObserver`.
+
+8. Scroll effects read layout and write style in the same pass.
+   - Evidence: the effects read `mainContainer.current.offsetHeight` and then set `infoText.current.style.transform`.
+   - Current impact: repeated read/write cycles can increase layout thrashing risk, especially with Lenis smoothing active globally.
+   - Recommended action: split measurement from mutation, cache the measured section height, and update transform from derived values.
+
+9. `scrollX` is subscribed but unused.
+   - Evidence: About and Work destructure `const { x: scrollX, y: scrollY } = useWindowScroll()`, but only `scrollY` is used.
+   - Current impact: this is small, but it signals that hook outputs are being copied broadly instead of narrowly.
+   - Recommended action: destructure only `y` to keep the dependency surface obvious.
+
+10. Route changes close the mobile nav, but route navigation itself is handled imperatively.
+    - Evidence: `components/NaviBox.tsx:26` closes nav on `pathname` change, while each item calls `router.push`.
+    - Current impact: the component needs both route subscription and imperative navigation state, which makes focus/overlay lifecycle harder to reason about.
+    - Recommended action: use `Link` for navigation and reserve state only for opening/closing the mobile menu.
+
+11. `NaviBox` imports runtime hooks it does not use.
+    - Evidence: `Link`, `useRef`, `useWindowSize`, `keyframes`, and `setRoute` are imported or destructured but unused.
+    - Current impact: route and viewport lifecycle concerns appear larger than they are, increasing maintenance noise.
+    - Recommended action: delete unused imports and remove `useCommonStore` from this component unless it drives visible behavior.
+
+12. The global Zustand store has no active consumer.
+    - Evidence: `stores/useCommon.ts` exports `route` and `setRoute`, but the only found import in runtime components is the unused `setRoute` destructuring in `NaviBox`.
+    - Current impact: route state can drift from Next's router and gives future code a tempting but redundant source of truth.
+    - Recommended action: remove the store for now, or replace it with a clearly scoped UI store only when multiple mounted components need shared UI state.
+
+13. About and Work keep static transition text in mutable state.
+    - Evidence: both pages create `effectTitle` and `effectRollingText` with setters that are never called.
+    - Current impact: the code implies runtime mutability that does not exist.
+    - Recommended action: use constants for these values until page transitions actually need to change them dynamically.
+
+14. `GalleryBox` imports React hooks and `next/router` without using them.
+    - Evidence: `components/GalleryBox.tsx` imports `useRouter`, `useEffect`, and `useState`, but the component is presentational.
+    - Current impact: this can confuse future App Router work because `next/router` is the Pages Router API and should not be present here.
+    - Recommended action: remove those imports and type image inputs as strings.
+
+15. Lenis imports an unused hook.
+    - Evidence: `lib/smoothScrolling.tsx:4` imports `useLenis`, but the component only renders `ReactLenis`.
+    - Current impact: this is minor, but it reinforces the pattern of unused lifecycle hooks living near global behavior.
+    - Recommended action: remove `useLenis`; if programmatic scrolling is needed later, centralize it in one tested helper.
+
+### Verification
+
+- Checked current worktree with `git status --short --branch`.
+- Inspected `EffectBox`, `NaviBox`, `AboutWrapper`, `WorkWrapper`, `GalleryBox`, `useCommon`, `smoothScrolling`, and `app/layout.tsx`.
+- Searched lifecycle and state patterns with `rg` for `useEffect`, `useState`, `useRef`, timers, direct DOM reads/writes, router hooks, Zustand usage, and window/scroll hooks.
+- Confirmed no active committed source change was present before adding this review.
+
+### Next Review Angle
+
+- Review data modeling and content ownership: project data, profile/contact data, repeated literals, typed content configs, and whether portfolio copy can be maintained without editing layout components.
+- Consider making the first implementation pass small and safe: remove unused hooks/imports, add ref guards, and clear the `EffectBox` timeout.
