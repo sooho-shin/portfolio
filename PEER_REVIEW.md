@@ -64,7 +64,7 @@
    - Current impact: the portfolio positioning did not clearly differentiate the developer's strength.
    - Action taken: revised the main copy toward evaluation, evidence, failure detection, repeatable validation, and reliability automation.
 
-2. Korean text in source files is vulnerable to mojibake during PowerShell-based edits.
+2. Korean text in source files is vulnerable to mojibake during shell-based edits.
    - Current impact: previous Korean copy became unreadable in `app/layout.tsx`, `components/main/MainWrapper.tsx`, and `components/Footer.tsx`.
    - Action taken: rewrote the affected copy blocks and re-saved touched files as UTF-8.
    - Action taken: added an `.editorconfig` with `charset = utf-8` and LF line endings.
@@ -90,3 +90,55 @@
 - Make About/Work pages support the new verification-focused positioning.
 - Add encoding/tooling guardrails so Korean content edits do not regress.
 - Separate visual copy changes from code cleanup in future commits.
+
+## 2026-05-25 04:00 KST - Review 3
+
+### Scope
+
+- Work page data modeling and navigation
+- App Router compatibility in shared gallery/navigation components
+- Ref safety around scroll-driven layout code
+- Documentation integrity after Korean encoding issues
+
+### Findings
+
+1. `components/works/WorkWrapper.tsx:107` still routes every work card to `/`.
+   - Current impact: the Work page looks clickable but cannot expose project detail, case-study, or external result pages.
+   - Recommended action: model each work item as `{ id, title, href, images }` and render `Link href={work.href}`. If a project has no target yet, make that explicit in the data instead of silently linking home.
+
+2. `components/works/WorkWrapper.tsx:64` keeps work data inside the component and uses duplicate titles as identity.
+   - Current impact: the UI, routing, and data are coupled; duplicate `"yummy yummy"` labels make React keys unstable and prevent reliable project expansion.
+   - Recommended action: extract a typed `works` array near the module top or under `config/works.ts`, with stable `id` values and project metadata.
+
+3. `components/GalleryBox.tsx:1` imports `useRouter` from `next/router`, and `components/GalleryBox.tsx:2` imports unused hooks.
+   - Current impact: it works only because those imports are unused, but it leaves Pages Router API in an App Router codebase and adds review noise.
+   - Recommended action: remove `useRouter`, `useEffect`, and `useState`; keep this component presentational.
+
+4. `components/GalleryBox.tsx:33` through `components/GalleryBox.tsx:133` manually repeats the same `<span>{text}</span>` blocks.
+   - Current impact: the component is long, harder to change, and easy to make inconsistent when the marquee behavior changes.
+   - Recommended action: create a small helper like `renderLoopText(text, count = 10)` or map over `Array.from({ length: 10 })` for each edge.
+
+5. `components/about/AboutWrapper.tsx:72` and `components/works/WorkWrapper.tsx:47` dereference refs through `mainContainer.current` and `infoText.current` without guarding `.current`.
+   - Current impact: React effects normally run after refs attach, but this can still crash under conditional rendering, test environments, or future layout changes.
+   - Recommended action: use early guards such as `if (!mainContainer.current || !infoText.current) return;`.
+
+6. `components/NaviBox.tsx:3`, `components/NaviBox.tsx:5`, `components/NaviBox.tsx:6`, `components/NaviBox.tsx:7`, and `components/NaviBox.tsx:23` show unused imports/state plumbing.
+   - Current impact: `Link`, `useRef`, `useWindowSize`, `keyframes`, and `setRoute` increase maintenance noise and hide the actual navigation behavior.
+   - Recommended action: remove unused imports and either wire `useCommonStore` to real behavior or delete it from this component.
+
+7. `app/layout.tsx` had a mojibake-damaged metadata description during this review.
+   - Current impact: the project could fail type checking or ship broken SEO text.
+   - Action taken: restored `description` to readable Korean and kept `Noto Sans KR` metadata setup intact.
+   - Recommended action: keep Korean copy changes in editor/patch workflows that preserve UTF-8.
+
+### Verification
+
+- `node ./node_modules/typescript/bin/tsc --noEmit`: passed after restoring `app/layout.tsx`.
+- Searched for known mojibake marker characters in `app`, `components`, and `PEER_REVIEW.md`: no matches after cleanup.
+- `git status --short --branch`: showed a clean branch before this review and only review/layout documentation changes afterward.
+
+### Next Review Angle
+
+- Turn the Work page findings into a small data-model cleanup commit.
+- Re-run lint in a stable Node environment and compare against the manual unused-import findings.
+- Review image handling and asset sizes, especially large `public/images/img_user_*.jpg` files.
