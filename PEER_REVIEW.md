@@ -1440,3 +1440,98 @@
 
 - Review maintainability of component structure: oversized wrappers, repeated left/right layout code, styled-components locality, dead List/CatchCatch components, and naming consistency.
 - Consider optimizing large images before further visual work, because asset size is one of the clearest production risks.
+
+## 2026-05-25 21:00 KST - Review 20
+
+### Scope
+
+- Component structure and maintainability
+- Oversized page wrappers
+- Repeated layout and styled-components patterns
+- Dead scaffold components
+- Naming consistency and typo debt
+
+### Findings
+
+1. `AboutWrapper` is too large and mixes too many responsibilities.
+   - Evidence: `components/about/AboutWrapper.tsx` is about 26 KB and contains page data, state, scroll effects, slider effects, JSX, and all styled-components in one file.
+   - Current impact: small copy or behavior changes require navigating an entire page implementation.
+   - Recommended action: split About into `AboutIntro`, `ProjectSlider`, `ClientList`, `SkillList`, `SocialLinks`, and page-level layout/data modules.
+
+2. `MainWrapper` has the same oversized-wrapper problem.
+   - Evidence: `components/main/MainWrapper.tsx` is about 24 KB and contains hero copy, page layout, hover gallery behavior, animations, buttons, and all style definitions.
+   - Current impact: homepage copy, image behavior, and layout changes are tightly coupled.
+   - Recommended action: split the homepage into server-rendered content sections and a small client gallery/animation component.
+
+3. Page-specific wrappers duplicate layout primitives.
+   - Evidence: `components/about/AboutWrapper.tsx`, `components/works/WorkWrapper.tsx`, and `components/main/MainWrapper.tsx` each define their own `Section`, `MainWrapper`, and `AboutLeft`-style layout blocks.
+   - Current impact: changing the two-column layout requires updating multiple files manually.
+   - Recommended action: create shared layout primitives such as `PortfolioShell`, `SplitSection`, `LeftRail`, and `ContentRail`.
+
+4. `LeftWrapperComponent` and `RightWrapperComponent` are thin wrappers but force client components.
+   - Evidence: `components/LeftWrapper.tsx` and `components/RightWrapper.tsx` both start with `"use client"` even though they only render styled layout containers.
+   - Current impact: purely structural layout becomes part of the client component graph.
+   - Recommended action: make shared layout primitives server-compatible where possible and keep client-only behavior outside them.
+
+5. Unused scaffold components remain in source.
+   - Evidence: `components/ListDetail.tsx` only appears in its own file, `components/works/CatchCatch.tsx` only appears in its own file, and `components/List.tsx` / `components/ListItem.tsx` are example-like and commented.
+   - Current impact: reviewers cannot tell whether these are planned features, abandoned examples, or safe-to-delete files.
+   - Recommended action: delete unused scaffold components or move planned examples into a clearly named sandbox directory outside production source.
+
+6. Zustand store code is effectively dead.
+   - Evidence: `stores/useCommon.ts` exports `useCommonStore`; `components/NaviBox.tsx` imports it and destructures `setRoute`, but no call or route-state consumer was found.
+   - Current impact: global state infrastructure exists without driving behavior.
+   - Recommended action: remove the store until a real cross-component state need exists, or wire it into a documented navigation transition feature.
+
+7. Work page includes copied About data that is not used.
+   - Evidence: `components/works/WorkWrapper.tsx:15` through `components/works/WorkWrapper.tsx:34` define `memberType` and `clientArrayData`, but Work rendering uses `workArray`.
+   - Current impact: page files contain stale data that increases review noise.
+   - Recommended action: remove copied declarations and keep Work data in a typed project config.
+
+8. About uses state for immutable content.
+   - Evidence: `components/about/AboutWrapper.tsx:61` stores `clientArrayData` with `useState`, but the array is never updated.
+   - Current impact: static content looks mutable and adds unnecessary React state.
+   - Recommended action: render static arrays directly or import them from a content config module.
+
+9. Several names carry typo debt.
+   - Evidence: `config/breakboint.ts`, `SwipeWrppaer`, `.border-gorup`, and related class names.
+   - Current impact: typos become part of import paths and CSS selectors, making future refactors more error-prone.
+   - Recommended action: rename with compatibility in one focused pass: `breakpoint`, `SwipeWrapper`, `border-group`.
+
+10. Styled-components are deeply local to page files.
+    - Evidence: About defines `SnsWrapper`, `SkillWrapper`, `ClientWrapper`, `UserImgGroup`, `UserNameGroup`, `SwipeWrppaer`, `CenterInfo`, `Title`, `AboutLeft`, `Section`, and `MainWrapper` in one file.
+    - Current impact: there is no clear boundary between reusable design primitives and one-off styles.
+    - Recommended action: keep truly page-specific styles local, but extract repeated layout primitives and card patterns.
+
+11. `GalleryBox` has unused imports and weak type boundaries.
+    - Evidence: `components/GalleryBox.tsx:1` imports `useRouter` from `next/router`, and image props are typed as `any`.
+    - Current impact: a shared visual component has both stale dependencies and loose input contracts.
+    - Recommended action: remove unused imports and type image props as strings or a tuple-backed image model.
+
+12. Component names do not consistently describe domain intent.
+    - Evidence: `memberType`, `memberArrayData`, and `clientArrayData` describe generic members/clients, while the UI is actually presenting portfolio projects and proof points.
+    - Current impact: domain meaning is hidden behind template-era names.
+    - Recommended action: rename data models to `ProjectSummary`, `ProofPoint`, `Capability`, or similar portfolio-specific types.
+
+13. The current file structure separates by page, but not by feature responsibility.
+    - Evidence: `components/about/AboutWrapper.tsx` owns About copy, contact rail, project slider, social links, skills, clients, and animation trigger.
+    - Current impact: future improvements such as AI case-study cards or accessibility fixes will touch a large page file instead of a focused component.
+    - Recommended action: move toward feature folders such as `components/about/ProjectSlider.tsx`, `components/shared/SplitLayout.tsx`, and `config/projects.ts`.
+
+14. Comments and copied snippets are left in production files.
+    - Evidence: Work contains commented example props for `GalleryBox`; `NaviBox` contains commented old `Link` markup; `MainWrapper` contains commented `LeftWrapper` styles.
+    - Current impact: stale comments distract from active behavior and make code review slower.
+    - Recommended action: remove comments that only describe abandoned code paths; keep comments only where they explain non-obvious decisions.
+
+### Verification
+
+- Checked current worktree with `git status --short --branch`.
+- Listed source files by size to identify maintenance hotspots.
+- Searched component/data/layout patterns with `rg` for wrapper names, page data arrays, dead components, typo names, store usage, and styled-component declarations.
+- Inspected `LeftWrapper`, `RightWrapper`, `config/breakboint.ts`, and `stores/useCommon.ts` directly.
+- Confirmed `ListDetail`, `CatchCatch`, and the List/ListItem scaffold have no production usage beyond their own/example files.
+
+### Next Review Angle
+
+- Review data modeling and content-source design: project configs, profile/capability schemas, social/contact config, image metadata, and how to make copy edits safer.
+- Consider deleting dead scaffold components before larger refactors, because it immediately reduces search noise.
