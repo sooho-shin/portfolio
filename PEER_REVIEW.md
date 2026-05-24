@@ -347,3 +347,79 @@
 
 - Review deployment/runtime configuration: `ecosystem.config.js`, scripts, Node version assumptions, package-manager consistency, and PM2 behavior.
 - Consider implementing low-risk cleanup from this review: remove unused imports/state from `smoothScrolling`, `EffectBox`, `NaviBox`, and the route page.
+
+## 2026-05-25 08:00 KST - Review 7
+
+### Scope
+
+- Package manager and lockfile consistency
+- Node/runtime version pinning
+- Build/start scripts and PM2 production behavior
+- Repository hygiene for generated artifacts
+- CI/deployment reproducibility
+
+### Findings
+
+1. The project tracks both `package-lock.json` and `yarn.lock`, but only the Yarn path currently works.
+   - Evidence: `git ls-files package-lock.json yarn.lock` shows both files tracked; `corepack yarn --version` returns `1.22.22`.
+   - Current impact: contributors and deployment environments can pick different dependency graphs depending on package manager.
+   - Recommended action: choose one package manager. Given current behavior, add `"packageManager": "yarn@1.22.22"` to `package.json` and remove or regenerate `package-lock.json`.
+
+2. `npm ci --dry-run` fails on the current dependency tree.
+   - Evidence: npm reports `react-textfit@1.1.1` requires React `^15.0.0 || ^16.0.0`, while the project uses React 18.
+   - Current impact: any npm-based CI/deploy target will fail before build.
+   - Recommended action: either standardize on Yarn or replace `react-textfit` with a React 18-compatible alternative.
+
+3. Node version is documented but not enforced.
+   - Evidence: `README.md` says `v20.12.2`; there is no `.nvmrc`, `.node-version`, `volta`, or `engines` field.
+   - Current impact: developers can use Node 22 or other versions and hit different Next/SWC/worker behavior.
+   - Recommended action: add `.nvmrc` with `20.12.2` and a matching `engines.node` range in `package.json`.
+
+4. `package.json` has no CI-oriented install/build contract.
+   - Evidence: scripts include `dev`, `build`, `start`, `lint`, and `only-start`, but no `typecheck`, `ci`, or `verify`.
+   - Current impact: the working manual gate `node ./node_modules/typescript/bin/tsc --noEmit` is not encoded as a script.
+   - Recommended action: add `typecheck` and `verify` scripts, for example `yarn typecheck && yarn lint`, once lint is stable in the target environment.
+
+5. The `start` script rebuilds on every process start.
+   - Evidence: `"start": "next build && next start"`.
+   - Current impact: production restarts do unnecessary build work and can fail at runtime even if a build artifact was already validated.
+   - Recommended action: split scripts into `build: next build` and `start: next start`; let CI/deploy run build before process start.
+
+6. `only-start` starts PM2 with `--env production`, but `env_production` is commented out.
+   - Evidence: `package.json` uses `pm2 start ecosystem.config.js --env production`; `ecosystem.config.js` has `env_production` commented.
+   - Current impact: `--env production` currently communicates intent but does not set `NODE_ENV`, `PORT`, or other runtime variables.
+   - Recommended action: either restore `env_production` or remove `--env production` until it has effect.
+
+7. PM2 `instances: 4` is set without an explicit `exec_mode: "cluster"`.
+   - Evidence: `ecosystem.config.js` sets `instances: 4`, while the `exec_mode: 'cluster'` line is commented.
+   - Current impact: multiple forked `next start` processes may compete for the same port depending on PM2 behavior and environment.
+   - Recommended action: explicitly configure cluster mode or run a single Next process behind an external process manager/reverse proxy.
+
+8. PM2 starts `script: "next"` directly.
+   - Evidence: `ecosystem.config.js` uses `script: "next"` and `args: "start"`.
+   - Current impact: PATH resolution can differ between shells, PM2, CI, and servers.
+   - Recommended action: prefer `script: "node_modules/next/dist/bin/next"` or run `yarn start`/a package script through PM2 consistently.
+
+9. Operational comments in `ecosystem.config.js` and README contain mojibake when viewed through the current shell.
+   - Evidence: PM2 comments and README reference text display as corrupted Korean in PowerShell output.
+   - Current impact: deployment instructions are harder to trust and maintain.
+   - Recommended action: rewrite operational comments in plain Korean or English and verify UTF-8 rendering in the editor, not just shell output.
+
+10. There is no CI workflow checked in.
+    - Evidence: `.github` does not exist.
+    - Current impact: typecheck/lint/build regressions are detected manually and inconsistently.
+    - Recommended action: add a GitHub Actions workflow pinned to Node 20.12.2 and Yarn 1.22.22, initially running install and typecheck. Add lint/build after the local Next worker issue is resolved.
+
+### Verification
+
+- `npm ci --dry-run`: failed with `ERESOLVE` due to `react-textfit` peer dependency against React 18.
+- `corepack yarn --version`: `1.22.22`.
+- `node --version`: `v20.12.2`.
+- `npm --version`: `10.5.0`.
+- Checked absence of `.nvmrc`, `.node-version`, `.npmrc`, `.yarnrc`, and `.github`.
+- Inspected `package.json`, `ecosystem.config.js`, `README.md`, `next.config.mjs`, `.gitignore`, and tracked lockfiles.
+
+### Next Review Angle
+
+- Review content consistency across About and Work now that the homepage is positioned around verification-oriented AI development.
+- Consider implementing the deployment hygiene fixes as separate commits: package manager declaration, `.nvmrc`, `typecheck` script, and PM2 env cleanup.
