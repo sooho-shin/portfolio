@@ -1630,3 +1630,98 @@
 
 - Review routing and navigation architecture: App Router route structure, placeholder links, router button usage, prefetch behavior, missing work detail routes, and URL design for case studies.
 - Consider creating typed content config before fixing copy again, because it would reduce repeated manual edits across pages.
+
+## 2026-05-25 23:00 KST - Review 22
+
+### Scope
+
+- Routing and navigation architecture
+- App Router route shape
+- Placeholder links and missing detail pages
+- Navigation semantics
+- URL design for case studies
+
+### Findings
+
+1. The App Router only exposes three real pages.
+   - Evidence: `app` contains `page.tsx`, `about/page.tsx`, and `work/page.tsx`.
+   - Current impact: the portfolio has no route surface for case studies, project proof, contact, or individual work details.
+   - Recommended action: add explicit routes based on the intended content model, starting with `/work/[slug]` if Work cards should be evidence pages.
+
+2. Work cards all navigate back to the homepage.
+   - Evidence: `components/works/WorkWrapper.tsx:107` renders `<Link href={"/"} key={c.text}>`.
+   - Current impact: users clicking a Work card lose context instead of seeing project details.
+   - Recommended action: model each work item with `slug` and route to `/work/${slug}`.
+
+3. There is no dynamic route for work details.
+   - Evidence: `Get-ChildItem app -Recurse -Directory` shows only `app/about` and `app/work`.
+   - Current impact: even if work data gets better, there is no place to render long-form case studies.
+   - Recommended action: add `app/work/[slug]/page.tsx` with `generateStaticParams` sourced from typed project config.
+
+4. Work item data cannot currently drive routing.
+   - Evidence: `workArray` only has `text` and `images`, and repeated `text: "yummy yummy"` values.
+   - Current impact: URLs cannot be stable, unique, or human-readable.
+   - Recommended action: add `id`, `slug`, `title`, and `summary` before creating detail pages.
+
+5. Navigation imports `Link` but uses buttons with `router.push`.
+   - Evidence: `components/NaviBox.tsx:3` imports `Link`, while `components/NaviBox.tsx:57`, `components/NaviBox.tsx:64`, and `components/NaviBox.tsx:69` call `router.push` from buttons.
+   - Current impact: top-level navigation loses native link behavior such as opening in a new tab, copying URLs, and link semantics.
+   - Recommended action: render Home, Work, and About as `Link` elements and keep buttons only for opening/closing the mobile menu.
+
+6. `useCommonStore` route state is not connected to routing.
+   - Evidence: `NaviBox` destructures `setRoute`, but no route setter call or route-state consumer was found.
+   - Current impact: route state appears planned but does not participate in navigation.
+   - Recommended action: remove the store from navigation or define an explicit transition state responsibility.
+
+7. The main CTA links use legacy `passHref` unnecessarily.
+   - Evidence: `components/main/MainWrapper.tsx:192` and `components/main/MainWrapper.tsx:209` use `passHref`.
+   - Current impact: this is harmless but suggests Pages Router-era patterns are still present in App Router code.
+   - Recommended action: remove `passHref` unless wrapping a custom component that forwards anchor props.
+
+8. Explicit `prefetch` props are redundant on basic internal links.
+   - Evidence: the homepage CTA links use `<Link prefetch href={"/about"}>` and `<Link prefetch href={"/work"}>`.
+   - Current impact: the code implies special prefetch behavior where Next already provides sensible defaults.
+   - Recommended action: omit `prefetch` unless there is a measured reason to override defaults.
+
+9. Main email is modeled as an internal-style placeholder link.
+   - Evidence: `components/main/MainWrapper.tsx:38` uses `<a href="#">soojoon92@gmail.com</a>`.
+   - Current impact: clicking it changes scroll/hash behavior rather than opening a contact flow.
+   - Recommended action: use a `mailto:` link or add a real `/contact` route.
+
+10. About has an anchor without `href`.
+    - Evidence: `components/about/AboutWrapper.tsx:325` renders `<a>` for Twitter without a destination.
+    - Current impact: it looks like a navigation item but is not a valid route/link.
+    - Recommended action: remove disabled social rows or source them from config with `enabled: false`.
+
+11. External profile links are spread across components instead of a route/link model.
+    - Evidence: Footer and About define separate social links inline, with different Instagram URLs and a Naver URL under the Facebook icon.
+    - Current impact: users can land in inconsistent destinations depending on page.
+    - Recommended action: centralize links in a `socialLinks` config and render them through one link component.
+
+12. `GalleryBox` imports `useRouter` from the Pages Router package.
+    - Evidence: `components/GalleryBox.tsx:1` imports `useRouter` from `next/router`.
+    - Current impact: the shared gallery component carries a stale Pages Router dependency, even though the app uses App Router and the import is unused.
+    - Recommended action: remove the import; if imperative navigation is needed, use `next/navigation` in a client component.
+
+13. Commented routing examples remain in production source.
+    - Evidence: `components/ListItem.tsx:12` references `/users/[id]`, and `components/NaviBox.tsx:46` keeps a commented old `Link`.
+    - Current impact: dead route examples create noise when auditing navigation.
+    - Recommended action: delete unused examples or move them to documentation.
+
+14. There is no canonical URL strategy for case-study pages.
+    - Evidence: no project slugs, no route metadata, and no `metadataBase`/canonical config exist.
+    - Current impact: future work detail pages could launch without stable SEO/social URL definitions.
+    - Recommended action: pair `/work/[slug]` with typed project metadata and route-level `generateMetadata`.
+
+### Verification
+
+- Checked current worktree with `git status --short --branch`.
+- Listed App Router files and route directories under `app`.
+- Searched route/link patterns with `rg -F` for `Link`, `href=`, `router.push`, `useRouter`, `usePathname`, `passHref`, `prefetch`, placeholder anchors, and dynamic-route hints.
+- Inspected `NaviBox`, `WorkWrapper`, `MainWrapper`, and `GalleryBox` directly.
+- Confirmed only `/`, `/about`, and `/work` are represented by route files.
+
+### Next Review Angle
+
+- Review form/contact and conversion flow: email affordances, inquiry paths, social destinations, CTA consistency, and what a recruiter/client can actually do after landing.
+- Consider implementing `/work/[slug]` only after typed project config exists, because route params should come from stable project ids.
