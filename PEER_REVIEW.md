@@ -3072,3 +3072,118 @@
 
 - Review implementation readiness for a first proof path: identify the smallest data model, route shape, and component split needed to add one credible AI validation case without destabilizing the current visual shell.
 - Consider drafting `config/projects.ts` and a single `/work/[slug]` case page before touching the rest of the Work grid.
+
+## 2026-05-25 14:00 KST - Review 36
+
+### Scope
+
+- Implementation readiness for the first proof path
+- Minimum project data model and route shape
+- Server/client boundaries for App Router
+- Component split needed for one credible case page
+- Migration path from visual gallery to evidence-driven work
+
+### Findings
+
+1. A first proof path can be added without changing the whole visual shell.
+   - Evidence: `app/work/page.tsx` is a small server page that only renders `WorkWrapper`, and `tsconfig.json` already supports the `@/*` alias.
+   - Current impact: a new `config/projects.ts` and `app/work/[slug]/page.tsx` can be introduced in a scoped way.
+   - Recommended action: start with one typed project record and one dynamic route before refactoring About or Home.
+
+2. The project data should live outside React components first.
+   - Evidence: `workArray`, `memberArrayData`, and `clientArrayData` are currently declared inside wrapper components.
+   - Current impact: project evidence cannot be shared by the Work grid, About carousel, metadata, sitemap, or future detail pages.
+   - Recommended action: create `config/projects.ts` or `content/projects.ts` with exported project records and helper lookups.
+
+3. The minimum schema needs proof fields, not just display fields.
+   - Evidence: the current work records only include card label and image paths.
+   - Current impact: moving the same shape into config would preserve the evidence gap.
+   - Recommended action: include `slug`, `title`, `status`, `summary`, `role`, `problem`, `approach`, `evaluation`, `failureCases`, `metrics`, `artifacts`, and `images` in the first schema.
+
+4. The route should be server-rendered by default.
+   - Evidence: current route files under `app/about` and `app/work` are server components unless their wrapper is client-only.
+   - Current impact: a detail page can use server-side `generateStaticParams` and `generateMetadata` while delegating animation to child client components.
+   - Recommended action: keep `app/work/[slug]/page.tsx` server-side and pass typed project data to presentational components.
+
+5. Current wrapper components are too broad for direct reuse on a detail page.
+   - Evidence: `MainWrapper` is about 23.9 KB, `AboutWrapper` is about 26.7 KB, and `WorkWrapper` mixes data, scroll transforms, fixed contact rail, gallery layout, footer, and effect overlay.
+   - Current impact: reusing them for a project detail route would pull unrelated page behavior into the first proof path.
+   - Recommended action: create smaller case-study components instead of extending `WorkWrapper`.
+
+6. `GalleryBox` is a card renderer, not a case-study renderer.
+   - Evidence: `GalleryBox` accepts only `text`, `imgFirst`, `imgSecond`, and `imgThird`, then renders decorative hover loops and CSS background images.
+   - Current impact: it cannot show proof sections, captions, metrics, or artifact links without becoming overloaded.
+   - Recommended action: keep `GalleryBox` for the grid and add a separate `CaseStudy` component for detail content.
+
+7. Client-only wrappers should not own metadata.
+   - Evidence: the current client wrappers contain page identity, but only `app/layout.tsx` defines metadata.
+   - Current impact: if project titles and summaries stay inside client components, route metadata cannot be generated from the same source.
+   - Recommended action: store metadata fields in the project config and consume them from `generateMetadata`.
+
+8. `generateStaticParams` needs stable slugs before visual work continues.
+   - Evidence: current Work entries have duplicate labels and no slug field.
+   - Current impact: dynamic routes cannot be statically generated reliably from the current data.
+   - Recommended action: make `slug` the canonical project key and use it for React keys, URLs, metadata, and sitemap entries.
+
+9. The first route needs a deliberate not-found behavior.
+   - Evidence: no `app/not-found.tsx` exists, and there is no current `notFound()` handling in route code.
+   - Current impact: mistyped project URLs would fall to the default framework experience.
+   - Recommended action: use `notFound()` in `/work/[slug]/page.tsx` and add a styled app-level `not-found.tsx`.
+
+10. The proof page should avoid inheriting the fixed inquiry rail initially.
+    - Evidence: About and Work both embed the same fixed inquiry block inside their wrappers.
+    - Current impact: adding a detail route by copying those wrappers would repeat contact content and distract from evidence sections.
+    - Recommended action: make the first detail page content-first, with contact as a footer or final CTA.
+
+11. The current image model is not enough for evidence screenshots.
+    - Evidence: screenshots are passed as raw strings into CSS backgrounds and have no captions, dimensions, or evidence role.
+    - Current impact: detail pages cannot explain what each image proves.
+    - Recommended action: define image records with `src`, `alt`, `caption`, `role`, and optional `width`/`height`.
+
+12. Metrics should be modeled as structured values.
+    - Evidence: there are no current metric fields or result components.
+    - Current impact: future metrics could become prose-only and hard to compare across cases.
+    - Recommended action: add a `metrics` array with `label`, `value`, `unit`, `baseline`, `method`, and `caveat`.
+
+13. Failure cases should be first-class content.
+    - Evidence: the homepage differentiates the portfolio through failure discovery, but no component or data shape represents failures.
+    - Current impact: the strongest claim has no durable implementation target.
+    - Recommended action: add `failureCases` with `scenario`, `expected`, `observed`, `fix`, and `verification`.
+
+14. Artifact links should be typed with visibility.
+    - Evidence: current outbound links are social links only; there are no demo, repository, report, or trace links.
+    - Current impact: private work and public proof can be mixed accidentally.
+    - Recommended action: model artifacts with `type`, `label`, `href`, `visibility`, and `notes`.
+
+15. The dynamic route can be implemented before a full design pass.
+    - Evidence: current visual layout is heavily styled, but App Router can serve a simple detail route alongside existing pages.
+    - Current impact: waiting for a full visual redesign delays the credibility improvement.
+    - Recommended action: ship the first case page with simple responsive typography and reuse only stable shell pieces.
+
+16. There is a risk of importing client-only modules into server data.
+    - Evidence: many shared components start with `"use client"` and depend on `styled-components`, `react-use`, or browser APIs.
+    - Current impact: placing data helpers inside component folders could create accidental client/server coupling.
+    - Recommended action: keep pure data and lookup helpers in a dependency-light config module with no React imports.
+
+17. The first proof path should be verified by build-time route checks.
+    - Evidence: there is no current route smoke test or CI, but direct `next build` has worked through the package binary path.
+    - Current impact: a new dynamic route could break static generation without a dedicated check.
+    - Recommended action: after adding `/work/[slug]`, run direct typecheck, direct build, and manually confirm the generated route list.
+
+18. A narrow first implementation plan is available.
+    - Evidence: current structure supports adding `config/projects.ts`, `app/work/[slug]/page.tsx`, and a few new components without touching global navigation immediately.
+    - Current impact: the next code change can be useful without becoming a full portfolio rebuild.
+    - Recommended action: implement one `yummygame` case record, update the Work grid link to `/work/yummygame`, and render one proof page with metadata, metrics, failure cases, images, and artifact placeholders.
+
+### Verification
+
+- Checked current worktree and latest commits before starting the review.
+- Inspected `tsconfig.json`, `package.json`, root route files, `app/layout.tsx`, `WorkWrapper`, `GalleryBox`, and shared layout wrappers.
+- Searched for existing types, local data arrays, `generateStaticParams`, `generateMetadata`, slug handling, `Link` usage, styled components, client-only modules, and route params.
+- Listed component file sizes to identify coupling and candidate extraction boundaries.
+- Confirmed the project has no current `config/projects.ts`, dynamic work route, proof component, or app-level not-found page.
+
+### Next Review Angle
+
+- Review server/client rendering boundaries and hydration risk: current `"use client"` spread, styled-components registry behavior, browser-only hooks, and how a new server-rendered project detail route should avoid avoidable client JavaScript.
+- Consider implementing the first proof path only after the data model and route boundary are explicit.
