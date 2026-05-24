@@ -1725,3 +1725,98 @@
 
 - Review form/contact and conversion flow: email affordances, inquiry paths, social destinations, CTA consistency, and what a recruiter/client can actually do after landing.
 - Consider implementing `/work/[slug]` only after typed project config exists, because route params should come from stable project ids.
+
+## 2026-05-26 00:00 KST - Review 23
+
+### Scope
+
+- Contact and conversion flow
+- Email affordances
+- CTA consistency
+- Social destination trust
+- Recruiter/client next actions after landing
+
+### Findings
+
+1. The primary homepage email link is not actionable.
+   - Evidence: `components/main/MainWrapper.tsx:38` renders the email as `<a href="#">...`.
+   - Current impact: a visitor who tries to contact from the first viewport does not get an email client or contact flow.
+   - Recommended action: change the link to `mailto:soojoon92@gmail.com` or route to a real contact page.
+
+2. About and Work show the email as text, not a link.
+   - Evidence: `components/about/AboutWrapper.tsx:106` and `components/works/WorkWrapper.tsx:90` render the email inside `<p className="mail">`.
+   - Current impact: users must manually copy the address, which creates avoidable friction.
+   - Recommended action: use a shared `ContactRail` component with a real mail link.
+
+3. There is no dedicated contact route.
+   - Evidence: the App Router only has `/`, `/about`, and `/work`.
+   - Current impact: there is no place for inquiry context, expected response, project-fit guidance, or alternative contact methods.
+   - Recommended action: either add `/contact` or make the homepage/About contact blocks fully actionable.
+
+4. Contact copy is duplicated across pages.
+   - Evidence: About and Work both render `Inquiries`, `CONTACT`, email, and the same placeholder address block.
+   - Current impact: contact edits can drift and placeholder content can survive in one page after being fixed in another.
+   - Recommended action: centralize contact data and render it through one component.
+
+5. The contact block includes fake address content.
+   - Evidence: About and Work both show `Blumenkopf kein Studio`, `Burgring 123`, and `1010 Wien, Korea`.
+   - Current impact: trust is damaged because a verification-oriented portfolio presents unverifiable or template-like contact information.
+   - Recommended action: remove fake address fields and replace them with real availability, location preference, or remote-work context.
+
+6. The homepage CTA hierarchy does not clearly prioritize contact.
+   - Evidence: homepage CTA buttons route to About and Work, while the only contact action is the placeholder email link.
+   - Current impact: the user can explore but cannot easily convert.
+   - Recommended action: make the primary conversion action explicit, for example contact/email, and keep About/Work as secondary exploration.
+
+7. Footer social destinations are inconsistent with labels/icons.
+   - Evidence: `components/Footer.tsx:63` links a Facebook icon to `https://www.naver.com/`.
+   - Current impact: users may interpret the portfolio as unfinished or unreliable after clicking a social icon.
+   - Recommended action: replace placeholder social URLs with real destinations or remove unavailable channels.
+
+8. About and Footer use different social profiles.
+   - Evidence: Footer links Instagram `_soooho`, while About links Instagram `iamnotsooho`; Footer has SoundCloud, while About has Facebook and a Twitter row.
+   - Current impact: visitors get different identity signals depending on page.
+   - Recommended action: define one canonical social profile list and render it consistently.
+
+9. About has a social row that is visually interactive but not a link.
+   - Evidence: `components/about/AboutWrapper.tsx:325` renders `<a>` without `href`.
+   - Current impact: users encounter a dead interactive affordance.
+   - Recommended action: remove disabled links or render them as inactive text with no anchor semantics.
+
+10. New-tab social links lack safety and expectation cues.
+    - Evidence: external anchors use `target="_blank"` but do not include `rel="noopener noreferrer"`.
+    - Current impact: link behavior and security hygiene are weaker than expected for a professional portfolio.
+    - Recommended action: use a shared external-link component that applies `rel` and accessible labels by default.
+
+11. The Work page does not offer a project-specific conversion path.
+    - Evidence: Work cards link to `/`, and the page repeats a generic contact rail.
+    - Current impact: a visitor interested in a specific project cannot ask about that project or inspect proof.
+    - Recommended action: add per-project detail routes and include a CTA tied to the project context.
+
+12. The portfolio does not explain what kind of inquiries are wanted.
+    - Evidence: visible contact surfaces only show generic inquiry/contact labels and email.
+    - Current impact: recruiters, clients, and collaborators do not get guidance on fit, scope, or expected materials.
+    - Recommended action: define contact microcopy such as AI evaluation consulting, RAG quality checks, agent QA automation, or frontend AI product work.
+
+13. Conversion state cannot be measured.
+    - Evidence: there is no analytics, event naming, form submit path, or structured CTA component.
+    - Current impact: after deployment, it will be hard to know which CTA or page produces contact attempts.
+    - Recommended action: after privacy requirements are decided, centralize CTA components and optionally add analytics hooks.
+
+14. Contact and social data should be part of the typed content source.
+    - Evidence: contact strings and social links are hard-coded in Main, About, Work, and Footer.
+    - Current impact: conversion fixes are currently repetitive code edits rather than content changes.
+    - Recommended action: add `config/contact.ts` or merge contact/social fields into `config/profile.ts`.
+
+### Verification
+
+- Checked current worktree with `git status --short --branch`.
+- Searched contact and link surfaces with `rg -F` for inquiry labels, contact labels, email strings, `href=`, `mailto:`, social URLs, About/Work CTA text, and contact route hints.
+- Inspected `MainWrapper`, `AboutWrapper`, `WorkWrapper`, and `Footer` directly.
+- Confirmed there is no `mailto:` usage and no dedicated contact route.
+- Confirmed social destinations differ between About and Footer.
+
+### Next Review Angle
+
+- Review visual QA and responsive layout risk: mobile nav overlay, text overflow, large fixed rails, blackhole SVG masking, gallery grid behavior, and whether key text remains readable across breakpoints.
+- Consider fixing contact links early, because actionable email and trusted social destinations are low-risk, high-impact improvements.
