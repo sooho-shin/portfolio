@@ -142,3 +142,61 @@
 - Turn the Work page findings into a small data-model cleanup commit.
 - Re-run lint in a stable Node environment and compare against the manual unused-import findings.
 - Review image handling and asset sizes, especially large `public/images/img_user_*.jpg` files.
+
+## 2026-05-25 05:00 KST - Review 4
+
+### Scope
+
+- Static image sizes and dimensions
+- Image rendering strategy in homepage, About, Work, gallery, and footer
+- Accessibility impact of CSS background images and icon images
+- Next.js image optimization opportunities
+
+### Findings
+
+1. Several public images are much larger than their likely display size.
+   - Evidence: `public/images/img_user_1.jpg` is 3543x3543 and 6.98 MB; `img_product_third.png` is 1228x1628 and 3.54 MB; `img_product_second.png` is 1150x1558 and 2.89 MB; `img_user_4.jpg` is 2456x1608 and 2.44 MB.
+   - Current impact: About and homepage/gallery views can transfer multi-megabyte assets before the user sees meaningful content.
+   - Recommended action: generate web-sized variants, preferably AVIF/WebP plus fallback, and keep originals outside `public` if they are not served directly.
+
+2. Most important visual assets are rendered as CSS `background-image` rather than `next/image`.
+   - Evidence: `components/main/MainWrapper.tsx:342`, `components/main/MainWrapper.tsx:538`, `components/main/MainWrapper.tsx:545`, `components/main/MainWrapper.tsx:553`, `components/about/AboutWrapper.tsx:263`, and `components/GalleryBox.tsx:229` use background images.
+   - Current impact: the app misses built-in image optimization, responsive `srcset`, priority/lazy loading controls, and semantic `alt` text.
+   - Recommended action: use `next/image` for content images. Keep CSS backgrounds only for purely decorative masks or texture-like art.
+
+3. About page carousel user images are content but have no accessible name.
+   - Evidence: `components/about/AboutWrapper.tsx:263` sets `backgroundImage` on `UserImgBox`.
+   - Current impact: assistive technologies cannot understand what each slide represents, and browser image loading cannot be optimized per slide.
+   - Recommended action: render an `Image` with `alt` derived from the project/member title and use CSS only for framing/cropping.
+
+4. Footer icons use raw `<img>` tags and trigger the existing Next lint warning.
+   - Evidence: `components/Footer.tsx:60`, `components/Footer.tsx:64`, and `components/Footer.tsx:68`.
+   - Current impact: the project keeps known lint warnings and bypasses Next's image handling even for small icons.
+   - Recommended action: switch to `next/image` for raster icons or inline SVG/import SVG icons where appropriate.
+
+5. `next.config.mjs` does not define image-related policy.
+   - Evidence: only the `styledComponents` compiler setting is configured.
+   - Current impact: there is no explicit format/device-size strategy or documented image optimization policy.
+   - Recommended action: once `next/image` is adopted, define `images.formats` such as `["image/avif", "image/webp"]` and ensure the device sizes match the portfolio layout breakpoints.
+
+6. Large Work thumbnails are repeated across multiple cards.
+   - Evidence: `components/works/WorkWrapper.tsx` maps four cards to the same three `yummygame` images, each roughly 0.83 MB to 1.09 MB.
+   - Current impact: caching helps after first load, but the page still has no real project diversity and can create duplicated decode/layout work.
+   - Recommended action: pair the Review 3 work data-model cleanup with optimized per-project thumbnails.
+
+7. Image dimensions are implicit in several components.
+   - Evidence: gallery and product images rely on container aspect ratio/background cover rather than explicit image dimensions.
+   - Current impact: layout stability depends on CSS containers and cannot benefit from image-level intrinsic sizing.
+   - Recommended action: give image components stable dimensions or `fill` with a constrained parent `aspect-ratio`.
+
+### Verification
+
+- Enumerated image file sizes with `Get-ChildItem public/images -Recurse -File`.
+- Read image dimensions via `System.Drawing.Image`.
+- Searched usage with `rg -n "background-image|<img|next/image|img_user|img_product|main\\.jpeg|images/work|ico_" app components styles lib config`.
+- `git status --short --branch`: clean before this review.
+
+### Next Review Angle
+
+- Review accessibility and keyboard interaction: navigation buttons, carousel arrows, external links, hover-only gallery behavior, and reduced-motion handling.
+- Consider implementing the small unused-import cleanup from Reviews 1 and 3 before larger image refactors.
