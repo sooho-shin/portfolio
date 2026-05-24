@@ -723,3 +723,83 @@
 
 - Review runtime motion and scroll behavior: Lenis provider placement, direct DOM mutation, resize listeners, scroll-triggered rendering cost, and reduced-motion handling.
 - Consider a dependency-removal branch that starts with `react-textfit`, `styled`, and `@studio-freight/react-lenis`.
+
+
+## 2026-05-25 13:00 KST - Review 12
+
+### Scope
+
+- Runtime motion and scroll behavior
+- Lenis provider placement and options
+- Direct DOM mutation during scroll/resize
+- Animation accessibility and reduced-motion support
+- Re-render and layout-read costs caused by viewport hooks
+
+### Findings
+
+1. Lenis is mounted globally with very heavy smoothing settings.
+   - Evidence: `lib/smoothScrolling.tsx:7` uses `<ReactLenis root options={{ lerp: 0.1, duration: 10 }}>`.
+   - Current impact: a `duration` of `10` can make scroll feel detached from input, especially on trackpads and mobile browsers.
+   - Recommended action: start with Lenis defaults or a much smaller duration, then validate actual feel on desktop wheel, trackpad, and mobile touch.
+
+2. Smooth scrolling has two competing implementations.
+   - Evidence: Lenis is mounted at root in `lib/smoothScrolling.tsx:7`, while `components/Footer.tsx:74` calls `window.scrollTo({ top: 0, behavior: "smooth" })`.
+   - Current impact: browser smooth scroll and Lenis-managed scroll can disagree about timing, easing, and cancellation.
+   - Recommended action: route top-scroll through the Lenis instance if Lenis remains, or remove Lenis and rely on native scrolling consistently.
+
+3. `useLenis` is imported but not used, which also prevents coordinated imperative scroll commands.
+   - Evidence: `lib/smoothScrolling.tsx:4` imports `useLenis` with `ReactLenis`.
+   - Current impact: the app pays for a global Lenis provider but does not expose the instance where imperative scroll behavior is needed.
+   - Recommended action: either remove the unused import and keep scrolling passive, or create a small scroll helper that owns Lenis-based commands.
+
+4. About and Work read layout and write inline transforms on every scroll update.
+   - Evidence: `components/about/AboutWrapper.tsx:72` through `components/about/AboutWrapper.tsx:80`, and `components/works/WorkWrapper.tsx:47` through `components/works/WorkWrapper.tsx:55`.
+   - Current impact: `offsetHeight` reads mixed with `style.transform` writes can create layout thrash as scroll frequency increases.
+   - Recommended action: cache measured section height with `ResizeObserver`, then update transform from derived state or CSS variables in a throttled `requestAnimationFrame` loop.
+
+5. Null guards check the ref object rather than the DOM node.
+   - Evidence: `if (infoText)` appears before `mainContainer.current.offsetHeight` and `infoText.current.style.transform` in About and Work.
+   - Current impact: the guard is always true after `useRef`, so a missing `.current` would still throw at runtime.
+   - Recommended action: guard `mainContainer.current && infoText.current` before reading or writing DOM values.
+
+6. Scroll hooks subscribe to more values than the code uses.
+   - Evidence: `components/about/AboutWrapper.tsx:67` and `components/works/WorkWrapper.tsx:42` destructure `scrollX`, but only `scrollY` drives behavior.
+   - Current impact: horizontal scroll changes can still cause component updates even though they are irrelevant.
+   - Recommended action: only subscribe to or retain `scrollY`, ideally through a local hook dedicated to the sticky-left transform.
+
+7. Window-size hooks are used as broad invalidation signals.
+   - Evidence: About and Work depend on `[scrollY, windowHeight, windowWidth]`, and `EffectBox` reads both width and height while only width is used.
+   - Current impact: resize changes can re-run DOM mutation effects more often than needed.
+   - Recommended action: remove unused `windowHeight` in `EffectBox`, and separate measurement invalidation from scroll updates in About/Work.
+
+8. The app has many infinite or delayed animations without a reduced-motion fallback.
+   - Evidence: `components/EffectBox.tsx:191`, `components/EffectBox.tsx:203`, `components/EffectBox.tsx:205`, `components/EffectBox.tsx:207`, `components/GalleryBox.tsx:277`, `components/GalleryBox.tsx:287`, `components/GalleryBox.tsx:301`, `components/GalleryBox.tsx:313`, `components/main/MainWrapper.tsx:580`, `components/main/MainWrapper.tsx:590`, `components/main/MainWrapper.tsx:604`, and `components/main/MainWrapper.tsx:615`.
+   - Current impact: users who prefer reduced motion still get marquee loops and page-cover animations.
+   - Recommended action: add a global `@media (prefers-reduced-motion: reduce)` rule that disables marquee animation and shortens transitions, then selectively re-enable essential state changes.
+
+9. `EffectBox` uses a timeout without cleanup.
+   - Evidence: `components/EffectBox.tsx:28` through `components/EffectBox.tsx:32`.
+   - Current impact: if the component unmounts before the timeout fires, the callback still runs and touches a stale ref check.
+   - Recommended action: store the timeout id and clear it in the effect cleanup.
+
+10. `EffectBox` stores props in state without later updates.
+    - Evidence: `components/EffectBox.tsx:14` and `components/EffectBox.tsx:15` initialize state from `text` and `rollingText`, but no setter is used after initialization.
+    - Current impact: a route/title prop change would not necessarily refresh the displayed transition text as expected, and the state adds render noise.
+    - Recommended action: render from props directly, or add an explicit effect if route-transition copy must be latched.
+
+11. Motion code is spread across component internals instead of having one policy layer.
+    - Evidence: Lenis config is in `lib/smoothScrolling.tsx`, top-scroll behavior is in `Footer`, page scroll transforms are in About/Work, and marquee animations are inside several styled components.
+    - Current impact: changing motion behavior requires checking multiple unrelated files and makes accessibility fixes easy to miss.
+    - Recommended action: create a small motion policy: global reduced-motion CSS, one scroll helper, and page-specific animation tokens shared by marquee components.
+
+### Verification
+
+- Searched runtime motion patterns with `rg -n "Lenis|ReactLenis|useLenis|useWindowScroll|useWindowSize|addEventListener|removeEventListener|requestAnimationFrame|scroll|resize|style\\.|offsetHeight|getBoundingClientRect|matchMedia|prefers-reduced-motion" app components lib stores styles config`.
+- Inspected `lib/smoothScrolling.tsx`, `components/EffectBox.tsx`, `components/about/AboutWrapper.tsx`, `components/works/WorkWrapper.tsx`, `components/NaviBox.tsx`, and `components/Footer.tsx`.
+- Confirmed no `prefers-reduced-motion` rule exists with `rg -n -F "prefers-reduced-motion" app components lib stores styles config`.
+- Confirmed animation-heavy files with `rg -n -F "animation:" components styles app`.
+
+### Next Review Angle
+
+- Review content/data integrity after the copy rewrite: mojibake text, stale fictional client lists, broken social links, duplicated About/Work scaffolding, and portfolio proof structure.
+- Consider fixing motion policy before adding more visual effects, because current animation behavior is hard to govern centrally.
