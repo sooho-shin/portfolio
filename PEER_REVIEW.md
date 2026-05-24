@@ -2540,3 +2540,108 @@
 
 - Review maintainability and refactor sequencing: which fixes should be batched first, dependency cleanup order, component extraction order, risk of touching large wrappers, and a practical stabilization roadmap.
 - Consider the first security fix to be a clean dependency baseline: pick one lockfile, remove unused packages, replace `react-textfit`, patch Next within 14.2.x, and add CI.
+
+## 2026-05-25 09:00 KST - Review 31
+
+### Scope
+
+- Maintainability and refactor sequencing
+- Large wrapper risk
+- Dependency cleanup order
+- Component extraction order
+- Practical stabilization roadmap
+
+### Findings
+
+1. The largest components are also the highest-risk edit targets.
+   - Evidence: `AboutWrapper.tsx` has 971 lines and `MainWrapper.tsx` has 947 lines.
+   - Current impact: copy, styling, state, animation, data, and layout changes collide in the same files.
+   - Recommended action: avoid starting with broad rewrites; first extract data and low-risk shared helpers.
+
+2. `AboutWrapper` combines at least six responsibilities.
+   - Evidence: it owns contact rail copy, biography copy, slider data, slider state, scroll transform effects, client list, skills, social links, footer, and transition overlay.
+   - Current impact: changing one area can accidentally affect scroll behavior, slider behavior, or page layout.
+   - Recommended action: split in stages: data constants, contact rail, slider, skill list, social list, then scroll behavior.
+
+3. `MainWrapper` combines content, hero media, CTA, gallery, marquee, and page transition state.
+   - Evidence: it imports `Textfit`, `Link`, `FooterComponent`, `EffectComponent`, Playfair font, shared wrappers, and contains 13 styled component definitions.
+   - Current impact: portfolio copy changes and visual gallery changes are tightly coupled.
+   - Recommended action: first move homepage copy to `config/home.ts`, then extract `HeroSection`, `ValidationAreas`, and `HomeProjectPreview`.
+
+4. `WorkWrapper` is smaller but still repeats page shell concerns.
+   - Evidence: it repeats contact rail markup, scroll transform effect, page transition state, footer, and shared left/right wrappers.
+   - Current impact: fixes to About rail/scroll behavior must be duplicated in Work.
+   - Recommended action: extract a shared `ContactRail` and `PageShell` before changing page-specific work data.
+
+5. Contact data should be extracted before visual refactors.
+   - Evidence: contact email/address/inquiry labels appear in Main, About, Work, and Footer.
+   - Current impact: a content fix touches several large components.
+   - Recommended action: create `config/contact.ts` and update consumers in a small PR that preserves current markup.
+
+6. Project data should be extracted before adding project routes.
+   - Evidence: Work project data is a local `workArray`; homepage project preview hard-codes product image paths separately.
+   - Current impact: adding `/work/[slug]` without shared data will duplicate content again.
+   - Recommended action: introduce `config/projects.ts` with stable `slug`, title, images, summary, stack, and proof fields before route work.
+
+7. Dependency cleanup should happen before UI component rewrites.
+   - Evidence: `react-textfit` affects multiple large wrappers and blocks clean npm install; Next also needs a patch upgrade.
+   - Current impact: a UI refactor can be obscured by install/framework noise.
+   - Recommended action: stabilize lockfile/package manager, patch Next, and replace/remove `react-textfit` before major layout edits.
+
+8. `Textfit` removal has broad visual blast radius.
+   - Evidence: `Textfit` appears in Main and About, and About/Work import it even where not clearly needed.
+   - Current impact: replacing it may shift major heading and layout dimensions.
+   - Recommended action: isolate `Textfit` behind a local `ResponsiveHeadline` component first, then replace the implementation after screenshots exist.
+
+9. Shared layout wrappers are too primitive for the repeated page shell.
+   - Evidence: `LeftWrapper` and `RightWrapper` only wrap children, while page-level sections repeatedly assemble rails, right content, footer, and transition overlay.
+   - Current impact: repeated composition remains in every page.
+   - Recommended action: create a `PortfolioPageShell` only after contact rail and transition overlay props are clarified.
+
+10. `EffectBox` is a good early refactor candidate.
+    - Evidence: it is 220 lines, has isolated responsibilities, and its issues are clear: timeout cleanup, ref guards, unused state, and repeated spans.
+    - Current impact: fixing it reduces lifecycle risk without touching main layout structure.
+    - Recommended action: refactor `EffectBox` before About/Main layout extraction.
+
+11. `GalleryBox` is another isolated candidate, but it depends on project data modeling.
+    - Evidence: it has typed `any` image props, repeated span markup, and CSS background screenshots.
+    - Current impact: improving it without project data can produce another temporary API.
+    - Recommended action: extract project image data first, then refactor `GalleryBox` to accept typed image objects and render repeated marquee through a helper.
+
+12. `Footer` is a medium-risk shared component.
+    - Evidence: `Footer.tsx` has 302 lines, repeated mobile/desktop copy, external links, icon images, and back-to-top behavior.
+    - Current impact: a footer fix affects all routes.
+    - Recommended action: first centralize footer/contact/social data; then convert the top control and external links.
+
+13. Dead scaffold files should be removed early after confirming no imports.
+    - Evidence: `List.tsx`, `ListItem.tsx`, `ListDetail.tsx`, and `works/CatchCatch.tsx` appear as small scaffold remnants.
+    - Current impact: they add search noise and can confuse future ownership decisions.
+    - Recommended action: run an import search and delete unused scaffold files in a focused cleanup.
+
+14. Naming cleanup should be low priority unless the module is already touched.
+    - Evidence: `breakboint.ts`, `SwipeWrppaer`, and `border-gorup` are misspelled.
+    - Current impact: renaming has import/style selector churn but limited user-visible benefit.
+    - Recommended action: fix names opportunistically during nearby edits, not as a standalone high-risk sweep.
+
+15. Review findings should be converted into an ordered backlog before implementation.
+    - Evidence: the review document now contains repeated issues across accessibility, SEO, data, dependency, lifecycle, and responsive reviews.
+    - Current impact: without a sequenced backlog, fixes can start in the most visible but riskiest files.
+    - Recommended action: add a roadmap section or issue list grouped by `install baseline`, `content data`, `safe accessibility`, `SEO`, `component extraction`, and `visual QA`.
+
+16. The safest first implementation batch is not visual.
+    - Evidence: low-risk changes include removing unused scaffold/dependencies, centralizing contact/social/project data, adding metadata/sitemap, and adding ARIA/rel labels.
+    - Current impact: these improve reliability and portfolio trust without large visual regressions.
+    - Recommended action: delay broad responsive/layout redesign until a dev server and screenshot QA path are stable.
+
+### Verification
+
+- Checked current worktree with `git status --short --branch`.
+- Measured source file sizes across `app`, `components`, `config`, `lib`, `stores`, and `styles`.
+- Searched responsibilities and coupling markers: data arrays, hooks, refs, Textfit, page shells, wrappers, links, background images, repeated arrays, contact text, and shared components.
+- Inspected `MainWrapper`, `AboutWrapper`, `WorkWrapper`, `GalleryBox`, `Footer`, `NaviBox`, and `EffectBox`.
+- Counted selected risk markers per major component with a UTF-8 Python scan.
+
+### Next Review Angle
+
+- Review visual asset and media strategy: image sizes, background images vs semantic images, optimization path, public asset hygiene, alt text readiness, and how asset choices affect performance and portfolio proof.
+- Consider turning the accumulated findings into an implementation roadmap before touching the 900-line wrappers.
