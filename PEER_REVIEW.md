@@ -972,3 +972,92 @@
 
 - Review accessibility more deeply: focus order, button labels, keyboard navigation, link semantics, color contrast, reduced motion, and screen-reader names.
 - Consider implementing metadata/sitemap/robots as a low-risk improvement after the content source is consolidated.
+
+## 2026-05-25 16:00 KST - Review 15
+
+### Scope
+
+- Keyboard navigation and focus visibility
+- Button and link semantics
+- Screen-reader accessible names
+- Image alternatives
+- Motion and hover-only interaction accessibility
+
+### Findings
+
+1. There is no visible focus style policy.
+   - Evidence: no `focus-visible` styles were found, and `styles/GlobalStyles.ts:65` removes `outline` from inputs and textareas.
+   - Current impact: keyboard users may not be able to track their current position through navigation, cards, links, and form-like controls.
+   - Recommended action: add a global `:focus-visible` rule with a high-contrast outline and avoid suppressing native outlines without a replacement.
+
+2. Mobile menu buttons do not expose accessible names.
+   - Evidence: `components/NaviBox.tsx:34` renders the hamburger button with only two empty `div` bars; `components/NaviBox.tsx:48` renders the dim close button with no text or `aria-label`.
+   - Current impact: screen readers announce generic buttons without purpose.
+   - Recommended action: add `aria-label="Open navigation"` and `aria-label="Close navigation"` or equivalent localized labels.
+
+3. Navigation uses buttons for route changes instead of links.
+   - Evidence: `components/NaviBox.tsx:55`, `components/NaviBox.tsx:61`, and `components/NaviBox.tsx:69` call `router.push` from `<button>` elements.
+   - Current impact: users cannot open routes in a new tab, copy link targets, or get native link semantics.
+   - Recommended action: use Next `Link` for Home, Work, and About; keep buttons for actions that mutate UI state.
+
+4. The footer "top" control is a clickable `div`.
+   - Evidence: `components/Footer.tsx:73` attaches `onClick` to a `<div className="top">`.
+   - Current impact: it is not keyboard-focusable by default and has no button semantics or accessible name.
+   - Recommended action: render it as `<button type="button" aria-label="Scroll to top">`.
+
+5. Carousel arrow buttons in About are icon-only without labels.
+   - Evidence: `components/about/AboutWrapper.tsx:154` and `components/about/AboutWrapper.tsx:196` render buttons whose visible content is decorative SVG/circle markup.
+   - Current impact: assistive technology cannot distinguish previous/next project controls.
+   - Recommended action: add `aria-label="Previous project"` and `aria-label="Next project"`, and hide decorative SVGs from screen readers.
+
+6. The Twitter row is an anchor without a destination.
+   - Evidence: `components/about/AboutWrapper.tsx:325` renders `<a>` with no `href`.
+   - Current impact: the element looks interactive but is not a real link, and keyboard/link semantics become inconsistent.
+   - Recommended action: add a real `href` or replace the row with non-interactive text until the destination exists.
+
+7. The main email affordance is a placeholder link.
+   - Evidence: `components/main/MainWrapper.tsx:38` renders `<a href="#">soojoon92@gmail.com</a>`.
+   - Current impact: keyboard and screen-reader users reach a link that does not perform the expected contact action.
+   - Recommended action: change it to `mailto:soojoon92@gmail.com` with descriptive link text.
+
+8. External links still lack new-tab safety attributes.
+   - Evidence: `components/Footer.tsx:58`, `components/Footer.tsx:63`, `components/Footer.tsx:67`, `components/about/AboutWrapper.tsx:359`, and `components/about/AboutWrapper.tsx:395`.
+   - Current impact: these links open new tabs without `rel="noopener noreferrer"`, and screen readers do not get any indication that a new tab opens.
+   - Recommended action: add `rel="noopener noreferrer"` and consider visible or `aria-label` text that includes "opens in a new tab".
+
+9. Social icon image alt text is implementation-oriented.
+   - Evidence: `components/Footer.tsx:60`, `components/Footer.tsx:64`, and `components/Footer.tsx:68` use `alt="icoSoundcloud"`, `alt="icoFacebook"`, and `alt="icoInsta"`.
+   - Current impact: the accessible name describes the icon file style rather than the link destination.
+   - Recommended action: use a descriptive anchor label and empty decorative image alt, or set image alt text such as "SoundCloud" and "Instagram".
+
+10. Hover-only gallery behavior has no keyboard equivalent.
+    - Evidence: `components/main/MainWrapper.tsx:219` toggles gallery hover state only with `onMouseEnter`; `components/GalleryBox.tsx` reveals loop labels and image states under `&:hover`.
+    - Current impact: keyboard and touch users cannot access the same interaction states as mouse users.
+    - Recommended action: add `onFocus`/`onBlur` behavior or CSS `:focus-within` alongside `:hover`.
+
+11. Motion accessibility is still missing.
+    - Evidence: no `prefers-reduced-motion` rule was found, while earlier review confirmed multiple infinite marquee animations in `EffectBox`, `GalleryBox`, and `MainWrapper`.
+    - Current impact: users who request reduced motion still receive continuous scrolling text and page-cover animations.
+    - Recommended action: add a global reduced-motion policy that disables infinite loops and shortens transitions.
+
+12. The page still lacks semantic landmarks and heading structure.
+    - Evidence: no `<main>` usage was found, and only a commented `<h1>` exists in `components/ListDetail.tsx:11`.
+    - Current impact: screen-reader users do not get a reliable page outline or main-content landmark.
+    - Recommended action: introduce a real `<main>` wrapper per page and convert visual titles to `h1`/`h2`/`h3` where appropriate.
+
+13. Decorative SVGs are exposed by default.
+    - Evidence: navigation arrows, footer arrows, blackhole SVGs, and slider masks are rendered inline without `aria-hidden`.
+    - Current impact: screen readers may encounter path-heavy graphics that do not add meaning.
+    - Recommended action: mark decorative SVGs with `aria-hidden="true"` and `focusable="false"` unless they need an accessible title.
+
+### Verification
+
+- Checked current worktree status before review with `git status --short --branch`.
+- Searched accessibility patterns with `rg` and `Select-String` for buttons, anchors, `aria-*`, roles, `tabIndex`, keyboard handlers, image alt text, new-tab links, focus styles, reduced-motion rules, and pointer-only interactions.
+- Inspected `styles/GlobalStyles.ts`, `components/NaviBox.tsx`, `components/Footer.tsx`, `components/GalleryBox.tsx`, and the first interaction-heavy section of `components/main/MainWrapper.tsx`.
+- Confirmed no `focus-visible`, no `aria-*`, and no `prefers-reduced-motion` pattern currently exists in app/component/style source.
+
+### Next Review Angle
+
+- Review build and CI reliability again with fresh eyes: package-manager consistency, lint/build memory failures, TypeScript-only checks, and which automated gates should block deployment.
+- Consider fixing low-risk accessibility issues first: button labels, mailto link, `rel` attributes, and the clickable footer div.
