@@ -48,3 +48,45 @@
 - Review responsive layout risks after Korean copy expansion.
 - Check About/Work pages for content consistency with AI developer positioning.
 - Identify low-risk cleanup commits that can be separated from visual/content changes.
+
+## 2026-05-25 03:00 KST - Review 2
+
+### Scope
+
+- Korean portfolio copy quality after AI developer positioning change
+- Encoding safety for Korean source text
+- Verification-oriented portfolio narrative
+- Fast syntax-level validation after copy changes
+
+### Findings
+
+1. The first AI developer copy was too generic and sounded like "AI로 빠르게 만든다" rather than "AI 결과를 책임 있게 검증한다."
+   - Current impact: the portfolio positioning did not clearly differentiate the developer's strength.
+   - Action taken: revised the main copy toward evaluation, evidence, failure detection, repeatable validation, and reliability automation.
+
+2. Korean text in source files is vulnerable to mojibake during PowerShell-based edits.
+   - Current impact: previous Korean copy became unreadable in `app/layout.tsx`, `components/main/MainWrapper.tsx`, and `components/Footer.tsx`.
+   - Action taken: rewrote the affected copy blocks and re-saved touched files as UTF-8.
+   - Action taken: added an `.editorconfig` with `charset = utf-8` and LF line endings.
+   - Recommended action: avoid ad hoc shell text replacement for Korean copy.
+
+3. The homepage now has a stronger technical narrative, but the About and Work pages still use older generic AI/developer wording.
+   - Current impact: users may see a strong verification-focused homepage, then inconsistent supporting pages.
+   - Recommended action: update `components/about/AboutWrapper.tsx` and `components/works/WorkWrapper.tsx` around the same "검증하는 AI 개발자" positioning.
+
+4. The build toolchain still has intermittent Node/V8 `Zone` memory failures on Windows.
+   - Current impact: `next lint` and `next build` are not reliable gates in this local environment.
+   - Recommended action: verify in a clean Linux/CI environment or WSL, then decide whether this is environment-specific or a Next/SWC dependency issue.
+
+### Verification
+
+- `node ./node_modules/typescript/bin/tsc --noEmit`: passed.
+- Mojibake marker search for known broken Korean byte patterns: no matches in `app`, `components`, or `PEER_REVIEW.md`.
+- `corepack yarn lint`: failed this run with Node/V8 `Fatal process out of memory: Zone`.
+- `corepack yarn build`: failed this run with Node/V8 `Fatal process out of memory: Zone`.
+
+### Next Review Angle
+
+- Make About/Work pages support the new verification-focused positioning.
+- Add encoding/tooling guardrails so Korean content edits do not regress.
+- Separate visual copy changes from code cleanup in future commits.

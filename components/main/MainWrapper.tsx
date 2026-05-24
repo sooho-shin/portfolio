@@ -14,7 +14,7 @@ const playfair = Playfair_Display({
 });
 const MainWrapper = () => {
   const [effectTitle] = useState("home");
-  const [effectRollingText] = useState("AI DEVELOPER");
+  const [effectRollingText] = useState("VERIFIED AI SYSTEMS");
   const [hoverState, setHoverState] = useState<boolean>(false);
 
   return (
@@ -24,16 +24,16 @@ const MainWrapper = () => {
           <InfoBox>
             <div className="info-left">
               <p>
-                AI 기능 개발과 업무 자동화 프로젝트를 함께 고민합니다.
+                그럴듯한 AI가 아니라, 검증 가능한 결과를 설계합니다.
               </p>
             </div>
             <div className="info-right">
               <p>
                 프로젝트 문의
                 <br />
-                AI 서비스 개발
+                평가 기준 설계
                 <br />
-                업무 자동화
+                신뢰성 검증 자동화
               </p>
               <a href="#">soojoon92@gmail.com</a>
             </div>
@@ -43,27 +43,27 @@ const MainWrapper = () => {
           <TopRightInfo>
             <div className="left">
               <span>
-                주로 다루는
+                검증 중심
                 <br />
                 기술:
               </span>
               <span>
-                LLM
+                EVALUATION
                 <br />
                 RAG
                 <br />
-                AI AGENT
+                LLM
                 <br />
-                NEXTJS
+                AGENT
                 <br />
-                NODEJS
+                AUTOMATION
               </span>
             </div>
             <div className="right">
               <span>
-                AI를 제품으로
+                AI 결과를
                 <br />
-                구현하는{" "}
+                의심하고 검증하는{" "}
                 <span className={playfair.className}>개발자</span>
               </span>
             </div>
@@ -94,24 +94,24 @@ const MainWrapper = () => {
         <CenterTextMobile>
           <div className="info-left">
             <p>
-              주로 다루는 기술:
+              검증 중심 기술:
               <br />
             </p>
             <p>
-              LLM
+              EVALUATION
               <br /> RAG
-              <br /> AI AGENT
-              <br /> NEXTJS
-              <br /> NODEJS
+              <br /> LLM
+              <br /> AGENT
+              <br /> AUTOMATION
             </p>
           </div>
           <div className="info-right">
             <p>
-              AI를
+              AI 결과를
               <br />
-              제품으로
+              의심하고
               <br />
-              구현하는
+              검증하는
               <br />
               개발자
               <br />
@@ -124,16 +124,16 @@ const MainWrapper = () => {
         <InfoBoxMobile>
           <div className="info-left">
             <p>
-              AI 기능 개발과 업무 자동화 프로젝트를 함께 고민합니다.
+              그럴듯한 AI가 아니라, 검증 가능한 결과를 설계합니다.
             </p>
           </div>
           <div className="info-right">
             <p>
               프로젝트 문의
               <br />
-              AI 서비스 개발
+              평가 기준 설계
               <br />
-              업무 자동화
+              신뢰성 검증 자동화
               <br />
               <span className={playfair.className}>SOOJOON92@GMAIL.COM</span>
             </p>
@@ -143,50 +143,50 @@ const MainWrapper = () => {
       <Section className="no-border home-about">
         <LeftWrapperComponent>
           <AboutLeft>
-            <p className="title">관심 있게 다루는 영역:</p>
+            <p className="title">검증하며 다루는 영역:</p>
             <ul className="brand-list">
-              <li>LLM</li>
+              <li>Eval</li>
               <li>RAG</li>
+              <li>LLM</li>
               <li>Agent</li>
-              <li>Automation</li>
+              <li>QA</li>
               <li>Frontend</li>
-              <li>Backend</li>
             </ul>
           </AboutLeft>
         </LeftWrapperComponent>
         <RightWrapperComponent>
           <AboutRight>
             <div className="left tablet">
-              <p className="title">관심 있게 다루는 영역:</p>
+              <p className="title">검증하며 다루는 영역:</p>
               <ul className="brand-list">
-                <li>LLM</li>
+                <li>Eval</li>
                 <li>RAG</li>
+                <li>LLM</li>
                 <li>Agent</li>
-                <li>Automation</li>
+                <li>QA</li>
                 <li>Frontend</li>
-                <li>Backend</li>
               </ul>
             </div>
             <div className="right">
               <div className="top-text">
                 <p>
-                  아이디어를 실험에서 끝내지 않고,
+                  AI가 만든 답을 그대로 믿지 않고,
                   <span className={playfair.className}>
                     {" "}
-                    실제 사용하는 제품으로{" "}
+                    기준과 근거로 검증해{" "}
                   </span>
-                  연결하는 개발을 합니다.
+                  제품에 넣을 수 있는 수준으로 만듭니다.
                 </p>
-                <p>문제를 정의하고 흐름을 설계합니다.</p>
+                <p>정답보다 중요한 것은 실패를 발견하는 구조입니다.</p>
               </div>
               <div className="bottom-text">
                 <p>
-                  필요한 데이터를 연결하고,
+                  테스트셋, 로그, 사용자 흐름을 연결하고,
                   <span className={playfair.className}>
                     {" "}
-                    반복 가능한 자동화와 인터페이스로{" "}
+                    반복 가능한 평가와 자동화로{" "}
                   </span>
-                  구현합니다.
+                  AI 기능의 품질을 증명합니다.
                 </p>
               </div>
               <Link prefetch href={"/about"} passHref>
@@ -203,7 +203,7 @@ const MainWrapper = () => {
           mode="single"
           forceSingleModeWidth={true}
         >
-          AI PORTFOLIO
+          VERIFIED AI
         </Textfit>
         <div className="text-right">
           <Link prefetch href={"/work"} passHref>
@@ -228,12 +228,12 @@ const MainWrapper = () => {
               <div className="text-loop-container top">
                 <div className="loop-box">
                   {Array.from({ length: 10 }).map((_, i) => (
-                    <span key={i}>AI PROJECT</span>
+                    <span key={i}>VERIFY AI</span>
                   ))}
                 </div>
                 <div className="loop-box">
                   {Array.from({ length: 10 }).map((_, i) => (
-                    <span key={i}>AI PROJECT</span>
+                    <span key={i}>VERIFY AI</span>
                   ))}
                 </div>
               </div>
@@ -241,12 +241,12 @@ const MainWrapper = () => {
               <div className="text-loop-container right">
                 <div className="loop-box">
                   {Array.from({ length: 10 }).map((_, i) => (
-                    <span key={i}>AI PROJECT</span>
+                    <span key={i}>VERIFY AI</span>
                   ))}
                 </div>
                 <div className="loop-box">
                   {Array.from({ length: 10 }).map((_, i) => (
-                    <span key={i}>AI PROJECT</span>
+                    <span key={i}>VERIFY AI</span>
                   ))}
                 </div>
               </div>
@@ -254,12 +254,12 @@ const MainWrapper = () => {
               <div className="text-loop-container left">
                 <div className="loop-box">
                   {Array.from({ length: 10 }).map((_, i) => (
-                    <span key={i}>AI PROJECT</span>
+                    <span key={i}>VERIFY AI</span>
                   ))}
                 </div>
                 <div className="loop-box">
                   {Array.from({ length: 10 }).map((_, i) => (
-                    <span key={i}>AI PROJECT</span>
+                    <span key={i}>VERIFY AI</span>
                   ))}
                 </div>
               </div>
@@ -267,12 +267,12 @@ const MainWrapper = () => {
               <div className="text-loop-container bottom">
                 <div className="loop-box">
                   {Array.from({ length: 10 }).map((_, i) => (
-                    <span key={i}>AI PROJECT</span>
+                    <span key={i}>VERIFY AI</span>
                   ))}
                 </div>
                 <div className="loop-box">
                   {Array.from({ length: 10 }).map((_, i) => (
-                    <span key={i}>AI PROJECT</span>
+                    <span key={i}>VERIFY AI</span>
                   ))}
                 </div>
               </div>
