@@ -1345,3 +1345,98 @@
 
 - Review performance payload and rendering cost: image sizes, client bundle surface, font loading, CSS animation cost, static versus client-rendered content, and LCP risks.
 - Consider deciding the deployment target before changing PM2 or Next output settings; otherwise fixes may optimize for the wrong runtime.
+
+## 2026-05-25 20:00 KST - Review 19
+
+### Scope
+
+- Performance payload and rendering cost
+- Image delivery and LCP risk
+- Client component surface area
+- Font loading and typography runtime work
+- CSS animation and scroll/runtime overhead
+
+### Findings
+
+1. Several public images are too large for direct page use.
+   - Evidence: `public/images/img_user_1.jpg` is about 7 MB, `img_product_third.png` is about 3.5 MB, `img_product_second.png` is about 2.9 MB, and `img_user_4.jpg` is about 2.4 MB.
+   - Current impact: production users can pay multi-megabyte transfers before seeing portfolio content.
+   - Recommended action: resize and compress these assets, then keep source-quality originals outside the served `public` tree if needed.
+
+2. Important images are delivered as CSS background images.
+   - Evidence: `components/main/MainWrapper.tsx:342`, `components/main/MainWrapper.tsx:538`, `components/main/MainWrapper.tsx:545`, `components/main/MainWrapper.tsx:553`, `components/about/AboutWrapper.tsx:263`, and `components/GalleryBox.tsx:229` through `components/GalleryBox.tsx:249`.
+   - Current impact: Next cannot apply `next/image` optimization, responsive sizing, lazy loading, or priority hints.
+   - Recommended action: migrate meaningful content images to `next/image`; reserve CSS backgrounds for decorative shapes only.
+
+3. No `next/image` usage exists.
+   - Evidence: searching performance-related patterns found `<img>` in `Footer`, but no `next/image` import or usage.
+   - Current impact: even small social icons bypass Next image handling, and larger content images cannot be optimized by the framework.
+   - Recommended action: start with large hero/project images, then convert footer icons if they remain raster assets.
+
+4. The homepage is forced into the client bundle.
+   - Evidence: `app/page.tsx:1` has `"use client"`, and `components/main/MainWrapper.tsx` uses `useState`, styled-components, `Textfit`, and hover state.
+   - Current impact: the main marketing content cannot stay as a mostly static server-rendered page shell.
+   - Recommended action: split the homepage into a server-rendered content shell and small client islands for hover/animation behavior.
+
+5. About and Work are also fully client-rendered wrappers.
+   - Evidence: `components/about/AboutWrapper.tsx:1` and `components/works/WorkWrapper.tsx:1` use `"use client"`.
+   - Current impact: static copy, project data, and layout content are shipped with client runtime even where only scroll/slider interactions need it.
+   - Recommended action: move static content and data mapping into server components, then isolate sliders and scroll effects.
+
+6. Global client providers are mounted for every route.
+   - Evidence: `app/layout.tsx` wraps all children in `SmoothScrolling`, `StyledComponentsRegistry`, and `NaviComponent`; `lib/smoothScrolling.tsx` mounts root Lenis.
+   - Current impact: every route inherits Lenis and navigation runtime cost, even if a route is mostly static.
+   - Recommended action: keep the navigation client component, but re-evaluate root-level Lenis and route-scope it if only some pages need it.
+
+7. `react-textfit` adds client measurement for display text that could be CSS.
+   - Evidence: `Textfit` is used in `components/main/MainWrapper.tsx:200`, `components/about/AboutWrapper.tsx:121`, and imported in Work.
+   - Current impact: large headings depend on runtime measurement and an outdated dependency.
+   - Recommended action: replace with CSS `clamp()`, stable container sizing, and responsive typography tokens.
+
+8. `react-use` window hooks make scroll/resize values part of render behavior.
+   - Evidence: `AboutWrapper` and `WorkWrapper` use `useWindowScroll` and `useWindowSize`; `EffectBox` uses `useWindowSize`.
+   - Current impact: scroll and resize can trigger React work for effects that are mostly layout transforms.
+   - Recommended action: replace broad hooks with narrow local hooks, CSS sticky behavior, or requestAnimationFrame-throttled DOM updates.
+
+9. Infinite marquee animations are widespread.
+   - Evidence: `EffectBox`, `GalleryBox`, and `MainWrapper` define multiple `keyframes` and continuous `animation:` declarations.
+   - Current impact: the page can consume CPU/GPU continuously after initial load.
+   - Recommended action: pause offscreen animations, disable or simplify them under reduced motion, and avoid running decorative loops by default.
+
+10. Product image reveal animations stack multiple large background layers.
+    - Evidence: `MainWrapper` uses `img_product_first.png`, `img_product_second.png`, and `img_product_third.png` as layered backgrounds with hover-triggered animations.
+    - Current impact: hover effects can require decoding and compositing multiple large assets at once.
+    - Recommended action: preload only the first meaningful image and lazy-load secondary reveal assets, or replace the effect with a lighter static card.
+
+11. Google font usage may be heavier than needed.
+    - Evidence: `app/layout.tsx` loads `Noto_Sans_KR` with six weights, while `NaviBox` and `MainWrapper` each instantiate `Playfair_Display` with three weights.
+    - Current impact: multiple font families and weights increase font CSS and font file work.
+    - Recommended action: reduce Noto Sans KR to used weights, centralize Playfair loading, and avoid re-instantiating the same font in multiple components.
+
+12. Footer icons are raster images for simple marks.
+    - Evidence: `components/Footer.tsx:60`, `components/Footer.tsx:64`, and `components/Footer.tsx:68` render PNG icons.
+    - Current impact: small but avoidable image requests remain in the footer.
+    - Recommended action: use SVG icons or a shared icon component if these are purely decorative/social affordances.
+
+13. Build performance is also affected by asset and client-surface choices.
+    - Evidence: the previous build reached compilation but failed during static generation under disk/memory pressure; this review found multi-megabyte assets and broad client wrappers.
+    - Current impact: even if the immediate failure is environmental, the app has avoidable work that makes constrained builds and runtime delivery more fragile.
+    - Recommended action: reduce asset sizes and client boundaries before treating build instability as only an infrastructure problem.
+
+14. There is no automated performance budget.
+    - Evidence: no Lighthouse, bundle analyzer, image-size check, or CI workflow exists in the repo.
+    - Current impact: regressions in asset size or JavaScript payload can land silently.
+    - Recommended action: add a lightweight budget gate after CI exists, starting with max image file sizes and a bundle analyzer script.
+
+### Verification
+
+- Checked current worktree with `git status --short --branch`.
+- Listed `public/images` by file size to identify largest served assets.
+- Searched performance-related usage with `rg` for `use client`, `next/image`, `<img>`, background images, font loaders, `Textfit`, `keyframes`, animations, window hooks, Lenis, and router hooks.
+- Inspected `components/main/MainWrapper.tsx`, `components/about/AboutWrapper.tsx`, `components/works/WorkWrapper.tsx`, and `app/layout.tsx`.
+- Checked disk state with `Get-PSDrive -Name C` before verification work.
+
+### Next Review Angle
+
+- Review maintainability of component structure: oversized wrappers, repeated left/right layout code, styled-components locality, dead List/CatchCatch components, and naming consistency.
+- Consider optimizing large images before further visual work, because asset size is one of the clearest production risks.
