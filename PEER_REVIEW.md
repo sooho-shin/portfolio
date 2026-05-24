@@ -1249,3 +1249,99 @@
 
 - Review deployment/runtime architecture: App Router static generation, PM2 startup, Next standalone/export assumptions, environment variables, and production process ownership.
 - Consider a dedicated hygiene cleanup after package-manager selection: editor files, line endings, README, and lockfile policy.
+
+## 2026-05-25 19:00 KST - Review 18
+
+### Scope
+
+- Deployment and runtime architecture
+- App Router rendering assumptions
+- PM2 process ownership
+- Environment/port configuration
+- Asset delivery and production portability
+
+### Findings
+
+1. Runtime target is not explicitly defined.
+   - Evidence: `next.config.mjs` only enables the styled-components compiler and does not set `output`, `distDir`, `assetPrefix`, `basePath`, or image options.
+   - Current impact: it is unclear whether the project is intended for Vercel, a Node server with `next start`, a static export, or a standalone Docker/PM2 deployment.
+   - Recommended action: document the intended deployment target first, then encode required Next config for that target.
+
+2. The PM2 path assumes a normal `.next` server build, not standalone output.
+   - Evidence: `ecosystem.config.js` runs `script: "next"` with `args: "start"`; `next.config.mjs` does not set `output: "standalone"`.
+   - Current impact: deployment requires full project files and `node_modules` on the server rather than a minimal standalone artifact.
+   - Recommended action: either keep `next start` and document server requirements, or switch to `output: "standalone"` and run the generated server entry.
+
+3. `package.json` mixes build and runtime in the `start` script.
+   - Evidence: `"start": "next build && next start"`.
+   - Current impact: process startup depends on a successful build and sufficient disk/memory at runtime.
+   - Recommended action: run `next build` during CI/deploy and make `start` only run `next start`.
+
+4. PM2 production environment is implied but not configured.
+   - Evidence: `package.json` uses `pm2 start ecosystem.config.js --env production`, but `ecosystem.config.js` has `env_production` commented out.
+   - Current impact: `--env production` looks meaningful but does not set `NODE_ENV`, `PORT`, or other production values.
+   - Recommended action: restore `env_production` or remove the flag until there is a real production environment block.
+
+5. Production port ownership is unclear.
+   - Evidence: `ecosystem.config.js` comments mention `PORT: "9981"` and `PORT: "3000"`, but no active port is set.
+   - Current impact: `next start` will use its default behavior unless the shell environment supplies `PORT`, which makes deployment dependent on the machine.
+   - Recommended action: define the production port in PM2, hosting settings, or a documented `.env` convention.
+
+6. PM2 uses four instances without cluster mode.
+   - Evidence: `ecosystem.config.js` sets `instances: 4`, while `exec_mode: "cluster"` is commented out.
+   - Current impact: PM2 may run multiple forked processes without the intended load-balancing model, or the setting may not behave as expected for this script.
+   - Recommended action: decide whether a single Next server is enough; if multiple instances are required, configure `exec_mode: "cluster"` deliberately and test routing.
+
+7. There is no runtime health check or readiness policy.
+   - Evidence: `ecosystem.config.js` has `wait_ready`, `listen_timeout`, and `kill_timeout` commented out.
+   - Current impact: process managers and deploy scripts cannot reliably know when the app is ready to receive traffic.
+   - Recommended action: add a simple health endpoint or rely on hosting-provider health checks, then wire PM2/deployment around it.
+
+8. The App Router pages are mostly static, but the app pays a large client-runtime cost.
+   - Evidence: `app/page.tsx` is a client component, and `AboutWrapper`, `WorkWrapper`, `NaviBox`, `Footer`, `SmoothScrolling`, `LeftWrapper`, and `RightWrapper` are client components.
+   - Current impact: a mostly static portfolio ships more JavaScript than necessary, which can affect production performance and hydration.
+   - Recommended action: keep page shells/server-rendered content as server components and isolate client behavior to navigation, animation, and interactive sections.
+
+9. Global smooth scrolling is part of the root runtime.
+   - Evidence: `app/layout.tsx` wraps the whole app with `SmoothScrolling`, and `lib/smoothScrolling.tsx` mounts `<ReactLenis root>`.
+   - Current impact: every route depends on client-side Lenis behavior even if a page does not need scroll effects.
+   - Recommended action: evaluate whether Lenis should be route-scoped or removed in favor of native scrolling.
+
+10. Styled-components SSR is configured manually, so runtime changes should be tested against hydration.
+    - Evidence: `lib/registry.tsx` uses `ServerStyleSheet`, `StyleSheetManager`, and `useServerInsertedHTML`; `next.config.mjs` enables `compiler.styledComponents`.
+    - Current impact: the styling setup is correct in principle, but root/client boundary changes can easily affect style injection and hydration.
+    - Recommended action: keep a build/runtime smoke test that checks pages after any registry/layout change.
+
+11. There is no environment-variable convention.
+    - Evidence: no `.env.example`, no `process.env` usage, and no site URL config were found.
+    - Current impact: future metadata, sitemap, analytics, or API settings have no documented place to live.
+    - Recommended action: add `.env.example` once deployment variables are introduced, starting with `NEXT_PUBLIC_SITE_URL` if canonical URLs are added.
+
+12. Work page links are deployment-safe but semantically wrong.
+    - Evidence: `components/works/WorkWrapper.tsx:107` links every work card to `/`.
+    - Current impact: there is no 404 risk, but production users cannot navigate to real case studies.
+    - Recommended action: add actual work detail routes or external artifact URLs before presenting the Work page as production content.
+
+13. Large public assets are served as-is.
+    - Evidence: `public/images/img_user_1.jpg` is about 7 MB, and product images include files around 2-3 MB.
+    - Current impact: static hosting and Node deployments both pay unnecessary transfer and LCP cost.
+    - Recommended action: resize/compress portfolio assets and migrate meaningful images to `next/image` so runtime delivery is optimized.
+
+14. README still only documents local dev startup.
+    - Evidence: `README.md` mentions `localhost:3000` but does not describe build, start, PM2, hosting, or environment requirements.
+    - Current impact: deployment knowledge lives in scripts and comments rather than in a reproducible runbook.
+    - Recommended action: add a deployment section after deciding whether the canonical runtime is Vercel, `next start`, or PM2 standalone.
+
+### Verification
+
+- Checked current worktree with `git status --short --branch`.
+- Inspected `package.json`, `next.config.mjs`, `ecosystem.config.js`, `app/layout.tsx`, `lib/registry.tsx`, and `lib/smoothScrolling.tsx`.
+- Searched runtime/deploy symbols with `rg` for env usage, Next output modes, `PORT`, App Router dynamic settings, `fetch`, `headers`, `cookies`, standalone/export settings, and route links.
+- Confirmed no `.env*`, Vercel, Docker, or deployment-specific files exist at the repository root.
+- Listed `public` assets and sizes to identify large production payloads.
+- Checked client-boundary markers with `rg` for `"use client"`, router hooks, `window`, Lenis, and styled-components SSR usage.
+
+### Next Review Angle
+
+- Review performance payload and rendering cost: image sizes, client bundle surface, font loading, CSS animation cost, static versus client-rendered content, and LCP risks.
+- Consider deciding the deployment target before changing PM2 or Next output settings; otherwise fixes may optimize for the wrong runtime.
