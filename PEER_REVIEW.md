@@ -496,3 +496,76 @@
 
 - Review CSS/layout maintainability: repeated section/wrapper styles, typo-prone names, hard-coded viewport units, and mobile layout risks.
 - Consider a content refactor before visual polish: About and Work should prove the same verification-focused story that Home now promises.
+
+## 2026-05-25 10:00 KST - Review 9
+
+### Scope
+
+- Styled-components layout maintainability
+- Repeated section/wrapper patterns
+- Responsive behavior based on viewport units
+- Hard-coded spacing, borders, and z-index layering
+- Naming consistency and typo-prone style identifiers
+
+### Findings
+
+1. `Section` and `MainWrapper` styled components are duplicated across major page wrappers.
+   - Evidence: `components/main/MainWrapper.tsx:823`, `components/about/AboutWrapper.tsx:938`, `components/works/WorkWrapper.tsx:191`, plus repeated `MainWrapper` definitions in About and Work.
+   - Current impact: page-level layout changes must be repeated manually and can drift between pages.
+   - Recommended action: extract shared layout primitives such as `PageWrapper`, `SplitSection`, and `ContentSection` under `components/layout` or `styles/layout.ts`.
+
+2. The left/right split layout is encoded in multiple places with hard-coded `25vw`, `75vw`, and `40px` offsets.
+   - Evidence: `components/LeftWrapper.tsx:16`, `components/RightWrapper.tsx:15`, `components/RightWrapper.tsx:18`, `components/main/MainWrapper.tsx:294`, `components/main/MainWrapper.tsx:317`, and `components/main/MainWrapper.tsx:846`.
+   - Current impact: changing the rail width or mobile offset requires broad search/replace across unrelated components.
+   - Recommended action: define layout constants/tokens for rail width and mobile gutter, then consume them consistently.
+
+3. Border styles are repeated as literal `4px solid #000`.
+   - Evidence: repeated in Footer, About, Main, Work, Gallery, Title, Skill, Client, and Section styles.
+   - Current impact: visual system changes are noisy and error-prone.
+   - Recommended action: create tokens such as `const BORDER = "4px solid #000"` or use CSS variables like `--line-width` and `--line-color`.
+
+4. Several components depend heavily on viewport-height/viewport-width typography and dimensions.
+   - Evidence: `components/main/MainWrapper.tsx:327`, `components/main/MainWrapper.tsx:458`, `components/main/MainWrapper.tsx:780`, `components/main/MainWrapper.tsx:816`, `components/about/AboutWrapper.tsx:545`, `components/about/AboutWrapper.tsx:665`, and `components/EffectBox.tsx:186`.
+   - Current impact: long Korean text and narrow devices can overflow or become unreadable because type and layout scale directly with viewport width.
+   - Recommended action: replace critical text sizes with `clamp(min, preferred, max)` and use max-width/line-height constraints for content blocks.
+
+5. Z-index values are scattered and undocumented.
+   - Evidence: navigation uses `150`, mobile navigation uses `190` and `200`, effect overlay uses `8000`, gallery uses `100`, masks/arrows use `10`, `20`, `30`, and `40`.
+   - Current impact: future overlays, modals, and mobile menus can accidentally layer under or above transition effects.
+   - Recommended action: create a z-index scale (`base`, `gallery`, `nav`, `mobileNav`, `overlay`) and use names instead of ad hoc numbers.
+
+6. `GlobalStyles` globally sets `flex-shrink: 0` on every element.
+   - Evidence: `styles/GlobalStyles.ts:10` through `styles/GlobalStyles.ts:14`.
+   - Current impact: text and controls are less able to shrink in constrained layouts, increasing overflow risk on mobile.
+   - Recommended action: remove global `flex-shrink: 0` and apply it only to fixed-format components that need it.
+
+7. Global responsive helpers `.tablet` and `.pc` rely on `!important`.
+   - Evidence: `styles/GlobalStyles.ts:70` through `styles/GlobalStyles.ts:80`.
+   - Current impact: component-level styles become harder to override and reason about.
+   - Recommended action: prefer explicit responsive rendering in components or non-important utility classes with clear naming.
+
+8. Typo-prone names are already present in style/component identifiers.
+   - Evidence: `components/about/AboutWrapper.tsx:735` defines `SwipeWrppaer`, and `components/Footer.tsx:13` uses `border-gorup`.
+   - Current impact: future searches and refactors are harder, and typos can spread through CSS selectors.
+   - Recommended action: rename to `SwipeWrapper` and `border-group` in a focused cleanup commit.
+
+9. Fixed-position left rails are duplicated in About and Work.
+   - Evidence: `components/about/AboutWrapper.tsx:906` and `components/works/WorkWrapper.tsx:159`.
+   - Current impact: fixed sidebar behavior, padding, and email typography can diverge across pages.
+   - Recommended action: extract a `FixedLeftRail` component that receives title/email/body content.
+
+10. Mobile navigation and page content both reserve a hard-coded 40px left offset.
+    - Evidence: `components/NaviBox.tsx:86`, `components/RightWrapper.tsx:18`, and multiple mobile content wrappers in `components/main/MainWrapper.tsx`.
+    - Current impact: any change to the mobile rail/menu affordance requires synchronized edits across nav and content.
+    - Recommended action: define a single mobile shell/gutter layout, preferably via CSS variable on `:root` or a shared layout wrapper.
+
+### Verification
+
+- Searched styled/layout patterns with `rg -n "styled\\.|const Section|const MainWrapper|const AboutLeft|width: calc\\(|height: [0-9.]+vw|font-size: [0-9.]+vw|margin-left: 40px|padding-left: 40px|position: fixed|z-index|border-bottom: 4px solid|border-right: 4px solid|breakpoints\\.md|breakpoints\\.sm" components app styles lib config`.
+- Inspected `components/LeftWrapper.tsx`, `components/RightWrapper.tsx`, and `styles/GlobalStyles.ts` directly.
+- `node ./node_modules/typescript/bin/tsc --noEmit`: passed.
+
+### Next Review Angle
+
+- Review data/type safety: `any` refs, image prop types, untyped work arrays, duplicated domain data, and opportunities for shared TypeScript models.
+- Consider a layout-token cleanup before larger redesign work to reduce future edit risk.
