@@ -803,3 +803,87 @@
 
 - Review content/data integrity after the copy rewrite: mojibake text, stale fictional client lists, broken social links, duplicated About/Work scaffolding, and portfolio proof structure.
 - Consider fixing motion policy before adding more visual effects, because current animation behavior is hard to govern centrally.
+
+## 2026-05-25 14:00 KST - Review 13
+
+### Scope
+
+- Content and data integrity after the AI-developer copy rewrite
+- Portfolio proof structure
+- Placeholder project/client data
+- External links and contact affordances
+- Duplication between About and Work page scaffolding
+
+### Findings
+
+1. The main and footer now present an AI validation position, but About still tells an older frontend-growth story.
+   - Evidence: `components/main/MainWrapper.tsx:27`, `components/main/MainWrapper.tsx:64`, and `components/Footer.tsx:33` focus on AI validation; `components/about/AboutWrapper.tsx:133` through `components/about/AboutWrapper.tsx:140` still describe a frontend-focused developer path.
+   - Current impact: the portfolio's first impression and deeper profile do not reinforce the same professional positioning.
+   - Recommended action: rewrite About around AI reliability work: evaluation design, RAG quality checks, agent failure analysis, automation, and product-level validation.
+
+2. Work data does not prove the AI-developer claim.
+   - Evidence: `components/works/WorkWrapper.tsx:64` through `components/works/WorkWrapper.tsx:80` lists repeated `yummygame` / `yummy yummy` items with the same images.
+   - Current impact: the Work page looks like sample data instead of evidence of AI engineering capability.
+   - Recommended action: replace `workArray` with case-study data fields such as `problem`, `aiRole`, `validationMethod`, `stack`, `result`, and `artifactUrl`.
+
+3. Work item keys are not stable because duplicated titles are used as keys.
+   - Evidence: `components/works/WorkWrapper.tsx:107` uses `key={c.text}`, while three entries use `text: "yummy yummy"`.
+   - Current impact: React can misidentify repeated Work items during updates.
+   - Recommended action: add a unique `id` to each work item and use `key={c.id}`.
+
+4. Work detail links currently route every card to the homepage.
+   - Evidence: `components/works/WorkWrapper.tsx:107` uses `<Link href={"/"} key={c.text}>`.
+   - Current impact: clicking a portfolio item does not lead to any proof, demo, source, or case-study detail.
+   - Recommended action: add real detail routes or outbound artifact links for each work item.
+
+5. About contains a fictional or aspirational client list that can be misread as real experience.
+   - Evidence: `components/about/AboutWrapper.tsx:19` through `components/about/AboutWrapper.tsx:32` includes Netflix, Apple, Samsung, Nike, Google, Gucci, Tesla, and others.
+   - Current impact: even though the heading says "Clients i wish i had", the list still weakens trust in a validation-oriented portfolio.
+   - Recommended action: replace it with actual technologies, evaluation artifacts, project domains, or remove the section.
+
+6. The same client-list scaffold is duplicated in Work even though Work does not render it.
+   - Evidence: `components/works/WorkWrapper.tsx:21` through `components/works/WorkWrapper.tsx:34`.
+   - Current impact: dead copied content makes it harder to know which data is real and which is leftover template material.
+   - Recommended action: delete unused Work page scaffold data during the next cleanup.
+
+7. Contact data mixes real email with fake address content.
+   - Evidence: `components/about/AboutWrapper.tsx:105` through `components/about/AboutWrapper.tsx:113`, and `components/works/WorkWrapper.tsx:89` through `components/works/WorkWrapper.tsx:97`.
+   - Current impact: a portfolio that emphasizes verification should not show placeholder address data such as `Blumenkopf kein Studio` and `Burgring 123`.
+   - Recommended action: keep the email and replace the address block with concrete availability, GitHub, LinkedIn, or project inquiry context.
+
+8. The main email link is not actionable.
+   - Evidence: `components/main/MainWrapper.tsx:38` uses `<a href="#">soojoon92@gmail.com</a>`.
+   - Current impact: users cannot click to contact from the main entry point.
+   - Recommended action: change it to `mailto:soojoon92@gmail.com` or a real contact route.
+
+9. External links open new tabs without `rel="noopener noreferrer"`.
+   - Evidence: `components/Footer.tsx:57`, `components/Footer.tsx:63`, `components/Footer.tsx:67`, `components/about/AboutWrapper.tsx:359`, and `components/about/AboutWrapper.tsx:394`.
+   - Current impact: new-tab links keep an unnecessary `window.opener` relationship.
+   - Recommended action: add `rel="noopener noreferrer"` to every `target="_blank"` anchor.
+
+10. Some social links appear mismatched with their icon or label.
+    - Evidence: `components/Footer.tsx:63` links the Facebook icon to `https://www.naver.com/`; `components/about/AboutWrapper.tsx:325` renders a Twitter row without an `href`.
+    - Current impact: users may click a social/contact affordance and land somewhere unrelated or nowhere at all.
+    - Recommended action: replace placeholder social links with real profiles, or remove unavailable channels.
+
+11. About project data is close to real case-study material but lacks validation outcomes.
+    - Evidence: `components/about/AboutWrapper.tsx:38` through `components/about/AboutWrapper.tsx:58` lists `sooho`, `amazoncar`, `catcatch`, and `yummygame` with short job descriptions.
+    - Current impact: these entries name projects, but they do not explain what was built, how correctness was checked, or what result was achieved.
+    - Recommended action: evolve this array into proof cards with measurable validation details rather than generic titles.
+
+12. Content is split across component files instead of a typed content source.
+    - Evidence: main copy, About biography, footer copy, Work data, contact blocks, and social links all live directly inside component files.
+    - Current impact: copy edits are hard to review for consistency and can drift between pages.
+    - Recommended action: move portfolio content into typed config files such as `config/profile.ts`, `config/projects.ts`, and `config/socialLinks.ts`.
+
+### Verification
+
+- Searched placeholder and portfolio-content strings with `rg -n` for client names, contact labels, social labels, project names, and email addresses across `app`, `components`, `lib`, `stores`, `styles`, and `config`.
+- Checked link affordances with `Select-String` for `target="_blank"`, `rel="noopener`, `href="https`, and `href="#"`.
+- Verified Korean content is UTF-8 text by reading `components/main/MainWrapper.tsx`, `components/about/AboutWrapper.tsx`, and `components/Footer.tsx` with Python and printing Unicode escapes.
+- Confirmed Work image assets exist under `public/images/work/yummygame`, while the rendered Work data repeats the same asset set for multiple cards.
+
+### Next Review Angle
+
+- Review SEO and metadata: page titles, descriptions, Open Graph data, sitemap/robots, semantic headings, and whether the AI-developer positioning appears in crawlable metadata.
+- Consider a content-source refactor before more copy changes so profile, work, footer, and social data stay consistent.
