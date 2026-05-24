@@ -2327,3 +2327,110 @@
 
 - Review deployment and production runtime readiness: build/start scripts, PM2 config, environment assumptions, lockfile consistency, Next config, static asset serving, and whether the project can be deployed repeatably.
 - Consider adding route-level metadata and `app/sitemap.ts` first; they are low-risk SEO improvements once the production domain is known.
+
+## 2026-05-25 07:00 KST - Review 29
+
+### Scope
+
+- Deployment and production runtime readiness
+- Package manager and install reproducibility
+- Build/start script semantics
+- PM2 process configuration
+- Runtime environment assumptions
+
+### Findings
+
+1. The project has two package lockfiles.
+   - Evidence: both `package-lock.json` and `yarn.lock` are tracked.
+   - Current impact: production installs can resolve different dependency trees depending on whether npm or Yarn is used.
+   - Recommended action: choose one package manager, remove the other lockfile, and document the exact install command.
+
+2. `package.json` does not declare `packageManager`.
+   - Evidence: no `packageManager` field exists in `package.json`.
+   - Current impact: Corepack cannot enforce a consistent package manager/version for developers or CI.
+   - Recommended action: add a field such as `packageManager: "yarn@1.22.22"` or standardize on npm and remove Yarn usage.
+
+3. `npm ci --dry-run` currently fails.
+   - Evidence: `npm ci --dry-run` fails with `ERESOLVE` because `react-textfit@1.1.1` declares React peer support for `^15.0.0 || ^16.0.0` while the project uses React 18.
+   - Current impact: a clean npm-based CI or production install is not repeatable without `--legacy-peer-deps` or dependency changes.
+   - Recommended action: replace `react-textfit`, remove it, or explicitly standardize on a package manager path that can install the project.
+
+4. Yarn install also has reproducibility risk in the current workspace.
+   - Evidence: `corepack yarn install --frozen-lockfile --ignore-scripts --non-interactive` warns about mixed lockfiles and `react-textfit` peer dependencies, then fails with `EPERM` while removing `node_modules/.bin`.
+   - Current impact: a developer or server updating dependencies in this OneDrive-backed workspace can corrupt local install shims.
+   - Recommended action: avoid installing inside synced folders for production work, and validate a clean clone install path in CI.
+
+5. The `start` script rebuilds before starting.
+   - Evidence: `package.json` defines `"start": "next build && next start"`.
+   - Current impact: production start becomes slow and failure-prone because each restart performs a full build.
+   - Recommended action: use `"start": "next start"` and run `"build": "next build"` in a separate deploy step.
+
+6. PM2 starts Next without building.
+   - Evidence: `ecosystem.config.js` uses `script: "next"` and `args: "start"`.
+   - Current impact: PM2 assumes a valid `.next` build already exists, but `only-start` does not create it.
+   - Recommended action: document the required `yarn build`/`npm run build` step before `pm2 start`, or deploy a prebuilt artifact.
+
+7. There is no current `.next` production artifact.
+   - Evidence: `.next` is missing in the current workspace.
+   - Current impact: `next start` or the PM2 config cannot serve the app until a build succeeds.
+   - Recommended action: make build success a required deployment gate and avoid treating PM2 start as a full deployment command.
+
+8. PM2 production environment variables are commented out.
+   - Evidence: `env_production` with `NODE_ENV` and `PORT` is present only in comments in `ecosystem.config.js`.
+   - Current impact: `pm2 start ecosystem.config.js --env production` does not actually apply the intended production port or environment settings.
+   - Recommended action: uncomment and verify `env_production`, or move runtime configuration to the deployment platform.
+
+9. PM2 instances are set to 4 without cluster mode.
+   - Evidence: `instances: 4` is set, while `exec_mode: "cluster"` is commented out.
+   - Current impact: PM2 defaults can be misunderstood, and multiple Next processes may not behave as intended.
+   - Recommended action: either set `exec_mode: "cluster"` deliberately or run one instance behind the platform's process manager.
+
+10. The app does not use Next standalone output.
+    - Evidence: `next.config.mjs` only enables `compiler.styledComponents`; there is no `output: "standalone"`.
+    - Current impact: server deployments must ship the full install rather than a smaller standalone server bundle.
+    - Recommended action: consider `output: "standalone"` if deploying to a custom Node server or PM2.
+
+11. Node version is only documented in README.
+    - Evidence: `README.md` mentions `v20.12.2`, but `package.json` has no `engines` and there is no `.nvmrc`.
+    - Current impact: hosting providers and CI can use a different Node version.
+    - Recommended action: add `engines.node` and optionally `.nvmrc` or `.node-version`.
+
+12. There is no CI workflow.
+    - Evidence: no tracked `.github/workflows` files were found.
+    - Current impact: typecheck, lint, install, and build regressions are only caught manually.
+    - Recommended action: add a CI workflow that runs install, typecheck, lint, and build on pull requests.
+
+13. The lint script uses the legacy Next lint command.
+    - Evidence: `package.json` defines `"lint": "next lint"` on Next 14.2.3.
+    - Current impact: the project is tied to a Next lint path that has been deprecated in newer Next versions.
+    - Recommended action: migrate toward direct ESLint invocation when upgrading Next.
+
+14. Production deployment docs are incomplete.
+    - Evidence: `README.md` only covers local dev commands and a Node version note; it does not describe build, start, PM2, port, or package manager decisions.
+    - Current impact: a fresh deployment depends on implicit operator knowledge.
+    - Recommended action: add a deployment section with the chosen install command, build command, start command, env vars, and rollback notes.
+
+15. The custom `only-start` script name hides what it does.
+    - Evidence: `package.json` defines `"only-start": "pm2 start ecosystem.config.js --env production"`.
+    - Current impact: the name suggests a server start, but it actually delegates to PM2 and depends on a prior build.
+    - Recommended action: rename it to `pm2:start` or `deploy:start` and pair it with explicit `pm2:reload` and `pm2:stop` scripts.
+
+16. The current install state was disturbed by an install attempt.
+    - Evidence: after the failed Yarn install, `node_modules/.bin/tsc` and `node_modules/.bin/next` are missing, while the package binaries still exist under `node_modules/typescript/bin` and `node_modules/next/dist/bin`.
+    - Current impact: scripts relying on `.bin` shims may fail until dependencies are reinstalled cleanly.
+    - Recommended action: perform dependency install in a clean, non-synced workspace and avoid relying on the current `node_modules` state as production evidence.
+
+### Verification
+
+- Checked current worktree with `git status --short --branch`.
+- Inspected `package.json`, `ecosystem.config.js`, `next.config.mjs`, `README.md`, `.gitignore`, `.editorconfig`, `.prettierrc`, and `.eslintrc.json`.
+- Listed tracked deployment-related files and confirmed both npm and Yarn lockfiles are tracked.
+- Checked that `.next` is missing in the current workspace.
+- Ran `npm ci --dry-run` and recorded the React peer dependency failure.
+- Ran `corepack yarn install --frozen-lockfile --ignore-scripts --non-interactive` and recorded the mixed-lockfile warnings plus `EPERM` failure.
+- Checked Node/npm/Corepack/Yarn versions and confirmed TypeScript/Next package binaries still exist outside `.bin`.
+
+### Next Review Angle
+
+- Review security and dependency risk: outdated packages, peer dependency mismatches, unused dependencies, external links, third-party runtime surface, and whether dependency upgrades need a controlled plan.
+- Consider stabilizing installs before production work: pick npm or Yarn, fix/remove `react-textfit`, add `packageManager` or `engines`, and rebuild from a clean clone.
