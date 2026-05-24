@@ -2750,3 +2750,110 @@
 
 - Review testing strategy and QA automation: typecheck/lint/build reliability, Playwright feasibility, visual regression points, route smoke tests, and how to verify fixes before touching visual-heavy components.
 - Consider starting media work by creating typed image metadata and deleting confirmed unused starter assets after a clean import search.
+
+## 2026-05-25 11:00 KST - Review 33
+
+### Scope
+
+- Testing strategy and QA automation
+- Typecheck, lint, and build reliability
+- Route smoke test coverage
+- Visual regression feasibility
+- CI readiness
+
+### Findings
+
+1. There is no dedicated test script.
+   - Evidence: `package.json` defines `dev`, `build`, `start`, `lint`, and `only-start`, but no `test` script.
+   - Current impact: behavioral checks are entirely manual.
+   - Recommended action: add a `test` script once a test runner is chosen, even if the first version only runs smoke tests.
+
+2. There is no typecheck script.
+   - Evidence: `tsconfig.json` supports `noEmit`, but `package.json` does not expose `tsc --noEmit`.
+   - Current impact: contributors must know the hidden command or rely on `next build`.
+   - Recommended action: add `"typecheck": "tsc --noEmit"` after dependency shims are restored.
+
+3. Local `.bin` shims are missing.
+   - Evidence: `node_modules/.bin/tsc` and `node_modules/.bin/next` are missing, while `node_modules/typescript/bin/tsc` and `node_modules/next/dist/bin/next` still exist.
+   - Current impact: package scripts may fail locally even though direct binary paths work.
+   - Recommended action: restore dependencies from a clean install in a non-synced workspace before relying on script-based QA.
+
+4. TypeScript checking currently passes through the direct binary path.
+   - Evidence: `node .\node_modules\typescript\bin\tsc --noEmit` exits successfully.
+   - Current impact: the TypeScript surface is currently clean, but the command is not encoded as a project gate.
+   - Recommended action: wire this into CI after package manager stabilization.
+
+5. Lint currently passes with warnings.
+   - Evidence: `node .\node_modules\next\dist\bin\next lint` exits successfully but reports three `@next/next/no-img-element` warnings in `components/Footer.tsx`.
+   - Current impact: lint does not block today, but image performance warnings are visible and repeat during build.
+   - Recommended action: fix the footer images or intentionally configure the rule only after media strategy is decided.
+
+6. Production build currently succeeds.
+   - Evidence: `node .\node_modules\next\dist\bin\next build` compiled, linted, typechecked, generated 7 static pages, and emitted routes for `/`, `/about`, and `/work`.
+   - Current impact: the app has a viable build path in the current state.
+   - Recommended action: preserve this as a required CI gate before visual or dependency refactors.
+
+7. Build still emits maintenance warnings.
+   - Evidence: build output repeats the three Footer `<img>` warnings and two Browserslist `caniuse-lite is outdated` messages.
+   - Current impact: warning noise can hide future meaningful warnings.
+   - Recommended action: reduce known warnings to zero before enforcing stricter CI.
+
+8. Build artifacts are large enough to matter in this workspace.
+   - Evidence: the generated `.next` directory contains 235 files totaling about 52.8 MB.
+   - Current impact: repeated build attempts consume disk in a workspace that has already hit space pressure.
+   - Recommended action: document cleanup and run CI/build work outside OneDrive or on clean runners.
+
+9. There are no route smoke tests.
+   - Evidence: source search found no Playwright, Cypress, Jest, Vitest, Storybook, or route test files.
+   - Current impact: `/`, `/about`, and `/work` can build but still break visually or interactively without automated detection.
+   - Recommended action: add a minimal Playwright smoke suite that checks each route renders, has no console errors, and exposes key text.
+
+10. There is no visual regression coverage.
+    - Evidence: no screenshot test, Storybook, Percy, Chromatic, or Playwright screenshot baseline exists.
+    - Current impact: responsive and animation regressions in the highly visual layout are manual-only.
+    - Recommended action: add screenshot checks only after image optimization and dev server stability are addressed.
+
+11. There is no accessibility automation.
+    - Evidence: `axe-core` appears only as a transitive package in the npm lockfile; there is no project-level axe or accessibility test.
+    - Current impact: repeated nav/link/label issues can return without detection.
+    - Recommended action: add axe checks to the Playwright smoke pass after semantic HTML fixes begin.
+
+12. There is no CI workflow.
+    - Evidence: no tracked `.github/workflows` directory exists.
+    - Current impact: install, typecheck, lint, build, and future smoke tests are not enforced before push.
+    - Recommended action: add a CI workflow after choosing one package manager and restoring a clean lockfile.
+
+13. Current scripts mix development, build, and runtime concerns.
+    - Evidence: `start` runs `next build && next start`, while `only-start` delegates to PM2.
+    - Current impact: a future CI pipeline cannot clearly separate install, typecheck, build, and runtime smoke phases.
+    - Recommended action: split scripts into `typecheck`, `lint`, `build`, `start`, `pm2:start`, and `verify`.
+
+14. There is no quality gate for image budgets.
+    - Evidence: prior media review found about 20.9 MB of public images, but no script checks file size budgets.
+    - Current impact: future assets can grow without triggering any automated warning.
+    - Recommended action: add a lightweight asset budget script before adding visual regression baselines.
+
+15. There is no dependency audit gate.
+    - Evidence: `npm audit` found vulnerabilities, but there is no `audit` script or CI policy.
+    - Current impact: security regressions stay manual.
+    - Recommended action: add dependency audit policy after the stale lockfile problem is resolved.
+
+16. QA should be introduced in phases.
+    - Evidence: build works, lint warns, typecheck passes, install state is damaged, and no route/visual/accessibility tests exist.
+    - Current impact: adding all QA at once would mix infrastructure repairs with product checks.
+    - Recommended action: sequence as `install baseline`, `typecheck/lint/build scripts`, `CI`, `route smoke`, `accessibility checks`, then `visual regression`.
+
+### Verification
+
+- Checked current worktree with `git status --short --branch`.
+- Searched the repository for test, spec, Playwright, Cypress, Jest, Vitest, Storybook, coverage, CI, Lighthouse, axe, lint, build, and script references.
+- Inspected `package.json`, `tsconfig.json`, `.eslintrc.json`, and `next.config.mjs`.
+- Confirmed project-level `.github` workflow files are missing.
+- Confirmed `.bin` shims for `tsc` and `next` are missing while package binary entry points still exist.
+- Ran direct typecheck, direct Next lint, and direct Next build.
+- Measured generated `.next` artifact size after build.
+
+### Next Review Angle
+
+- Review routing and information architecture: current route set, missing project detail routes, navigation semantics, conversion paths, page hierarchy, and how the portfolio should scale beyond three routes.
+- Consider adding `typecheck`, `verify`, and a minimal CI workflow after package manager cleanup restores script reliability.
