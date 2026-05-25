@@ -30,11 +30,11 @@ function FooterComponent() {
       <RightWrapperComponent>
         <InfoMobile className="tablet">
           <p>
-            검증하는 AI 개발자
+            SERVICE-ORIENTED DEVELOPER
             <br />
-            평가 기준과 자동화를 만듭니다
+            BUILDING PRODUCT FLOWS
             <br />
-            Eval / RAG / Agent
+            TYPESCRIPT / API / ARCHITECTURE
             <br />
             <span className="sec-font">SOOJOON92@GMAIL.COM</span>
           </p>
@@ -43,11 +43,11 @@ function FooterComponent() {
         <div className="footer-info-group">
           <div className="info pc">
             <p>
-              검증하는 AI 개발자
+              SERVICE-ORIENTED DEVELOPER
               <br />
-              평가 기준과 자동화를 만듭니다
+              BUILDING PRODUCT FLOWS
               <br />
-              Eval / RAG / Agent
+              TYPESCRIPT / API / ARCHITECTURE
               <br />
               <span className="sec-font">SOOJOON92@GMAIL.COM</span>
             </p>

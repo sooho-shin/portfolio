@@ -24,18 +24,18 @@ const MainWrapper = () => {
           <InfoBox>
             <div className="info-left">
               <p>
-                그럴듯한 AI가 아니라, 검증 가능한 결과를 설계합니다.
+                사용자 흐름, 데이터 연동, 성능, 유지보수성을 함께 설계하는 개발자입니다.
               </p>
             </div>
             <div className="info-right">
               <p>
-                프로젝트 문의
+                TYPESCRIPT SERVICE DEVELOPMENT
                 <br />
-                평가 기준 설계
+                REACT / NEXT.JS ARCHITECTURE
                 <br />
-                신뢰성 검증 자동화
+                API / AI WORKFLOW VERIFICATION
               </p>
-              <a href="#">soojoon92@gmail.com</a>
+              <a href="mailto:soojoon92@gmail.com">soojoon92@gmail.com</a>
             </div>
           </InfoBox>
         </LeftWrapperComponent>
@@ -43,28 +43,28 @@ const MainWrapper = () => {
           <TopRightInfo>
             <div className="left">
               <span>
-                검증 중심
+                주요
                 <br />
                 기술:
               </span>
               <span>
-                EVALUATION
+                TYPESCRIPT
                 <br />
-                RAG
+                REACT
                 <br />
-                LLM
+                NEXT.JS
                 <br />
-                AGENT
+                NODE / API
                 <br />
-                AUTOMATION
+                AI VERIFICATION
               </span>
             </div>
             <div className="right">
               <span>
-                AI-NATIVE
+                SERVICE
                 <br />
                 DEVELOPER WHO{" "}
-                <span className={playfair.className}>VERIFIES</span>
+                <span className={playfair.className}>BUILDS</span>
               </span>
             </div>
           </TopRightInfo>
@@ -94,26 +94,26 @@ const MainWrapper = () => {
         <CenterTextMobile>
           <div className="info-left">
             <p>
-              검증 중심 기술:
+              주요 기술:
               <br />
             </p>
             <p>
-              EVALUATION
-              <br /> RAG
-              <br /> LLM
-              <br /> AGENT
-              <br /> AUTOMATION
+              TYPESCRIPT
+              <br /> REACT
+              <br /> NEXT.JS
+              <br /> NODE / API
+              <br /> AI VERIFICATION
             </p>
           </div>
           <div className="info-right">
             <p>
-              AI-NATIVE
+              SERVICE
               <br />
               DEVELOPER
               <br />
               WHO
               <br />
-              VERIFIES
+              BUILDS
               <br />
               <span className={playfair.className}>Sooho.</span>
             </p>
@@ -124,16 +124,16 @@ const MainWrapper = () => {
         <InfoBoxMobile>
           <div className="info-left">
             <p>
-              그럴듯한 AI가 아니라, 검증 가능한 결과를 설계합니다.
+              사용자 흐름, 데이터 연동, 성능, 유지보수성을 함께 설계하는 개발자입니다.
             </p>
           </div>
           <div className="info-right">
             <p>
-              프로젝트 문의
+              TYPESCRIPT SERVICE DEVELOPMENT
               <br />
-              평가 기준 설계
+              REACT / NEXT.JS ARCHITECTURE
               <br />
-              신뢰성 검증 자동화
+              API / AI WORKFLOW VERIFICATION
               <br />
               <span className={playfair.className}>SOOJOON92@GMAIL.COM</span>
             </p>
@@ -143,50 +143,60 @@ const MainWrapper = () => {
       <Section className="no-border home-about">
         <LeftWrapperComponent>
           <AboutLeft>
-            <p className="title">검증하며 다루는 영역:</p>
+            <p className="title">경험하고 다뤄온 영역:</p>
             <ul className="brand-list">
-              <li>Eval</li>
-              <li>RAG</li>
-              <li>LLM</li>
-              <li>Agent</li>
-              <li>QA</li>
-              <li>Frontend</li>
+              <li>Service Dev</li>
+              <li>TypeScript</li>
+              <li>React/Next</li>
+              <li>Node/API</li>
+              <li>SQL/EF</li>
+              <li>WebSocket</li>
+              <li>Architecture</li>
+              <li>DevOps</li>
+              <li>Mobile</li>
+              <li>Web3</li>
+              <li>AI Verification</li>
             </ul>
           </AboutLeft>
         </LeftWrapperComponent>
         <RightWrapperComponent>
           <AboutRight>
             <div className="left tablet">
-              <p className="title">검증하며 다루는 영역:</p>
+              <p className="title">경험하고 다뤄온 영역:</p>
               <ul className="brand-list">
-                <li>Eval</li>
-                <li>RAG</li>
-                <li>LLM</li>
-                <li>Agent</li>
-                <li>QA</li>
-                <li>Frontend</li>
+                <li>Service Dev</li>
+                <li>TypeScript</li>
+                <li>React/Next</li>
+                <li>Node/API</li>
+                <li>SQL/EF</li>
+                <li>WebSocket</li>
+                <li>Architecture</li>
+                <li>DevOps</li>
+                <li>Mobile</li>
+                <li>Web3</li>
+                <li>AI Verification</li>
               </ul>
             </div>
             <div className="right">
               <div className="top-text">
                 <p>
-                  AI가 만든 답을 그대로 믿지 않고,
+                  기능 구현에서 멈추지 않고,
                   <span className={playfair.className}>
                     {" "}
-                    기준과 근거로 검증해{" "}
+                    사용자 흐름과 상태 구조를 기준으로{" "}
                   </span>
-                  제품에 넣을 수 있는 수준으로 만듭니다.
+                  서비스 경험을 설계합니다.
                 </p>
-                <p>정답보다 중요한 것은 실패를 발견하는 구조입니다.</p>
+                <p>컴포넌트 구조, 비동기 데이터, 성능 최적화를 함께 고려합니다.</p>
               </div>
               <div className="bottom-text">
                 <p>
-                  테스트셋, 로그, 사용자 흐름을 연결하고,
+                  AI를 개발 흐름에 맞게 활용하고
                   <span className={playfair.className}>
                     {" "}
-                    반복 가능한 평가와 자동화로{" "}
+                    생성된 결과를 코드, 요구사항, 실제 동작 기준으로{" "}
                   </span>
-                  AI 기능의 품질을 증명합니다.
+                  검토하고 검증합니다.
                 </p>
               </div>
               <Link prefetch href={"/about"} passHref>
@@ -228,12 +238,12 @@ const MainWrapper = () => {
               <div className="text-loop-container top">
                 <div className="loop-box">
                   {Array.from({ length: 10 }).map((_, i) => (
-                    <span key={i}>VERIFY AI</span>
+                    <span key={i}>BUILD SYSTEMS</span>
                   ))}
                 </div>
                 <div className="loop-box">
                   {Array.from({ length: 10 }).map((_, i) => (
-                    <span key={i}>VERIFY AI</span>
+                    <span key={i}>BUILD SYSTEMS</span>
                   ))}
                 </div>
               </div>
@@ -241,12 +251,12 @@ const MainWrapper = () => {
               <div className="text-loop-container right">
                 <div className="loop-box">
                   {Array.from({ length: 10 }).map((_, i) => (
-                    <span key={i}>VERIFY AI</span>
+                    <span key={i}>BUILD SYSTEMS</span>
                   ))}
                 </div>
                 <div className="loop-box">
                   {Array.from({ length: 10 }).map((_, i) => (
-                    <span key={i}>VERIFY AI</span>
+                    <span key={i}>BUILD SYSTEMS</span>
                   ))}
                 </div>
               </div>
@@ -254,12 +264,12 @@ const MainWrapper = () => {
               <div className="text-loop-container left">
                 <div className="loop-box">
                   {Array.from({ length: 10 }).map((_, i) => (
-                    <span key={i}>VERIFY AI</span>
+                    <span key={i}>BUILD SYSTEMS</span>
                   ))}
                 </div>
                 <div className="loop-box">
                   {Array.from({ length: 10 }).map((_, i) => (
-                    <span key={i}>VERIFY AI</span>
+                    <span key={i}>BUILD SYSTEMS</span>
                   ))}
                 </div>
               </div>
@@ -267,12 +277,12 @@ const MainWrapper = () => {
               <div className="text-loop-container bottom">
                 <div className="loop-box">
                   {Array.from({ length: 10 }).map((_, i) => (
-                    <span key={i}>VERIFY AI</span>
+                    <span key={i}>BUILD SYSTEMS</span>
                   ))}
                 </div>
                 <div className="loop-box">
                   {Array.from({ length: 10 }).map((_, i) => (
-                    <span key={i}>VERIFY AI</span>
+                    <span key={i}>BUILD SYSTEMS</span>
                   ))}
                 </div>
               </div>
@@ -339,7 +349,7 @@ const MainBgContainer = styled.div`
   width: 100%;
   height: 100%;
   z-index: -1;
-  background-image: url("/images/main.jpeg");
+  background-image: url("/images/main-portfolio-photo.png");
   background-position: center;
   background-size: cover;
 `;
@@ -715,18 +725,20 @@ const AboutRight = styled.div`
             display: flex;
             align-items: center;
             justify-content: end;
-            line-height: 1px;
-            padding: 2px 0;
-            font-size: 14px;
+            line-height: 1;
+            padding: 3px 0;
+            font-size: 13px;
+            white-space: nowrap;
 
             &::before {
               content: "";
               display: inline-block;
-              width: 8px;
-              height: 8px;
-              border-radius: 4px;
+              width: 7px;
+              height: 7px;
+              border-radius: 50%;
               background-color: #000;
               margin-right: 4px;
+              flex: 0 0 auto;
             }
           }
         }
@@ -758,18 +770,20 @@ const AboutLeft = styled.div`
       display: flex;
       align-items: center;
       justify-content: end;
-      line-height: 1px;
-      padding: 2px 0;
-      font-size: 18px;
+      line-height: 1;
+      padding: 3px 0;
+      font-size: 16px;
+      white-space: nowrap;
 
       &::before {
         content: "";
         display: inline-block;
-        width: 16px;
-        height: 16px;
-        border-radius: 8px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
         background-color: #000;
-        margin-right: 8px;
+        margin-right: 6px;
+        flex: 0 0 auto;
       }
     }
   }

@@ -300,20 +300,32 @@ const AboutWrapper = () => {
               OUR <span className="sec-font">SKILLSET:</span>
             </p>
             <div className="row">
-              <div className="box">REACT</div>
-              <div className="box">NEXT JS</div>
+              <div className="box">TYPESCRIPT</div>
+              <div className="box">REACT / NEXT</div>
             </div>
             <div className="row">
-              <div className="box">NODE JS</div>
-              <div className="box">EXPRESS</div>
+              <div className="box">NODE / API</div>
+              <div className="box">REST / WEBSOCKET</div>
             </div>
             <div className="row">
-              <div className="box">HTML</div>
-              <div className="box">JAVASCRIPT</div>
+              <div className="box">TANSTACK QUERY</div>
+              <div className="box">ZUSTAND</div>
             </div>
             <div className="row">
               <div className="box">CSS / SCSS</div>
-              <div className="box">SQL</div>
+              <div className="box">STYLED COMPONENTS</div>
+            </div>
+            <div className="row">
+              <div className="box">SQL / EF</div>
+              <div className="box">ARCHITECTURE</div>
+            </div>
+            <div className="row">
+              <div className="box">DEVOPS</div>
+              <div className="box">MOBILE / WEB3</div>
+            </div>
+            <div className="row">
+              <div className="box">AI WORKFLOW</div>
+              <div className="box">AI VERIFICATION</div>
             </div>
           </SkillWrapper>
           <SnsWrapper>

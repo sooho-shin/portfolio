@@ -42,18 +42,22 @@ const WorkWrapper = () => {
   // {/*  imgThird={}*/}
   const workArray = [
     {
+      id: "yummygame",
       text: "yummygame",
       images: ["/yummygame/1.png", "/yummygame/2.png", "/yummygame/3.png"],
     },
     {
+      id: "yummy-game-2",
       text: "yummy yummy",
       images: ["/yummygame/1.png", "/yummygame/2.png", "/yummygame/3.png"],
     },
     {
+      id: "yummy-game-3",
       text: "yummy yummy",
       images: ["/yummygame/1.png", "/yummygame/2.png", "/yummygame/3.png"],
     },
     {
+      id: "yummy-game-4",
       text: "yummy yummy",
       images: ["/yummygame/1.png", "/yummygame/2.png", "/yummygame/3.png"],
     },
@@ -83,7 +87,7 @@ const WorkWrapper = () => {
           <GalleryContainer>
             {workArray.map(c => {
               return (
-                <Link href={"/"} key={c.text}>
+                <Link href={"/"} key={c.id}>
                   <GalleryBox
                     text={c.text}
                     imgFirst={"/images/work" + c.images[0]}

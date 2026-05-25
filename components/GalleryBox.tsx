@@ -16,9 +16,9 @@ const GalleryComponent = ({
 }: Props) => {
   return (
     <ProjectWrapper
-      imgFirst={imgFirst}
-      imgSecond={imgSecond}
-      imgThird={imgThird}
+      $imgFirst={imgFirst}
+      $imgSecond={imgSecond}
+      $imgThird={imgThird}
     >
       <div className="content">
         <p className="title">{text}</p>
@@ -156,9 +156,9 @@ const textLoopAniVertical = keyframes`
 `;
 
 const ProjectWrapper = styled.div<{
-  imgFirst: string;
-  imgSecond: string;
-  imgThird: string;
+  $imgFirst: string;
+  $imgSecond: string;
+  $imgThird: string;
 }>`
   background-color: #fff;
   display: inline-block;
@@ -225,7 +225,7 @@ const ProjectWrapper = styled.div<{
 
       &.first {
         ${props => css`
-          background-image: url(${props.imgFirst});
+          background-image: url(${props.$imgFirst});
         `}
         background-size:cover;
         background-position: center;
@@ -234,7 +234,7 @@ const ProjectWrapper = styled.div<{
       }
       &.second {
         ${props => css`
-          background-image: url(${props.imgSecond});
+          background-image: url(${props.$imgSecond});
         `}
         background-size:cover;
         background-position: center;
@@ -245,7 +245,7 @@ const ProjectWrapper = styled.div<{
       }
       &.third {
         ${props => css`
-          background-image: url(${props.imgThird});
+          background-image: url(${props.$imgThird});
         `}
         background-size:cover;
         background-position: center;

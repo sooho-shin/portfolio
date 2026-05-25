@@ -5,9 +5,9 @@ import { Noto_Sans_KR } from "next/font/google";
 import SmoothScrolling from "@/lib/smoothScrolling";
 
 export const metadata: Metadata = {
-  title: "AI Validation Engineer Portfolio | Sooho",
+  title: "Service Developer Portfolio | Sooho",
   description:
-    "AI 결과물을 검증 가능한 제품과 자동화 시스템으로 구현하는 개발자 포트폴리오",
+    "TypeScript, React, API integration, and verified AI workflow portfolio by Sooho",
 };
 
 const notoSansKr = Noto_Sans_KR({
