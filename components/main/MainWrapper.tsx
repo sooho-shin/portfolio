@@ -14,7 +14,7 @@ const playfair = Playfair_Display({
 });
 const MainWrapper = () => {
   const [effectTitle] = useState("home");
-  const [effectRollingText] = useState("VERIFIED AI SYSTEMS");
+  const [effectRollingText] = useState("SHINSOOHO");
   const [hoverState, setHoverState] = useState<boolean>(false);
 
   return (
@@ -61,10 +61,10 @@ const MainWrapper = () => {
             </div>
             <div className="right">
               <span>
-                AI 결과를
+                AI-NATIVE
                 <br />
-                의심하고 검증하는{" "}
-                <span className={playfair.className}>개발자</span>
+                DEVELOPER WHO{" "}
+                <span className={playfair.className}>VERIFIES</span>
               </span>
             </div>
           </TopRightInfo>
@@ -107,13 +107,13 @@ const MainWrapper = () => {
           </div>
           <div className="info-right">
             <p>
-              AI 결과를
+              AI-NATIVE
               <br />
-              의심하고
+              DEVELOPER
               <br />
-              검증하는
+              WHO
               <br />
-              개발자
+              VERIFIES
               <br />
               <span className={playfair.className}>Sooho.</span>
             </p>
@@ -203,7 +203,7 @@ const MainWrapper = () => {
           mode="single"
           forceSingleModeWidth={true}
         >
-          VERIFIED AI
+          SHINSOOHO
         </Textfit>
         <div className="text-right">
           <Link prefetch href={"/work"} passHref>
