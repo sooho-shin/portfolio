@@ -1,7 +1,7 @@
 "use client";
 
 import React, { ReactNode } from "react";
-import styled, { css } from "styled-components";
+import styled from "styled-components";
 import { breakpoints } from "@/config/breakboint";
 
 type Props = {

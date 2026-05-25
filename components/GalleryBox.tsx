@@ -1,12 +1,11 @@
-import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import styled, { css, keyframes } from "styled-components";
 
 type Props = {
   text: string;
-  imgFirst: any;
-  imgSecond: any;
-  imgThird: any;
+  imgFirst: string;
+  imgSecond: string;
+  imgThird: string;
 };
 
 const GalleryComponent = ({
@@ -157,9 +156,9 @@ const textLoopAniVertical = keyframes`
 `;
 
 const ProjectWrapper = styled.div<{
-  imgFirst: any;
-  imgSecond: any;
-  imgThird: any;
+  imgFirst: string;
+  imgSecond: string;
+  imgThird: string;
 }>`
   background-color: #fff;
   display: inline-block;

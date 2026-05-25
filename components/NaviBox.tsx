@@ -1,14 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { useEffect, useState, useRef } from "react";
-import { useWindowSize } from "react-use";
-import styled, { css, keyframes } from "styled-components";
+import React, { useEffect, useState } from "react";
+import styled, { css } from "styled-components";
 import { breakpoints } from "@/config/breakboint";
 import { Playfair_Display } from "next/font/google";
 import classNames from "classnames";
-import { useCommonStore } from "@/stores/useCommon";
 import { useRouter } from "next/navigation";
 const playfair = Playfair_Display({
   subsets: ["latin"],
@@ -20,7 +17,6 @@ const NaviComponent = () => {
   const [naviState, setNaviState] = useState<boolean>(false);
   const pathname = usePathname();
 
-  const { setRoute } = useCommonStore();
   const router = useRouter();
 
   useEffect(() => {
