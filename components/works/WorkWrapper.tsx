@@ -11,6 +11,7 @@ import styled from "styled-components";
 import { breakpoints } from "@/config/breakboint";
 import GalleryBox from "@/components/GalleryBox";
 import Link from "next/link";
+import ContactInfoPanel from "@/components/ContactInfoPanel";
 
 const WorkWrapper = () => {
   const effectTitle = "work";
@@ -67,21 +68,7 @@ const WorkWrapper = () => {
     <MainWrapper>
       <Section ref={mainContainer}>
         <LeftWrapperComponent>
-          <AboutLeft>
-            <div className="about-info" ref={infoText}>
-              <p className="title">Inquiries:</p>
-              <p className="mail">soojoon92@gmail.com</p>
-              <p className="info">
-                CONTACT:
-                <br />
-                Blumenkopf kein Studio
-                <br />
-                Burgring 123
-                <br />
-                1010 Wien, Korea
-              </p>
-            </div>
-          </AboutLeft>
+          <ContactInfoPanel infoRef={infoText} />
         </LeftWrapperComponent>
         <RightWrapperComponent>
           <GalleryContainer>
@@ -135,38 +122,6 @@ const GalleryContainer = styled.div`
     &:nth-last-child(2),
     &:last-child {
       border-bottom: none;
-    }
-  }
-`;
-
-const AboutLeft = styled.div`
-  width: 25vw;
-  padding-right: 40px;
-  height: 100vh;
-  position: fixed;
-  left: 0;
-  top: 0;
-
-  .about-info {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    padding: 10px 50px 10px 10px;
-    box-sizing: border-box;
-
-    > p {
-      &.title {
-        font-size: 1.875vw;
-      }
-
-      &.mail {
-        font-size: 3vw;
-        text-decoration: underline;
-        text-transform: uppercase;
-        margin-bottom: 4px;
-        word-break: break-all;
-      }
     }
   }
 `;
