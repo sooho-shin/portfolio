@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import LeftWrapperComponent from "@/components/LeftWrapper";
 import RightWrapperComponent from "@/components/RightWrapper";
 import { Textfit } from "react-textfit";
@@ -12,38 +12,17 @@ import { breakpoints } from "@/config/breakboint";
 import GalleryBox from "@/components/GalleryBox";
 import Link from "next/link";
 
-type memberType = {
-  user_idx: number;
-  name: string;
-  job: string;
-};
-
-const clientArrayData: string[] = [
-  "Netflix",
-  "Apple",
-  "Samsung",
-  "Nike",
-  "Google",
-  "MicroSoft",
-  "Gucci",
-  "Adidas",
-  "Hyundae",
-  "Chanel",
-  "Kia",
-  "Tesla",
-];
-
 const WorkWrapper = () => {
-  const [effectTitle, setEffectTitle] = useState("work");
-  const [effectRollingText, setEffectRollingText] = useState("SOOHO work");
+  const effectTitle = "work";
+  const effectRollingText = "SOOHO work";
 
-  const mainContainer = useRef<any>();
-  const infoText = useRef<any>();
-  const { x: scrollX, y: scrollY } = useWindowScroll();
+  const mainContainer = useRef<HTMLDivElement | null>(null);
+  const infoText = useRef<HTMLDivElement | null>(null);
+  const { y: scrollY } = useWindowScroll();
   const { width: windowWidth, height: windowHeight } = useWindowSize();
 
   useEffect(() => {
-    if (infoText) {
+    if (infoText.current && mainContainer.current) {
       const mainHeight = mainContainer.current.offsetHeight;
       if (windowHeight + scrollY > mainHeight) {
         // setInfoTextMaigin(windowHeight + scrollY - mainHeight)

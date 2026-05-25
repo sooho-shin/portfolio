@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { useWindowSize } from "react-use";
-import styled, { css, keyframes } from "styled-components";
+import styled, { keyframes } from "styled-components";
 import { breakpoints } from "@/config/breakboint";
-import { usePathname } from "next/navigation";
 
 type Props = {
   text: string;
@@ -12,13 +11,14 @@ type Props = {
 };
 
 const EffectComponent = ({ text, rollingText = "text text" }: Props) => {
-  const [pageState, setPageState] = useState<string | null>(text);
-  const [rollingTextState, setRollingTextState] = useState(rollingText);
-  const effectRef = useRef<any>();
-  const { width: windowWidth, height: windowHeight } = useWindowSize();
-  const pathname = usePathname();
+  const effectRef = useRef<HTMLDivElement | null>(null);
+  const { width: windowWidth } = useWindowSize();
 
   useEffect(() => {
+    if (!effectRef.current) {
+      return;
+    }
+
     effectRef.current.style.width = `40px`;
     if (windowWidth > breakpoints.md) {
       effectRef.current.style.left = `calc(25vw - 40px)`;
@@ -33,57 +33,57 @@ const EffectComponent = ({ text, rollingText = "text text" }: Props) => {
   }, [windowWidth]);
 
   return (
-    <EffectBox $pageState={pageState} ref={effectRef}>
-      {pageState ? (
+    <EffectBox $pageState={text} ref={effectRef}>
+      {text ? (
         <>
           <div className="mask">
-            <span>{pageState}</span>
+            <span>{text}</span>
           </div>
           <div className="loop-row-mask">
             <div className="show-ani">
               <div className="loop-row">
-                <span>{rollingTextState}</span>
-                <span>{rollingTextState}</span>
-                <span>{rollingTextState}</span>
-                <span>{rollingTextState}</span>
-                <span>{rollingTextState}</span>
-                <span>{rollingTextState}</span>
-                <span>{rollingTextState}</span>
-                <span>{rollingTextState}</span>
-                <span>{rollingTextState}</span>
-                <span>{rollingTextState}</span>
+                <span>{rollingText}</span>
+                <span>{rollingText}</span>
+                <span>{rollingText}</span>
+                <span>{rollingText}</span>
+                <span>{rollingText}</span>
+                <span>{rollingText}</span>
+                <span>{rollingText}</span>
+                <span>{rollingText}</span>
+                <span>{rollingText}</span>
+                <span>{rollingText}</span>
               </div>
             </div>
           </div>
           <div className="loop-row-mask">
             <div className="show-ani">
               <div className="loop-row reverse">
-                <span>{rollingTextState}</span>
-                <span>{rollingTextState}</span>
-                <span>{rollingTextState}</span>
-                <span>{rollingTextState}</span>
-                <span>{rollingTextState}</span>
-                <span>{rollingTextState}</span>
-                <span>{rollingTextState}</span>
-                <span>{rollingTextState}</span>
-                <span>{rollingTextState}</span>
-                <span>{rollingTextState}</span>
+                <span>{rollingText}</span>
+                <span>{rollingText}</span>
+                <span>{rollingText}</span>
+                <span>{rollingText}</span>
+                <span>{rollingText}</span>
+                <span>{rollingText}</span>
+                <span>{rollingText}</span>
+                <span>{rollingText}</span>
+                <span>{rollingText}</span>
+                <span>{rollingText}</span>
               </div>
             </div>
           </div>
           <div className="loop-row-mask">
             <div className="show-ani">
               <div className="loop-row">
-                <span>{rollingTextState}</span>
-                <span>{rollingTextState}</span>
-                <span>{rollingTextState}</span>
-                <span>{rollingTextState}</span>
-                <span>{rollingTextState}</span>
-                <span>{rollingTextState}</span>
-                <span>{rollingTextState}</span>
-                <span>{rollingTextState}</span>
-                <span>{rollingTextState}</span>
-                <span>{rollingTextState}</span>
+                <span>{rollingText}</span>
+                <span>{rollingText}</span>
+                <span>{rollingText}</span>
+                <span>{rollingText}</span>
+                <span>{rollingText}</span>
+                <span>{rollingText}</span>
+                <span>{rollingText}</span>
+                <span>{rollingText}</span>
+                <span>{rollingText}</span>
+                <span>{rollingText}</span>
               </div>
             </div>
           </div>
@@ -148,7 +148,7 @@ const rowAniReverse = keyframes`
   }
 `;
 
-const EffectBox = styled.div<{ $pageState: string | null }>`
+const EffectBox = styled.div<{ $pageState: string }>`
   position: fixed;
   left: 0;
   width: 100%;

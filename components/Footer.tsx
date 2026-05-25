@@ -56,15 +56,24 @@ function FooterComponent() {
             <a
               href="https://soundcloud.com/soohozzang/sets/hiphop"
               target="_blank"
+              rel="noopener noreferrer"
             >
               <img src={"/images/ico_soundcloud.png"} alt="icoSoundcloud" />
             </a>
 
-            <a href="https://www.naver.com/" target="_blank">
+            <a
+              href="https://www.naver.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <img src={"/images/ico_facebook.png"} alt="icoFacebook" />
             </a>
 
-            <a href="https://www.instagram.com/_soooho/" target="_blank">
+            <a
+              href="https://www.instagram.com/_soooho/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <img src={"/images/ico_insta.png"} alt="icoInsta" />
             </a>
           </div>

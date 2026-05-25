@@ -32,8 +32,8 @@ const clientArrayData: string[] = [
 ];
 
 const AboutWrapper = () => {
-  const [effectTitle, setEffectTitle] = useState("about");
-  const [effectRollingText, setEffectRollingText] = useState("SOOHO about");
+  const effectTitle = "about";
+  const effectRollingText = "SOOHO about";
 
   const memberArrayData: memberType[] = [
     {
@@ -59,16 +59,16 @@ const AboutWrapper = () => {
   ];
   const [currentMemberIdx, setCurrentMemberIdx] = useState<number>(1);
   const [clientArray] = useState(clientArrayData);
-  const sliderRef = useRef<any>();
-  const sliderJobRef = useRef<any>();
-  const sliderImgRef = useRef<any>();
-  const mainContainer = useRef<any>();
-  const infoText = useRef<any>();
-  const { x: scrollX, y: scrollY } = useWindowScroll();
+  const sliderRef = useRef<HTMLDivElement | null>(null);
+  const sliderJobRef = useRef<HTMLDivElement | null>(null);
+  const sliderImgRef = useRef<HTMLDivElement | null>(null);
+  const mainContainer = useRef<HTMLDivElement | null>(null);
+  const infoText = useRef<HTMLDivElement | null>(null);
+  const { y: scrollY } = useWindowScroll();
   const { width: windowWidth, height: windowHeight } = useWindowSize();
 
   useEffect(() => {
-    if (infoText) {
+    if (infoText.current && mainContainer.current) {
       const mainHeight = mainContainer.current.offsetHeight;
       if (windowHeight + scrollY > mainHeight) {
         // setInfoTextMaigin(windowHeight + scrollY - mainHeight)
@@ -83,7 +83,7 @@ const AboutWrapper = () => {
   }, [scrollY, windowHeight, windowWidth]);
 
   useEffect(() => {
-    if (sliderRef) {
+    if (sliderRef.current && sliderJobRef.current && sliderImgRef.current) {
       sliderRef.current.style.transform = `translateX(-${
         currentMemberIdx - 1
       }00%)`;
@@ -356,7 +356,11 @@ const AboutWrapper = () => {
               </span>
               <div className="mask"></div>
             </a>
-            <a href="https://www.facebook.com/sooho.shin.16" target="_blank">
+            <a
+              href="https://www.facebook.com/sooho.shin.16"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <span>facebook</span>
               <span className="arrow">
                 <svg
@@ -393,6 +397,7 @@ const AboutWrapper = () => {
             <a
               href="https://www.instagram.com/iamnotsooho"
               target="_blank"
+              rel="noopener noreferrer"
               className="no-border"
             >
               <span>instagram</span>
