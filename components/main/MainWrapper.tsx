@@ -5,9 +5,10 @@ import LeftWrapperComponent from "@/components/LeftWrapper";
 import RightWrapperComponent from "@/components/RightWrapper";
 import { Textfit } from "react-textfit";
 import Link from "next/link";
-import FooterComponent from "@/components/Footer";
-import EffectComponent from "@/components/EffectBox";
 import { Playfair_Display } from "next/font/google";
+import PageSection from "@/components/atoms/PageSection";
+import BlackholeSvg from "@/components/atoms/BlackholeSvg";
+import PortfolioPageShell from "@/components/templates/PortfolioPageShell";
 const playfair = Playfair_Display({
   subsets: ["latin"],
   weight: ["400", "700", "900"],
@@ -18,13 +19,17 @@ const MainWrapper = () => {
   const [hoverState, setHoverState] = useState<boolean>(false);
 
   return (
-    <Wrapper>
-      <Section>
+    <PortfolioPageShell
+      effectTitle={effectTitle}
+      effectRollingText={effectRollingText}
+    >
+      <PageSection>
         <LeftWrapperComponent>
           <InfoBox>
             <div className="info-left">
               <p>
-                사용자 흐름, 데이터 연동, 성능, 유지보수성을 함께 설계하는 개발자입니다.
+                사용자 흐름, 데이터 연동, 성능, 유지보수성을 함께 설계하는
+                개발자입니다.
               </p>
             </div>
             <div className="info-right">
@@ -63,34 +68,19 @@ const MainWrapper = () => {
               <span>
                 SERVICE
                 <br />
-                DEVELOPER WHO{" "}
-                <span className={playfair.className}>BUILDS</span>
+                DEVELOPER WHO <span className={playfair.className}>BUILDS</span>
               </span>
             </div>
           </TopRightInfo>
           <MainBgContainer />
           <BlackholePositioner>
             <div className="js-blackhole-pinner blackhole-pinner">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="100%"
-                height="100%"
-                viewBox="0 0 1440 1440.003"
-                className="blackhole"
-                preserveAspectRatio="none meet"
-              >
-                <path
-                  id="blackhole"
-                  d="M653,480l-720,0V-238.46C-66.172,157.7,256.818,480,653,480h0Zm720,0H653c396.025,0,719.015-322.189,720-718.216ZM-67-241.542h0V-960H651.46C256.125-959.174-66.174-636.876-67-241.542Zm1440-.241h0c-.981-395.2-323.279-717.392-718.456-718.216H1373Z"
-                  transform="translate(67 960.001)"
-                  data-v-3a229bb7=""
-                ></path>
-              </svg>
+              <BlackholeSvg id="blackhole" className="blackhole" />
             </div>
           </BlackholePositioner>
         </RightWrapperComponent>
-      </Section>
-      <Section className="tablet">
+      </PageSection>
+      <PageSection className="tablet">
         <CenterTextMobile>
           <div className="info-left">
             <p>
@@ -119,12 +109,13 @@ const MainWrapper = () => {
             </p>
           </div>
         </CenterTextMobile>
-      </Section>
-      <Section className="tablet">
+      </PageSection>
+      <PageSection className="tablet">
         <InfoBoxMobile>
           <div className="info-left">
             <p>
-              사용자 흐름, 데이터 연동, 성능, 유지보수성을 함께 설계하는 개발자입니다.
+              사용자 흐름, 데이터 연동, 성능, 유지보수성을 함께 설계하는
+              개발자입니다.
             </p>
           </div>
           <div className="info-right">
@@ -139,8 +130,8 @@ const MainWrapper = () => {
             </p>
           </div>
         </InfoBoxMobile>
-      </Section>
-      <Section className="no-border home-about">
+      </PageSection>
+      <PageSection className="no-border home-about">
         <LeftWrapperComponent>
           <AboutLeft>
             <p className="title">경험하고 다뤄온 영역:</p>
@@ -187,7 +178,9 @@ const MainWrapper = () => {
                   </span>
                   서비스 경험을 설계합니다.
                 </p>
-                <p>컴포넌트 구조, 비동기 데이터, 성능 최적화를 함께 고려합니다.</p>
+                <p>
+                  컴포넌트 구조, 비동기 데이터, 성능 최적화를 함께 고려합니다.
+                </p>
               </div>
               <div className="bottom-text">
                 <p>
@@ -205,8 +198,8 @@ const MainWrapper = () => {
             </div>
           </AboutRight>
         </RightWrapperComponent>
-      </Section>
-      <Section className="no-border fd-c center-text">
+      </PageSection>
+      <PageSection className="no-border fd-c center-text">
         <Textfit
           style={{ width: "100%", height: "auto" }}
           max={9999}
@@ -220,7 +213,7 @@ const MainWrapper = () => {
             <StyledButton className="right">Work</StyledButton>
           </Link>
         </div>
-      </Section>
+      </PageSection>
       <ProjectWrapper $hover={hoverState}>
         <LeftWrapperComponent></LeftWrapperComponent>
         <RightWrapperComponent>
@@ -290,10 +283,7 @@ const MainWrapper = () => {
           </div>
         </RightWrapperComponent>
       </ProjectWrapper>
-      <FooterComponent />
-
-      <EffectComponent text={effectTitle} rollingText={effectRollingText} />
-    </Wrapper>
+    </PortfolioPageShell>
   );
 };
 
@@ -834,42 +824,6 @@ const TopRightInfo = styled.div`
   }
 `;
 
-const Section = styled.div`
-  width: 100%;
-  border-bottom: 4px solid #000;
-  display: flex;
-  height: fit-content;
-
-  &.no-border {
-    border: none;
-  }
-
-  &.home-about {
-    padding-bottom: 120px;
-    @media (max-width: ${breakpoints.md}px) {
-      padding-bottom: 30px;
-    }
-  }
-
-  &.fd-c {
-    flex-direction: column;
-  }
-
-  &.center-text {
-    @media (max-width: ${breakpoints.md}px) {
-      padding-left: 40px;
-      box-sizing: border-box;
-    }
-  }
-
-  .text-right {
-    text-align: right;
-
-    a {
-      margin-top: 2vw;
-    }
-  }
-`;
 const BlackholePositioner = styled.div`
   top: 0;
   right: 0;
@@ -911,15 +865,6 @@ const BlackholePositioner = styled.div`
     }
   }
 `;
-const Wrapper = styled.div`
-  width: 100%;
-  height: 100%;
-  display: block;
-  @media (max-width: ${breakpoints.md}px) {
-  }
-  /* justify-content: center; */
-`;
-
 // const LeftWrapper = styled.div`
 //   width: calc(25vw);
 //   padding-right:40px;

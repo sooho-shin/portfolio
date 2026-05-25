@@ -1,41 +1,16 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
-import LeftWrapperComponent from "@/components/LeftWrapper";
-import RightWrapperComponent from "@/components/RightWrapper";
-import { Textfit } from "react-textfit";
-import { useWindowScroll, useWindowSize } from "react-use";
-import FooterComponent from "@/components/Footer";
-import EffectComponent from "@/components/EffectBox";
+import React from "react";
 import styled from "styled-components";
 import { breakpoints } from "@/config/breakboint";
 import GalleryBox from "@/components/GalleryBox";
 import Link from "next/link";
-import ContactInfoPanel from "@/components/ContactInfoPanel";
+import ContactSidebarLayout from "@/components/templates/ContactSidebarLayout";
+import PortfolioPageShell from "@/components/templates/PortfolioPageShell";
 
 const WorkWrapper = () => {
   const effectTitle = "work";
   const effectRollingText = "SOOHO work";
-
-  const mainContainer = useRef<HTMLDivElement | null>(null);
-  const infoText = useRef<HTMLDivElement | null>(null);
-  const { y: scrollY } = useWindowScroll();
-  const { width: windowWidth, height: windowHeight } = useWindowSize();
-
-  useEffect(() => {
-    if (infoText.current && mainContainer.current) {
-      const mainHeight = mainContainer.current.offsetHeight;
-      if (windowHeight + scrollY > mainHeight) {
-        // setInfoTextMaigin(windowHeight + scrollY - mainHeight)
-        infoText.current.style.transform = `translate3d(0px,-${
-          windowHeight + scrollY - mainHeight
-        }px,0px)`;
-      } else {
-        // setInfoTextMaigin(0)
-        infoText.current.style.transform = `translate3d(0px,0px,0px)`;
-      }
-    }
-  }, [scrollY, windowHeight, windowWidth]);
 
   // {/*  text={"catch catch"}*/}
   // {/*  imgFirst={}*/}
@@ -65,31 +40,27 @@ const WorkWrapper = () => {
   ];
 
   return (
-    <MainWrapper>
-      <Section ref={mainContainer}>
-        <LeftWrapperComponent>
-          <ContactInfoPanel infoRef={infoText} />
-        </LeftWrapperComponent>
-        <RightWrapperComponent>
-          <GalleryContainer>
-            {workArray.map(c => {
-              return (
-                <Link href={"/"} key={c.id}>
-                  <GalleryBox
-                    text={c.text}
-                    imgFirst={"/images/work" + c.images[0]}
-                    imgSecond={"/images/work" + c.images[1]}
-                    imgThird={"/images/work" + c.images[2]}
-                  />
-                </Link>
-              );
-            })}
-          </GalleryContainer>
-        </RightWrapperComponent>
-      </Section>
-      <FooterComponent />
-      <EffectComponent text={effectTitle} rollingText={effectRollingText} />
-    </MainWrapper>
+    <PortfolioPageShell
+      effectTitle={effectTitle}
+      effectRollingText={effectRollingText}
+    >
+      <ContactSidebarLayout>
+        <GalleryContainer>
+          {workArray.map(c => {
+            return (
+              <Link href={"/"} key={c.id}>
+                <GalleryBox
+                  text={c.text}
+                  imgFirst={"/images/work" + c.images[0]}
+                  imgSecond={"/images/work" + c.images[1]}
+                  imgThird={"/images/work" + c.images[2]}
+                />
+              </Link>
+            );
+          })}
+        </GalleryContainer>
+      </ContactSidebarLayout>
+    </PortfolioPageShell>
   );
 };
 
@@ -124,40 +95,6 @@ const GalleryContainer = styled.div`
       border-bottom: none;
     }
   }
-`;
-
-const Section = styled.div`
-  width: 100%;
-  border-bottom: 4px solid #000;
-  display: flex;
-  height: fit-content;
-
-  &.no-border {
-    border: none;
-  }
-
-  &.home-about {
-    padding-bottom: 120px;
-  }
-
-  &.fd-c {
-    flex-direction: column;
-  }
-
-  .text-right {
-    text-align: right;
-
-    a {
-      margin-top: 2vw;
-    }
-  }
-`;
-
-const MainWrapper = styled.div`
-  width: 100%;
-  height: 100%;
-  display: block;
-  /* justify-content: center; */
 `;
 
 export default WorkWrapper;

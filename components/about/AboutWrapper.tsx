@@ -1,15 +1,13 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import LeftWrapperComponent from "@/components/LeftWrapper";
-import RightWrapperComponent from "@/components/RightWrapper";
 import { Textfit } from "react-textfit";
-import { useWindowScroll, useWindowSize } from "react-use";
-import FooterComponent from "@/components/Footer";
-import EffectComponent from "@/components/EffectBox";
 import styled from "styled-components";
 import { breakpoints } from "@/config/breakboint";
-import ContactInfoPanel from "@/components/ContactInfoPanel";
+import ArrowSvg from "@/components/atoms/ArrowSvg";
+import BlackholeSvg from "@/components/atoms/BlackholeSvg";
+import ContactSidebarLayout from "@/components/templates/ContactSidebarLayout";
+import PortfolioPageShell from "@/components/templates/PortfolioPageShell";
 
 type memberType = {
   user_idx: number;
@@ -63,25 +61,6 @@ const AboutWrapper = () => {
   const sliderRef = useRef<HTMLDivElement | null>(null);
   const sliderJobRef = useRef<HTMLDivElement | null>(null);
   const sliderImgRef = useRef<HTMLDivElement | null>(null);
-  const mainContainer = useRef<HTMLDivElement | null>(null);
-  const infoText = useRef<HTMLDivElement | null>(null);
-  const { y: scrollY } = useWindowScroll();
-  const { width: windowWidth, height: windowHeight } = useWindowSize();
-
-  useEffect(() => {
-    if (infoText.current && mainContainer.current) {
-      const mainHeight = mainContainer.current.offsetHeight;
-      if (windowHeight + scrollY > mainHeight) {
-        // setInfoTextMaigin(windowHeight + scrollY - mainHeight)
-        infoText.current.style.transform = `translate3d(0px,-${
-          windowHeight + scrollY - mainHeight
-        }px,0px)`;
-      } else {
-        // setInfoTextMaigin(0)
-        infoText.current.style.transform = `translate3d(0px,0px,0px)`;
-      }
-    }
-  }, [scrollY, windowHeight, windowWidth]);
 
   useEffect(() => {
     if (sliderRef.current && sliderJobRef.current && sliderImgRef.current) {
@@ -98,346 +77,191 @@ const AboutWrapper = () => {
   }, [currentMemberIdx]);
 
   return (
-    <MainWrapper>
-      <Section ref={mainContainer}>
-        <LeftWrapperComponent>
-          <ContactInfoPanel infoRef={infoText} />
-        </LeftWrapperComponent>
-        <RightWrapperComponent>
-          <Title>
-            <Textfit
-              // style={{ width: "100%", height: "auto" }}
-              max={9999}
-              mode="single"
-              // forceSingleModeWidth={true}
-            >
-              INFO
-            </Textfit>
-          </Title>
-          <CenterInfo>
-            <div>
+    <PortfolioPageShell
+      effectTitle={effectTitle}
+      effectRollingText={effectRollingText}
+    >
+      <ContactSidebarLayout>
+        <Title>
+          <Textfit
+            // style={{ width: "100%", height: "auto" }}
+            max={9999}
+            mode="single"
+            // forceSingleModeWidth={true}
+          >
+            INFO
+          </Textfit>
+        </Title>
+        <CenterInfo>
+          <div>
+            <p>최신 기술과 창의적 사고로 아이디어를 현실로 구현하는 개발자.</p>
+            <div className="flex">
               <p>
-                최신 기술과 창의적 사고로 아이디어를 현실로 구현하는 개발자.
+                {`저는 시각디자인 전공 후 개발로 전향한, 책임감과 도전정신이 강한 사람입니다. 직접 무언가를 만들고 배우는 과정에서 큰 즐거움을 느끼며, ‘교통데이터 활용 공모전’에서 앱 개발로 두 번 수상했습니다. 지금은 프론트엔드에 집중하지만, 머지않아 백엔드까지 섭렵해 모든 분야를 아우르는 개발자가 될 것입니다.`}
               </p>
-              <div className="flex">
-                <p>
-                  {`저는 시각디자인 전공 후 개발로 전향한, 책임감과 도전정신이 강한 사람입니다. 직접 무언가를 만들고 배우는 과정에서 큰 즐거움을 느끼며, ‘교통데이터 활용 공모전’에서 앱 개발로 두 번 수상했습니다. 지금은 프론트엔드에 집중하지만, 머지않아 백엔드까지 섭렵해 모든 분야를 아우르는 개발자가 될 것입니다.`}
-                </p>
-                <p>
-                  {`저는 지금 프론트엔드에 집중하고 있지만, 곧 백엔드까지 섭렵해 풀스택 개발자가 될 겁니다. 그리고 좋은 소식은, 그 성장 속도를 3년 기다릴 필요도 없다는 거죠. 이미 빠르게 배우고 만들며 증명해왔으니까요. 준비됐습니다, 이제 시작하죠!`}
-                </p>
-              </div>
+              <p>
+                {`저는 지금 프론트엔드에 집중하고 있지만, 곧 백엔드까지 섭렵해 풀스택 개발자가 될 겁니다. 그리고 좋은 소식은, 그 성장 속도를 3년 기다릴 필요도 없다는 거죠. 이미 빠르게 배우고 만들며 증명해왔으니까요. 준비됐습니다, 이제 시작하죠!`}
+              </p>
             </div>
-          </CenterInfo>
-          <SwipeWrppaer>
-            <div className="swipe-info-box">
-              <div className="title">Work</div>
-              <div className="pagenation">
-                <span>{currentMemberIdx}</span>
-                <span className="border"></span>
-                <span>{memberArrayData.length}</span>
-              </div>
-              <div className="arrow-group">
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (currentMemberIdx === 1) {
-                      return false;
-                    } else {
-                      setCurrentMemberIdx(currentMemberIdx - 1);
-                    }
-                  }}
-                >
-                  <div className="circle"></div>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="239.398"
-                    height="164.987"
-                    viewBox="0 0 239.398 164.987"
-                  >
-                    <g transform="translate(-149.102 -434.108)">
-                      <path
-                        d="M136.911,499.6s49.913-15.781,49.913-46.255V417.108"
-                        transform="translate(14 17)"
-                        fill="none"
-                        stroke="#000"
-                        strokeWidth="12"
-                      />
-                      <path
-                        d="M136.911,417.108s49.913,15.781,49.913,46.255V499.6"
-                        transform="translate(14 99.493)"
-                        fill="none"
-                        stroke="#000"
-                        strokeWidth="12"
-                      />
-                      <line
-                        x2="238"
-                        transform="translate(150.5 516.5)"
-                        fill="none"
-                        stroke="#000"
-                        strokeWidth="12"
-                      />
-                    </g>
-                  </svg>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (currentMemberIdx === memberArrayData.length) {
-                      return false;
-                    } else {
-                      setCurrentMemberIdx(currentMemberIdx + 1);
-                    }
-                  }}
-                >
-                  <div className="circle"></div>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="239.398"
-                    height="164.987"
-                    viewBox="0 0 239.398 164.987"
-                  >
-                    <path
-                      d="M186.824,499.6s-49.913-15.781-49.913-46.255V417.108"
-                      transform="translate(50.765 -417.108)"
-                      fill="none"
-                      stroke="#000"
-                      strokeWidth="12"
-                    />
-                    <path
-                      d="M186.824,417.108s-49.913,15.781-49.913,46.255V499.6"
-                      transform="translate(50.765 -334.615)"
-                      fill="none"
-                      stroke="#000"
-                      strokeWidth="12"
-                    />
-                    <line
-                      x1="238"
-                      transform="translate(0 82.392)"
-                      fill="none"
-                      stroke="#000"
-                      strokeWidth="12"
-                    />
-                  </svg>
-                </button>
-              </div>
-              <UserNameGroup>
-                <div className="user-name-slider" ref={sliderRef}>
-                  {memberArrayData.map(user => (
-                    <div className="user-name-box" key={user.user_idx}>
-                      {user.name}
-                    </div>
-                  ))}
-                </div>
-              </UserNameGroup>
-              <UserJobGroup>
-                <div className="user-job-slider" ref={sliderJobRef}>
-                  {memberArrayData.map(user => (
-                    <div className="user-job-box" key={user.user_idx}>
-                      {user.job}
-                    </div>
-                  ))}
-                </div>
-              </UserJobGroup>
+          </div>
+        </CenterInfo>
+        <SwipeWrppaer>
+          <div className="swipe-info-box">
+            <div className="title">Work</div>
+            <div className="pagenation">
+              <span>{currentMemberIdx}</span>
+              <span className="border"></span>
+              <span>{memberArrayData.length}</span>
             </div>
-            <div className="swipe-gallery-box">
-              <UserImgGroup>
-                <div className="user-img-slider" ref={sliderImgRef}>
-                  {memberArrayData.map(user => (
-                    <UserImgBox
-                      key={user.user_idx}
-                      style={{
-                        backgroundImage: `url('/images/img_user_${user.user_idx}.jpg')`,
-                      }}
-                    >
-                      {/* {user.job} */}
-                    </UserImgBox>
-                  ))}
-                </div>
-              </UserImgGroup>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="1440"
-                height="1440.003"
-                viewBox="0 0 1440 1440.003"
-                className="slider-blackhole"
-                preserveAspectRatio="none meet"
+            <div className="arrow-group">
+              <button
+                type="button"
+                onClick={() => {
+                  if (currentMemberIdx === 1) {
+                    return false;
+                  } else {
+                    setCurrentMemberIdx(currentMemberIdx - 1);
+                  }
+                }}
               >
-                <path
-                  d="M653,480l-720,0V-238.46C-66.172,157.7,256.818,480,653,480h0Zm720,0H653c396.025,0,719.015-322.189,720-718.216ZM-67-241.542h0V-960H651.46C256.125-959.174-66.174-636.876-67-241.542Zm1440-.241h0c-.981-395.2-323.279-717.392-718.456-718.216H1373Z"
-                  transform="translate(67 960.001)"
-                ></path>
-              </svg>
+                <div className="circle"></div>
+                <ArrowSvg direction="left" />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (currentMemberIdx === memberArrayData.length) {
+                    return false;
+                  } else {
+                    setCurrentMemberIdx(currentMemberIdx + 1);
+                  }
+                }}
+              >
+                <div className="circle"></div>
+                <ArrowSvg />
+              </button>
             </div>
-          </SwipeWrppaer>
-          <ClientWrapper>
-            <p className="title">
-              Clients i wish i had <span className="sec-font">WORKED FOR:</span>
-            </p>
-            <ul>
-              {clientArray.map(client => (
-                <li key={client}>
-                  <span>{client}</span>
-                </li>
-              ))}
-            </ul>
-          </ClientWrapper>
-          <SkillWrapper>
-            <p className="title">
-              OUR <span className="sec-font">SKILLSET:</span>
-            </p>
-            <div className="row">
-              <div className="box">TYPESCRIPT</div>
-              <div className="box">REACT / NEXT</div>
-            </div>
-            <div className="row">
-              <div className="box">NODE / API</div>
-              <div className="box">REST / WEBSOCKET</div>
-            </div>
-            <div className="row">
-              <div className="box">TANSTACK QUERY</div>
-              <div className="box">ZUSTAND</div>
-            </div>
-            <div className="row">
-              <div className="box">CSS / SCSS</div>
-              <div className="box">STYLED COMPONENTS</div>
-            </div>
-            <div className="row">
-              <div className="box">SQL / EF</div>
-              <div className="box">ARCHITECTURE</div>
-            </div>
-            <div className="row">
-              <div className="box">DEVOPS</div>
-              <div className="box">MOBILE / WEB3</div>
-            </div>
-            <div className="row">
-              <div className="box">AI WORKFLOW</div>
-              <div className="box">AI VERIFICATION</div>
-            </div>
-          </SkillWrapper>
-          <SnsWrapper>
-            <p className="title">
-              {/* eslint-disable-next-line react/no-unescaped-entities */}
-              <span className="sec-font">YOU</span> won't{" "}
-              <span className="sec-font">FIND ME HERE</span>
-            </p>
-            <a>
-              <span>Twitter</span>
-              <span className="arrow">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="239.398"
-                  height="164.987"
-                  viewBox="0 0 239.398 164.987"
-                >
-                  <path
-                    d="M186.824,499.6s-49.913-15.781-49.913-46.255V417.108"
-                    transform="translate(50.765 -417.108)"
-                    fill="none"
-                    stroke="#000"
-                    strokeWidth="12"
-                  />
-                  <path
-                    d="M186.824,417.108s-49.913,15.781-49.913,46.255V499.6"
-                    transform="translate(50.765 -334.615)"
-                    fill="none"
-                    stroke="#000"
-                    strokeWidth="12"
-                  />
-                  <line
-                    x1="238"
-                    transform="translate(0 82.392)"
-                    fill="none"
-                    stroke="#000"
-                    strokeWidth="12"
-                  />
-                </svg>
-              </span>
-              <div className="mask"></div>
-            </a>
-            <a
-              href="https://www.facebook.com/sooho.shin.16"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <span>facebook</span>
-              <span className="arrow">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="239.398"
-                  height="164.987"
-                  viewBox="0 0 239.398 164.987"
-                >
-                  <path
-                    d="M186.824,499.6s-49.913-15.781-49.913-46.255V417.108"
-                    transform="translate(50.765 -417.108)"
-                    fill="none"
-                    stroke="#000"
-                    strokeWidth="12"
-                  />
-                  <path
-                    d="M186.824,417.108s-49.913,15.781-49.913,46.255V499.6"
-                    transform="translate(50.765 -334.615)"
-                    fill="none"
-                    stroke="#000"
-                    strokeWidth="12"
-                  />
-                  <line
-                    x1="238"
-                    transform="translate(0 82.392)"
-                    fill="none"
-                    stroke="#000"
-                    strokeWidth="12"
-                  />
-                </svg>
-              </span>
-              <div className="mask"></div>
-            </a>
-            <a
-              href="https://www.instagram.com/iamnotsooho"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="no-border"
-            >
-              <span>instagram</span>
-              <span className="arrow">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="239.398"
-                  height="164.987"
-                  viewBox="0 0 239.398 164.987"
-                >
-                  <path
-                    d="M186.824,499.6s-49.913-15.781-49.913-46.255V417.108"
-                    transform="translate(50.765 -417.108)"
-                    fill="none"
-                    stroke="#000"
-                    strokeWidth="12"
-                  />
-                  <path
-                    d="M186.824,417.108s-49.913,15.781-49.913,46.255V499.6"
-                    transform="translate(50.765 -334.615)"
-                    fill="none"
-                    stroke="#000"
-                    strokeWidth="12"
-                  />
-                  <line
-                    x1="238"
-                    transform="translate(0 82.392)"
-                    fill="none"
-                    stroke="#000"
-                    strokeWidth="12"
-                  />
-                </svg>
-              </span>
-              <div className="mask"></div>
-            </a>
-          </SnsWrapper>
-        </RightWrapperComponent>
-      </Section>
-      <FooterComponent />
-      <EffectComponent text={effectTitle} rollingText={effectRollingText} />
-    </MainWrapper>
+            <UserNameGroup>
+              <div className="user-name-slider" ref={sliderRef}>
+                {memberArrayData.map(user => (
+                  <div className="user-name-box" key={user.user_idx}>
+                    {user.name}
+                  </div>
+                ))}
+              </div>
+            </UserNameGroup>
+            <UserJobGroup>
+              <div className="user-job-slider" ref={sliderJobRef}>
+                {memberArrayData.map(user => (
+                  <div className="user-job-box" key={user.user_idx}>
+                    {user.job}
+                  </div>
+                ))}
+              </div>
+            </UserJobGroup>
+          </div>
+          <div className="swipe-gallery-box">
+            <UserImgGroup>
+              <div className="user-img-slider" ref={sliderImgRef}>
+                {memberArrayData.map(user => (
+                  <UserImgBox
+                    key={user.user_idx}
+                    style={{
+                      backgroundImage: `url('/images/img_user_${user.user_idx}.jpg')`,
+                    }}
+                  >
+                    {/* {user.job} */}
+                  </UserImgBox>
+                ))}
+              </div>
+            </UserImgGroup>
+            <BlackholeSvg className="slider-blackhole" />
+          </div>
+        </SwipeWrppaer>
+        <ClientWrapper>
+          <p className="title">
+            Clients i wish i had <span className="sec-font">WORKED FOR:</span>
+          </p>
+          <ul>
+            {clientArray.map(client => (
+              <li key={client}>
+                <span>{client}</span>
+              </li>
+            ))}
+          </ul>
+        </ClientWrapper>
+        <SkillWrapper>
+          <p className="title">
+            OUR <span className="sec-font">SKILLSET:</span>
+          </p>
+          <div className="row">
+            <div className="box">TYPESCRIPT</div>
+            <div className="box">REACT / NEXT</div>
+          </div>
+          <div className="row">
+            <div className="box">NODE / API</div>
+            <div className="box">REST / WEBSOCKET</div>
+          </div>
+          <div className="row">
+            <div className="box">TANSTACK QUERY</div>
+            <div className="box">ZUSTAND</div>
+          </div>
+          <div className="row">
+            <div className="box">CSS / SCSS</div>
+            <div className="box">STYLED COMPONENTS</div>
+          </div>
+          <div className="row">
+            <div className="box">SQL / EF</div>
+            <div className="box">ARCHITECTURE</div>
+          </div>
+          <div className="row">
+            <div className="box">DEVOPS</div>
+            <div className="box">MOBILE / WEB3</div>
+          </div>
+          <div className="row">
+            <div className="box">AI WORKFLOW</div>
+            <div className="box">AI VERIFICATION</div>
+          </div>
+        </SkillWrapper>
+        <SnsWrapper>
+          <p className="title">
+            {/* eslint-disable-next-line react/no-unescaped-entities */}
+            <span className="sec-font">YOU</span> won't{" "}
+            <span className="sec-font">FIND ME HERE</span>
+          </p>
+          <a>
+            <span>Twitter</span>
+            <span className="arrow">
+              <ArrowSvg />
+            </span>
+            <div className="mask"></div>
+          </a>
+          <a
+            href="https://www.facebook.com/sooho.shin.16"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <span>facebook</span>
+            <span className="arrow">
+              <ArrowSvg />
+            </span>
+            <div className="mask"></div>
+          </a>
+          <a
+            href="https://www.instagram.com/iamnotsooho"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="no-border"
+          >
+            <span>instagram</span>
+            <span className="arrow">
+              <ArrowSvg />
+            </span>
+            <div className="mask"></div>
+          </a>
+        </SnsWrapper>
+      </ContactSidebarLayout>
+    </PortfolioPageShell>
   );
 };
 
@@ -907,37 +731,4 @@ const Title = styled.div`
   }
 `;
 
-const Section = styled.div`
-  width: 100%;
-  border-bottom: 4px solid #000;
-  display: flex;
-  height: fit-content;
-
-  &.no-border {
-    border: none;
-  }
-
-  &.home-about {
-    padding-bottom: 120px;
-  }
-
-  &.fd-c {
-    flex-direction: column;
-  }
-
-  .text-right {
-    text-align: right;
-
-    a {
-      margin-top: 2vw;
-    }
-  }
-`;
-
-const MainWrapper = styled.div`
-  width: 100%;
-  height: 100%;
-  display: block;
-  /* justify-content: center; */
-`;
 export default AboutWrapper;
