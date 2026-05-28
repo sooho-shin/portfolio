@@ -1,36 +1,35 @@
+"use client";
+
 import React, { useState } from "react";
 import styled, { css, keyframes } from "styled-components";
 import { breakpoints } from "@/config/breakboint";
 import LeftWrapperComponent from "@/components/LeftWrapper";
 import RightWrapperComponent from "@/components/RightWrapper";
-import { Textfit } from "react-textfit";
 import Link from "next/link";
 import { Playfair_Display } from "next/font/google";
 import PageSection from "@/components/atoms/PageSection";
 import BlackholeSvg from "@/components/atoms/BlackholeSvg";
 import PortfolioPageShell from "@/components/templates/PortfolioPageShell";
+import { siteProfile } from "@/config/profile";
+
 const playfair = Playfair_Display({
   subsets: ["latin"],
   weight: ["400", "700", "900"],
 });
 const MainWrapper = () => {
-  const [effectTitle] = useState("home");
-  const [effectRollingText] = useState("SHINSOOHO");
   const [hoverState, setHoverState] = useState<boolean>(false);
+  const mainCapabilities = siteProfile.capabilities.slice(0, 11);
 
   return (
     <PortfolioPageShell
-      effectTitle={effectTitle}
-      effectRollingText={effectRollingText}
+      effectTitle="home"
+      effectRollingText="SHINSOOHO"
     >
       <PageSection>
         <LeftWrapperComponent>
           <InfoBox>
             <div className="info-left">
-              <p>
-                사용자 흐름, 데이터 연동, 성능, 유지보수성을 함께 설계하는
-                개발자입니다.
-              </p>
+              <p>{siteProfile.headline}</p>
             </div>
             <div className="info-right">
               <p>
@@ -40,7 +39,7 @@ const MainWrapper = () => {
                 <br />
                 API / AI WORKFLOW VERIFICATION
               </p>
-              <a href="mailto:soojoon92@gmail.com">soojoon92@gmail.com</a>
+              <a href={`mailto:${siteProfile.email}`}>{siteProfile.email}</a>
             </div>
           </InfoBox>
         </LeftWrapperComponent>
@@ -53,15 +52,12 @@ const MainWrapper = () => {
                 기술:
               </span>
               <span>
-                TYPESCRIPT
-                <br />
-                REACT
-                <br />
-                NEXT.JS
-                <br />
-                NODE / API
-                <br />
-                AI VERIFICATION
+                {mainCapabilities.slice(0, 5).map(capability => (
+                  <React.Fragment key={capability}>
+                    {capability}
+                    <br />
+                  </React.Fragment>
+                ))}
               </span>
             </div>
             <div className="right">
@@ -114,8 +110,7 @@ const MainWrapper = () => {
         <InfoBoxMobile>
           <div className="info-left">
             <p>
-              사용자 흐름, 데이터 연동, 성능, 유지보수성을 함께 설계하는
-              개발자입니다.
+              {siteProfile.headline}
             </p>
           </div>
           <div className="info-right">
@@ -136,17 +131,9 @@ const MainWrapper = () => {
           <AboutLeft>
             <p className="title">경험하고 다뤄온 영역:</p>
             <ul className="brand-list">
-              <li>Service Dev</li>
-              <li>TypeScript</li>
-              <li>React/Next</li>
-              <li>Node/API</li>
-              <li>SQL/EF</li>
-              <li>WebSocket</li>
-              <li>Architecture</li>
-              <li>DevOps</li>
-              <li>Mobile</li>
-              <li>Web3</li>
-              <li>AI Verification</li>
+              {mainCapabilities.map(capability => (
+                <li key={capability}>{capability}</li>
+              ))}
             </ul>
           </AboutLeft>
         </LeftWrapperComponent>
@@ -155,17 +142,9 @@ const MainWrapper = () => {
             <div className="left tablet">
               <p className="title">경험하고 다뤄온 영역:</p>
               <ul className="brand-list">
-                <li>Service Dev</li>
-                <li>TypeScript</li>
-                <li>React/Next</li>
-                <li>Node/API</li>
-                <li>SQL/EF</li>
-                <li>WebSocket</li>
-                <li>Architecture</li>
-                <li>DevOps</li>
-                <li>Mobile</li>
-                <li>Web3</li>
-                <li>AI Verification</li>
+                {mainCapabilities.map(capability => (
+                  <li key={capability}>{capability}</li>
+                ))}
               </ul>
             </div>
             <div className="right">
@@ -200,14 +179,7 @@ const MainWrapper = () => {
         </RightWrapperComponent>
       </PageSection>
       <PageSection className="no-border fd-c center-text">
-        <Textfit
-          style={{ width: "100%", height: "auto" }}
-          max={9999}
-          mode="single"
-          forceSingleModeWidth={true}
-        >
-          SHINSOOHO
-        </Textfit>
+        <BrandTitle>SHINSOOHO</BrandTitle>
         <div className="text-right">
           <Link prefetch href={"/work"} passHref>
             <StyledButton className="right">Work</StyledButton>
@@ -654,6 +626,16 @@ const StyledButton = styled.div`
     color: #000 !important;
     background-color: #fff;
   }
+`;
+
+const BrandTitle = styled.h1`
+  width: 100%;
+  font-size: clamp(56px, 17vw, 260px);
+  line-height: 0.88;
+  font-weight: 900;
+  text-transform: uppercase;
+  text-align: left;
+  overflow-wrap: anywhere;
 `;
 
 const AboutRight = styled.div`

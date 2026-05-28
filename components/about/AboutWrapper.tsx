@@ -1,393 +1,289 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import { Textfit } from "react-textfit";
+import React from "react";
+import Image from "next/image";
+import Link from "next/link";
 import styled from "styled-components";
 import { breakpoints } from "@/config/breakboint";
-import ArrowSvg from "@/components/atoms/ArrowSvg";
-import BlackholeSvg from "@/components/atoms/BlackholeSvg";
 import ContactSidebarLayout from "@/components/templates/ContactSidebarLayout";
 import PortfolioPageShell from "@/components/templates/PortfolioPageShell";
-
-type memberType = {
-  user_idx: number;
-  name: string;
-  job: string;
-};
-
-const clientArrayData: string[] = [
-  "Netflix",
-  "Apple",
-  "Samsung",
-  "Nike",
-  "Google",
-  "MicroSoft",
-  "Gucci",
-  "Adidas",
-  "Hyundae",
-  "Chanel",
-  "Kia",
-  "Tesla",
-];
+import { projects } from "@/config/projects";
+import { siteProfile } from "@/config/profile";
 
 const AboutWrapper = () => {
-  const effectTitle = "about";
-  const effectRollingText = "SOOHO about";
-
-  const memberArrayData: memberType[] = [
-    {
-      user_idx: 1,
-      name: "sooho",
-      job: "web front developer",
-    },
-    {
-      user_idx: 2,
-      name: "amazoncar",
-      job: "렌트 및 리스 전문 웹 서비스",
-    },
-    {
-      user_idx: 3,
-      name: "catcatch",
-      job: "인형뽑기를 집에서 즐길 수 있는 블록체인을 이용한 서비스",
-    },
-    {
-      user_idx: 4,
-      name: "yummygame",
-      job: "블록체인 온라인 게임 서비스",
-    },
-  ];
-  const [currentMemberIdx, setCurrentMemberIdx] = useState<number>(1);
-  const [clientArray] = useState(clientArrayData);
-  const sliderRef = useRef<HTMLDivElement | null>(null);
-  const sliderJobRef = useRef<HTMLDivElement | null>(null);
-  const sliderImgRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (sliderRef.current && sliderJobRef.current && sliderImgRef.current) {
-      sliderRef.current.style.transform = `translateX(-${
-        currentMemberIdx - 1
-      }00%)`;
-      sliderJobRef.current.style.transform = `translateX(-${
-        currentMemberIdx - 1
-      }00%)`;
-      sliderImgRef.current.style.transform = `translateX(-${
-        currentMemberIdx - 1
-      }00%)`;
-    }
-  }, [currentMemberIdx]);
-
   return (
     <PortfolioPageShell
-      effectTitle={effectTitle}
-      effectRollingText={effectRollingText}
+      effectTitle="about"
+      effectRollingText="SERVICE PROOF"
     >
       <ContactSidebarLayout>
-        <Title>
-          <Textfit
-            // style={{ width: "100%", height: "auto" }}
-            max={9999}
-            mode="single"
-            // forceSingleModeWidth={true}
-          >
-            INFO
-          </Textfit>
-        </Title>
-        <CenterInfo>
-          <div>
-            <p>최신 기술과 창의적 사고로 아이디어를 현실로 구현하는 개발자.</p>
-            <div className="flex">
+        <AboutRoot>
+          <Hero>
+            <p className="eyebrow">About</p>
+            <h1>{siteProfile.headline}</h1>
+            <div className="copy">
               <p>
-                {`저는 시각디자인 전공 후 개발로 전향한, 책임감과 도전정신이 강한 사람입니다. 직접 무언가를 만들고 배우는 과정에서 큰 즐거움을 느끼며, ‘교통데이터 활용 공모전’에서 앱 개발로 두 번 수상했습니다. 지금은 프론트엔드에 집중하지만, 머지않아 백엔드까지 섭렵해 모든 분야를 아우르는 개발자가 될 것입니다.`}
+                저는 React와 Next.js 기반 서비스 화면을 만들고, API 연동,
+                상태 구조, 사용자 흐름이 실제 운영에서 어긋나지 않도록
+                검증 가능한 기준으로 정리합니다.
               </p>
               <p>
-                {`저는 지금 프론트엔드에 집중하고 있지만, 곧 백엔드까지 섭렵해 풀스택 개발자가 될 겁니다. 그리고 좋은 소식은, 그 성장 속도를 3년 기다릴 필요도 없다는 거죠. 이미 빠르게 배우고 만들며 증명해왔으니까요. 준비됐습니다, 이제 시작하죠!`}
+                렌트/리스 서비스, 블록체인 게임, 위치 기반 AI 추천,
+                AI-assisted 업무 시스템처럼 화면과 데이터, 검증 기준이 함께
+                움직이는 프로젝트를 다뤄왔습니다.
               </p>
             </div>
-          </div>
-        </CenterInfo>
-        <SwipeWrppaer>
-          <div className="swipe-info-box">
-            <div className="title">Work</div>
-            <div className="pagenation">
-              <span>{currentMemberIdx}</span>
-              <span className="border"></span>
-              <span>{memberArrayData.length}</span>
+          </Hero>
+
+          <ProjectProof>
+            <div className="section-title">
+              <p>Proof through projects</p>
+              <span>{projects.length} cases</span>
             </div>
-            <div className="arrow-group">
-              <button
-                type="button"
-                onClick={() => {
-                  if (currentMemberIdx === 1) {
-                    return false;
-                  } else {
-                    setCurrentMemberIdx(currentMemberIdx - 1);
-                  }
-                }}
-              >
-                <div className="circle"></div>
-                <ArrowSvg direction="left" />
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  if (currentMemberIdx === memberArrayData.length) {
-                    return false;
-                  } else {
-                    setCurrentMemberIdx(currentMemberIdx + 1);
-                  }
-                }}
-              >
-                <div className="circle"></div>
-                <ArrowSvg />
-              </button>
+            <div className="project-list">
+              {projects.map(project => (
+                <Link href={`/work/${project.slug}`} key={project.slug}>
+                  <article>
+                    <div className="thumb">
+                      {project.images?.[0] ? (
+                        <Image
+                          src={project.images[0].src}
+                          alt={project.images[0].alt}
+                          fill
+                          sizes="(max-width: 768px) 100vw, 33vw"
+                        />
+                      ) : (
+                        <span>{project.title.slice(0, 2)}</span>
+                      )}
+                    </div>
+                    <div className="body">
+                      <p className="type">{project.type}</p>
+                      <h2>{project.title}</h2>
+                      <p>{project.cardSummary}</p>
+                    </div>
+                  </article>
+                </Link>
+              ))}
             </div>
-            <UserNameGroup>
-              <div className="user-name-slider" ref={sliderRef}>
-                {memberArrayData.map(user => (
-                  <div className="user-name-box" key={user.user_idx}>
-                    {user.name}
-                  </div>
-                ))}
-              </div>
-            </UserNameGroup>
-            <UserJobGroup>
-              <div className="user-job-slider" ref={sliderJobRef}>
-                {memberArrayData.map(user => (
-                  <div className="user-job-box" key={user.user_idx}>
-                    {user.job}
-                  </div>
-                ))}
-              </div>
-            </UserJobGroup>
-          </div>
-          <div className="swipe-gallery-box">
-            <UserImgGroup>
-              <div className="user-img-slider" ref={sliderImgRef}>
-                {memberArrayData.map(user => (
-                  <UserImgBox
-                    key={user.user_idx}
-                    style={{
-                      backgroundImage: `url('/images/img_user_${user.user_idx}.jpg')`,
-                    }}
-                  >
-                    {/* {user.job} */}
-                  </UserImgBox>
-                ))}
-              </div>
-            </UserImgGroup>
-            <BlackholeSvg className="slider-blackhole" />
-          </div>
-        </SwipeWrppaer>
-        <ClientWrapper>
-          <p className="title">
-            Clients i wish i had <span className="sec-font">WORKED FOR:</span>
-          </p>
-          <ul>
-            {clientArray.map(client => (
-              <li key={client}>
-                <span>{client}</span>
-              </li>
+          </ProjectProof>
+
+          <CapabilityWrapper>
+            <p className="title">
+              EXPERIENCE <span className="sec-font">AREAS:</span>
+            </p>
+            <ul>
+              {siteProfile.capabilities.map(capability => (
+                <li key={capability}>
+                  <span>{capability}</span>
+                </li>
+              ))}
+            </ul>
+          </CapabilityWrapper>
+
+          <SkillWrapper>
+            <p className="title">
+              WORKING <span className="sec-font">STACK:</span>
+            </p>
+            <div className="row">
+              <div className="box">TYPESCRIPT</div>
+              <div className="box">REACT / NEXT</div>
+            </div>
+            <div className="row">
+              <div className="box">NODE / EXPRESS</div>
+              <div className="box">REST / API CONTRACT</div>
+            </div>
+            <div className="row">
+              <div className="box">REACT QUERY</div>
+              <div className="box">ZUSTAND</div>
+            </div>
+            <div className="row">
+              <div className="box">STYLED COMPONENTS</div>
+              <div className="box">SCSS</div>
+            </div>
+            <div className="row">
+              <div className="box">GEMINI / PLACES API</div>
+              <div className="box">WORKFLOW VALIDATION</div>
+            </div>
+          </SkillWrapper>
+
+          <SnsWrapper>
+            <p className="title">
+              CONTACT <span className="sec-font">CHANNELS</span>
+            </p>
+            <a href={`mailto:${siteProfile.email}`}>
+              <span>{siteProfile.email}</span>
+              <span className="arrow">MAIL</span>
+              <div className="mask"></div>
+            </a>
+            {siteProfile.socials.map(social => (
+              <a
+                href={social.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                key={social.label}
+              >
+                <span>{social.label}</span>
+                <span className="arrow">OPEN</span>
+                <div className="mask"></div>
+              </a>
             ))}
-          </ul>
-        </ClientWrapper>
-        <SkillWrapper>
-          <p className="title">
-            OUR <span className="sec-font">SKILLSET:</span>
-          </p>
-          <div className="row">
-            <div className="box">TYPESCRIPT</div>
-            <div className="box">REACT / NEXT</div>
-          </div>
-          <div className="row">
-            <div className="box">NODE / API</div>
-            <div className="box">REST / WEBSOCKET</div>
-          </div>
-          <div className="row">
-            <div className="box">TANSTACK QUERY</div>
-            <div className="box">ZUSTAND</div>
-          </div>
-          <div className="row">
-            <div className="box">CSS / SCSS</div>
-            <div className="box">STYLED COMPONENTS</div>
-          </div>
-          <div className="row">
-            <div className="box">SQL / EF</div>
-            <div className="box">ARCHITECTURE</div>
-          </div>
-          <div className="row">
-            <div className="box">DEVOPS</div>
-            <div className="box">MOBILE / WEB3</div>
-          </div>
-          <div className="row">
-            <div className="box">AI WORKFLOW</div>
-            <div className="box">AI VERIFICATION</div>
-          </div>
-        </SkillWrapper>
-        <SnsWrapper>
-          <p className="title">
-            {/* eslint-disable-next-line react/no-unescaped-entities */}
-            <span className="sec-font">YOU</span> won't{" "}
-            <span className="sec-font">FIND ME HERE</span>
-          </p>
-          <a>
-            <span>Twitter</span>
-            <span className="arrow">
-              <ArrowSvg />
-            </span>
-            <div className="mask"></div>
-          </a>
-          <a
-            href="https://www.facebook.com/sooho.shin.16"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <span>facebook</span>
-            <span className="arrow">
-              <ArrowSvg />
-            </span>
-            <div className="mask"></div>
-          </a>
-          <a
-            href="https://www.instagram.com/iamnotsooho"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="no-border"
-          >
-            <span>instagram</span>
-            <span className="arrow">
-              <ArrowSvg />
-            </span>
-            <div className="mask"></div>
-          </a>
-        </SnsWrapper>
+          </SnsWrapper>
+        </AboutRoot>
       </ContactSidebarLayout>
     </PortfolioPageShell>
   );
 };
 
-const SnsWrapper = styled.div`
-  .title {
-    font-size: 2vw;
-    padding-left: 2vw;
-    border-bottom: 4px solid #000;
+const AboutRoot = styled.div`
+  margin-top: 84px;
+  border-top: 4px solid #000;
+  background: #fff;
+
+  @media (max-width: ${breakpoints.sm}px) {
+    margin-top: 0;
+  }
+`;
+
+const Hero = styled.section`
+  padding: 32px;
+  border-bottom: 4px solid #000;
+
+  @media (max-width: ${breakpoints.md}px) {
+    padding: 24px 16px;
+  }
+
+  .eyebrow {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    max-width: 920px;
+    font-size: clamp(38px, 6.5vw, 96px);
+    line-height: 1.02;
+    margin-bottom: 28px;
+  }
+
+  .copy {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+    max-width: 980px;
 
     @media (max-width: ${breakpoints.md}px) {
-      font-size: 20px;
+      grid-template-columns: 1fr;
+    }
+
+    p {
+      font-size: 17px;
+      line-height: 1.7;
     }
   }
-  a {
-    padding: 0 2vw;
+`;
+
+const ProjectProof = styled.section`
+  border-bottom: 4px solid #000;
+
+  .section-title {
     display: flex;
-    align-items: center;
     justify-content: space-between;
+    gap: 16px;
+    padding: 16px 32px;
     border-bottom: 4px solid #000;
-    overflow: hidden;
-    position: relative;
+    font-weight: 700;
+    text-transform: uppercase;
+
     @media (max-width: ${breakpoints.md}px) {
-      padding: 1vw 2vw;
+      padding: 16px;
+    }
+  }
+
+  .project-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    @media (max-width: ${breakpoints.md}px) {
+      grid-template-columns: 1fr;
     }
 
-    &.no-border {
-      border-bottom: none;
-    }
+    a {
+      border-right: 4px solid #000;
+      border-bottom: 4px solid #000;
 
-    .mask {
-      position: absolute;
-      left: 0;
-      top: 0;
-      transform: translateY(100%);
-      width: 100%;
-      height: 100%;
-      background-color: #000;
-      display: block;
-      transition: transform 150ms;
-      z-index: -1;
-    }
-
-    span {
-      &:first-child {
-        color: #000;
-        font-size: 3vw;
-        text-transform: uppercase;
-        transition: all 150ms;
-        @media (max-width: ${breakpoints.md}px) {
-          font-size: 34px;
-        }
+      &:nth-child(2n) {
+        border-right: none;
       }
-      &.arrow {
-        svg {
-          width: 3vw;
-          height: auto;
-          * {
-            stroke: #000;
-            transition: all 150ms;
-          }
-        }
+
+      @media (max-width: ${breakpoints.md}px) {
+        border-right: none;
       }
     }
 
-    &:hover {
-      .mask {
-        transform: translateY(0%);
-        transition: transform 150ms;
+    article {
+      min-height: 100%;
+      display: grid;
+      grid-template-columns: 38% 1fr;
+
+      @media (max-width: ${breakpoints.sm}px) {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .thumb {
+      position: relative;
+      min-height: 220px;
+      border-right: 4px solid #000;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f4f1ea;
+
+      @media (max-width: ${breakpoints.sm}px) {
+        border-right: none;
+        border-bottom: 4px solid #000;
+      }
+
+      img {
+        object-fit: cover;
       }
 
       span {
-        &:first-child {
-          color: #fff;
-          transition: all 150ms;
-        }
-        &.arrow {
-          svg {
-            * {
-              stroke: #fff;
-              transition: all 150ms;
-            }
-          }
-        }
+        font-size: clamp(42px, 7vw, 84px);
+        font-weight: 800;
+        line-height: 1;
+        text-transform: uppercase;
+      }
+    }
+
+    .body {
+      padding: 22px;
+
+      .type {
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+      }
+
+      h2 {
+        font-size: clamp(24px, 3vw, 42px);
+        line-height: 1;
+        margin-bottom: 14px;
+        text-transform: uppercase;
+      }
+
+      p:last-child {
+        font-size: 15px;
+        line-height: 1.6;
       }
     }
   }
 `;
 
-const SkillWrapper = styled.div`
-  /* border-bottom:4px solid #000; */
-  padding-bottom: 6vw;
-
-  .title {
-    font-size: 2vw;
-    border-bottom: 4px solid #000;
-    text-align: center;
-    padding: 0.5vw 0;
-    @media (max-width: ${breakpoints.md}px) {
-      font-size: 20px;
-    }
-  }
-  .row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    .box {
-      flex: 1;
-      font-size: 1.25vw;
-      border-bottom: 4px solid #000;
-      padding: 0.5vw 0;
-      padding-left: 2vw;
-      @media (max-width: ${breakpoints.md}px) {
-        font-size: 16px;
-        padding: 1vw 0;
-        padding-left: 2vw;
-      }
-
-      &:first-child {
-        border-right: 4px solid #000;
-      }
-    }
-  }
-`;
-
-const ClientWrapper = styled.div`
+const CapabilityWrapper = styled.section`
   padding-top: 0.5vw;
   padding-left: 2vw;
   border-bottom: 4px solid #000;
@@ -417,7 +313,7 @@ const ClientWrapper = styled.div`
       display: flex;
       align-items: center;
       justify-content: end;
-      flex: 20% 0 0;
+      flex: 25% 0 0;
       margin-top: 16px;
 
       @media (max-width: ${breakpoints.md}px) {
@@ -427,6 +323,7 @@ const ClientWrapper = styled.div`
 
       > span {
         font-size: 16px;
+
         @media (max-width: ${breakpoints.md}px) {
           font-size: 13px;
         }
@@ -440,6 +337,7 @@ const ClientWrapper = styled.div`
         border-radius: 10px;
         background-color: #000;
         margin-right: 12px;
+
         @media (max-width: ${breakpoints.md}px) {
           width: 10px;
           height: 10px;
@@ -450,284 +348,105 @@ const ClientWrapper = styled.div`
   }
 `;
 
-const UserImgBox = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 100% 0 0;
-  height: 100%;
-  text-transform: uppercase;
+const SkillWrapper = styled.section`
+  padding-bottom: 6vw;
 
-  background-position: center;
-  background-size: cover;
-`;
+  .title {
+    font-size: 2vw;
+    border-bottom: 4px solid #000;
+    text-align: center;
+    padding: 0.5vw 0;
 
-const UserJobGroup = styled.div`
-  overflow: hidden;
-  width: 100%;
-  position: absolute;
-  left: 0;
-  bottom: 0.5vw;
-  z-index: 20;
-
-  .user-job-slider {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    box-sizing: border-box;
-    transition: 300ms transform 100ms;
-
-    .user-job-box {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex: 100% 0 0;
-      text-transform: uppercase;
+    @media (max-width: ${breakpoints.md}px) {
+      font-size: 20px;
     }
   }
-`;
 
-const UserImgGroup = styled.div`
-  overflow: hidden;
-  width: 100%;
-  height: 40vw;
-  position: absolute;
-  left: 0;
-  top: 0;
-  z-index: 20;
-
-  @media (max-width: ${breakpoints.md}px) {
-    width: 100%;
-    height: 100%;
-  }
-
-  .user-img-slider {
-    width: 100%;
-    height: 100%;
+  .row {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    box-sizing: border-box;
-    transition: 300ms transform;
 
-    .user-img-box {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex: 100% 0 0;
-      height: 100%;
-      font-size: 1.8vw;
-      font-weight: bold;
-      text-transform: uppercase;
+    .box {
+      flex: 1;
+      font-size: 1.25vw;
+      border-bottom: 4px solid #000;
+      padding: 0.5vw 0;
+      padding-left: 2vw;
 
-      img {
-        width: 100%;
-        height: 100%;
-      }
-    }
-  }
-`;
-
-const UserNameGroup = styled.div`
-  overflow: hidden;
-  width: 100%;
-  height: 40vw;
-  position: absolute;
-  left: 0;
-  top: 0;
-  z-index: 20;
-
-  .user-name-slider {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    box-sizing: border-box;
-    transition: 300ms transform;
-
-    .user-name-box {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex: 100% 0 0;
-      height: 100%;
-      font-size: 1.8vw;
-      font-weight: bold;
-      text-transform: uppercase;
       @media (max-width: ${breakpoints.md}px) {
-        font-size: 30px;
+        font-size: 16px;
+        padding: 1vw 0 1vw 2vw;
+      }
+
+      &:first-child {
+        border-right: 4px solid #000;
       }
     }
   }
 `;
 
-const SwipeWrppaer = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-bottom: 4px solid #000;
-  overflow: hidden;
-  @media (max-width: ${breakpoints.md}px) {
-    flex-direction: column-reverse;
+const SnsWrapper = styled.section`
+  .title {
+    font-size: 2vw;
+    padding-left: 2vw;
+    border-bottom: 4px solid #000;
+
+    @media (max-width: ${breakpoints.md}px) {
+      font-size: 20px;
+    }
   }
 
-  > div {
-    flex: 1;
-    height: 40vw;
+  a {
+    padding: 0 2vw;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 4px solid #000;
+    overflow: hidden;
     position: relative;
 
     @media (max-width: ${breakpoints.md}px) {
-      flex: auto;
+      padding: 1vw 2vw;
+    }
+
+    .mask {
+      position: absolute;
+      left: 0;
+      top: 0;
+      transform: translateY(100%);
       width: 100%;
+      height: 100%;
+      background-color: #000;
+      display: block;
+      transition: transform 150ms;
+      z-index: -1;
     }
 
-    &.swipe-info-box {
-      .title {
-        position: absolute;
-        left: 2vw;
-        top: 0.5vw;
-        font-size: 30px;
-      }
-      .pagenation {
-        position: absolute;
-        right: 2vw;
-        top: 0.5vw;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-
-        > .border {
-          width: 1px;
-          height: 14px;
-          display: inline-block;
-          background-color: #000;
-          margin: 0 8px;
-        }
-      }
-
-      .arrow-group {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        display: flex;
-        width: calc(100% - 4vw);
-        align-items: center;
-        justify-content: space-between;
-        z-index: 30;
-
-        button {
-          position: relative;
-          border: none;
-          background-color: transparent;
-          cursor: pointer;
-
-          svg {
-            width: 30px;
-            height: 28px;
-            position: relative;
-            z-index: 20;
-            transition: 300ms all;
-          }
-
-          .circle {
-            opacity: 0;
-            width: 1px;
-            height: 1px;
-            display: block;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 10;
-            transition: 300ms all;
-          }
-
-          &:hover {
-            .circle {
-              width: 80px;
-              height: 80px;
-              border-radius: 40px;
-              background-color: #000;
-              opacity: 1;
-              transition: 300ms all;
-            }
-            svg {
-              * {
-                stroke: #fff;
-                transition: 300ms all;
-              }
-            }
-          }
-        }
-      }
+    span:first-child {
+      color: #000;
+      font-size: clamp(28px, 3vw, 52px);
+      text-transform: uppercase;
+      transition: all 150ms;
+      word-break: break-word;
     }
 
-    &.swipe-gallery-box {
-      @media (max-width: ${breakpoints.md}px) {
-        flex: auto;
-        width: calc(100vw - 40px);
-        height: calc(100vw - 40px);
-      }
-      .slider-blackhole {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-        fill: #000;
-        overflow: hidden;
-        z-index: 40;
-      }
-    }
-  }
-`;
-
-const CenterInfo = styled.div`
-  padding-top: 0.5vw;
-  padding-left: 2vw;
-  border-bottom: 4px solid #000;
-
-  @media (max-width: ${breakpoints.md}px) {
-    padding: 2vw;
-  }
-
-  > div {
-    width: 47vw;
-    margin-bottom: 60px;
-
-    @media (max-width: ${breakpoints.md}px) {
-      width: 100%;
+    span.arrow {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
     }
 
-    > p {
-      font-size: 30px;
-      word-break: keep-all;
-    }
-    div.flex {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      margin-top: 10px;
-      > p {
-        flex: 1;
-        word-break: keep-all;
-        font-size: 13px;
+    &:hover,
+    &:focus-visible {
+      .mask {
+        transform: translateY(0%);
       }
-      p + p {
-        margin-left: 20px;
-      }
-    }
-  }
-`;
 
-const Title = styled.div`
-  border-top: 4px solid #000;
-  border-bottom: 4px solid #000;
-  overflow: hidden;
-  * {
-    line-height: 1;
-    font-weight: bold;
+      span {
+        color: #fff;
+      }
+    }
   }
 `;
 

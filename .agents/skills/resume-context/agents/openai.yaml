@@ -1,0 +1,4 @@
+interface:
+  display_name: "Resume Context"
+  short_description: "이력서 경력 맥락을 기준으로 포트폴리오 문구와 Work 구성을 정리"
+  default_prompt: "Use $resume-context to revise portfolio copy and project ordering using the resume context."

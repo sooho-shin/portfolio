@@ -2,22 +2,20 @@
 
 import { usePathname } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import styled, { css } from "styled-components";
 import { breakpoints } from "@/config/breakboint";
 import { Playfair_Display } from "next/font/google";
 import classNames from "classnames";
-import { useRouter } from "next/navigation";
+
 const playfair = Playfair_Display({
   subsets: ["latin"],
   weight: ["400", "700", "900"],
 });
 
-// const EffectComponent = ({text,rollingText = 'text text'}:Props) => {
 const NaviComponent = () => {
   const [naviState, setNaviState] = useState<boolean>(false);
   const pathname = usePathname();
-
-  const router = useRouter();
 
   useEffect(() => {
     setNaviState(false);
@@ -29,6 +27,10 @@ const NaviComponent = () => {
         <p className="title">Sooho</p>
         <button
           className="hamburger-group"
+          type="button"
+          aria-label="메뉴 열기"
+          aria-expanded={naviState}
+          aria-controls="site-navigation"
           onClick={() => {
             setNaviState(true);
           }}
@@ -37,36 +39,30 @@ const NaviComponent = () => {
           <div></div>
         </button>
       </div>
-      <div className="navi-group">
-        {/*playfair*/}
-        {/*<Link className="navi home sec-font" href={"/"}>*/}
+      <nav className="navi-group" id="site-navigation" aria-label="Primary">
         <div className="content">
           <button
             className="dim"
             type={"button"}
+            aria-label="메뉴 닫기"
             onClick={() => {
               setNaviState(false);
             }}
           ></button>
-          <button
+          <Link
+            href="/"
             className={classNames("navi", "home", playfair.className)}
-            onClick={() => router.push("/")}
           >
             HOME
-          </button>
-          <button
-            className="navi"
-            onClick={() => {
-              router.push("/work");
-            }}
-          >
+          </Link>
+          <Link href="/work" className="navi">
             WORK
-          </button>
-          <button className="navi" onClick={() => router.push("/about")}>
+          </Link>
+          <Link href="/about" className="navi">
             ABOUT
-          </button>
+          </Link>
         </div>
-      </div>
+      </nav>
     </NaviWrapper>
   );
 };

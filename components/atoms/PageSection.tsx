@@ -3,7 +3,7 @@
 import styled from "styled-components";
 import { breakpoints } from "@/config/breakboint";
 
-const PageSection = styled.div`
+const PageSection = styled.section`
   width: 100%;
   border-bottom: 4px solid #000;
   display: flex;

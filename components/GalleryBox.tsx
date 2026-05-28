@@ -1,11 +1,13 @@
 import React from "react";
-import styled, { css, keyframes } from "styled-components";
+import Image from "next/image";
+import styled, { keyframes } from "styled-components";
 
 type Props = {
   text: string;
   imgFirst: string;
   imgSecond: string;
   imgThird: string;
+  summary?: string;
 };
 
 const GalleryComponent = ({
@@ -13,19 +15,23 @@ const GalleryComponent = ({
   imgFirst,
   imgSecond,
   imgThird,
+  summary,
 }: Props) => {
   return (
-    <ProjectWrapper
-      $imgFirst={imgFirst}
-      $imgSecond={imgSecond}
-      $imgThird={imgThird}
-    >
+    <ProjectWrapper>
       <div className="content">
         <p className="title">{text}</p>
+        {summary ? <p className="summary">{summary}</p> : null}
         <div className="project-box">
-          <div className="project first"></div>
-          <div className="project second"></div>
-          <div className="project third"></div>
+          <div className="project first">
+            <Image src={imgFirst} alt={`${text} preview 1`} fill sizes="(max-width: 640px) 100vw, 50vw" />
+          </div>
+          <div className="project second">
+            <Image src={imgSecond} alt={`${text} preview 2`} fill sizes="(max-width: 640px) 100vw, 50vw" />
+          </div>
+          <div className="project third">
+            <Image src={imgThird} alt={`${text} preview 3`} fill sizes="(max-width: 640px) 100vw, 50vw" />
+          </div>
         </div>
         <div className="text-loop-container top">
           <div className="loop-box">
@@ -155,11 +161,7 @@ const textLoopAniVertical = keyframes`
   }
 `;
 
-const ProjectWrapper = styled.div<{
-  $imgFirst: string;
-  $imgSecond: string;
-  $imgThird: string;
-}>`
+const ProjectWrapper = styled.div`
   background-color: #fff;
   display: inline-block;
   z-index: 100;
@@ -208,6 +210,23 @@ const ProjectWrapper = styled.div<{
       text-transform: uppercase;
       font-size: 1rem;
       font-weight: 500;
+      z-index: 5;
+      background: #fff;
+      padding: 2px 6px;
+    }
+
+    > p.summary {
+      position: absolute;
+      left: 10px;
+      bottom: 40px;
+      z-index: 5;
+      width: calc(100% - 20px);
+      max-width: 360px;
+      font-size: 13px;
+      line-height: 1.35;
+      background: #fff;
+      padding: 6px;
+      color: #000;
     }
 
     .project-box {
@@ -224,35 +243,21 @@ const ProjectWrapper = styled.div<{
       top: 50%;
 
       &.first {
-        ${props => css`
-          background-image: url(${props.$imgFirst});
-        `}
-        background-size:cover;
-        background-position: center;
-        background-repeat: no-repeat;
         transform: translate(-50%, -50%);
       }
       &.second {
-        ${props => css`
-          background-image: url(${props.$imgSecond});
-        `}
-        background-size:cover;
-        background-position: center;
-        background-repeat: no-repeat;
         transform: translate(-50%, -50%) rotate(6deg);
         opacity: 0;
         transition-delay: 50ms;
       }
       &.third {
-        ${props => css`
-          background-image: url(${props.$imgThird});
-        `}
-        background-size:cover;
-        background-position: center;
-        background-repeat: no-repeat;
         transform: translate(-50%, -50%) rotate(-2deg);
         opacity: 0;
         transition-delay: 100ms;
+      }
+
+      img {
+        object-fit: cover;
       }
     }
 

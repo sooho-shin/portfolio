@@ -3696,3 +3696,329 @@
 
 - Review first proof-route data model in detail: exact TypeScript types for `Project`, `Metric`, `FailureCase`, `Artifact`, `ProjectImage`, lookup helpers, and which fields should be required for the first public AI validation case.
 - Consider keeping cleanup and feature implementation in separate commits so verification remains attributable.
+
+## 2026-05-26 15:24 KST - Review 41
+
+### Scope
+
+- 원격 `main` pull 이후 현재 코드 기준 전수 재점검
+- 기존 `PEER_REVIEW.md` 지적사항과 현재 코드 상태 비교
+- 라우팅/콘텐츠 신뢰도/접근성/SEO/빌드 재현성 중심 검토
+- 실제 코드는 수정하지 않고 리뷰 문서만 업데이트
+
+### Compared With Previous Review Log
+
+- `package-lock.json` 관련 지적은 현재 기준으로 일부 해소됨. `git ls-files` 결과 `yarn.lock`만 추적되고 `package-lock.json`은 더 이상 추적되지 않는다.
+- Footer 외부 링크의 `rel="noopener noreferrer"` 누락 지적은 현재 코드에서 해소됨. `components/Footer.tsx:56`부터 `components/Footer.tsx:77`까지 외부 링크에 `rel`이 들어가 있다.
+- `components/GalleryBox.tsx`의 `next/router` import, `useRouter`, `useEffect`, `useState`, `any` prop 지적은 현재 코드에서 해소됨. 현재 prop 타입은 `string`으로 정리되어 있다.
+- `components/EffectBox.tsx`의 일부 죽은 상태와 `any` ref 지적은 현재 코드에서 해소됨. 현재 ref는 `useRef<HTMLDivElement | null>`이다.
+- 과거 로컬 환경에서 실패하던 `next build`는 이번 macOS/Node 환경에서 성공했다. 따라서 "현재 빌드가 실패한다"는 항목은 유지하지 말고 환경별 과거 이슈로만 취급해야 한다.
+
+### Findings
+
+1. Work 카드가 여전히 모두 홈(`/`)으로 연결된다.
+   - Evidence: `components/works/WorkWrapper.tsx:51`.
+   - Current impact: Work 페이지의 각 프로젝트가 클릭 가능하게 보이지만 실제 상세 페이지, 데모, 저장소, 산출물로 이어지지 않는다.
+   - Recommended action: `workArray`에 `href` 또는 `artifactUrl`을 추가하고 `Link href={c.href}`로 연결한다. 준비되지 않은 항목은 클릭 링크 대신 명확한 상태 텍스트로 보여주는 편이 낫다.
+
+2. Work 데이터가 아직 실제 포트폴리오 증거 구조가 아니다.
+   - Evidence: `components/works/WorkWrapper.tsx:19` through `components/works/WorkWrapper.tsx:39`.
+   - Current impact: `yummy yummy` 더미 카드와 동일한 이미지 세트 반복 때문에 서비스 개발/AI 검증 포지셔닝을 뒷받침하지 못한다.
+   - Recommended action: `id`, `title`, `problem`, `role`, `stack`, `verification`, `result`, `href`를 가진 typed case-study 데이터로 바꾼다.
+
+3. About 본문은 여전히 홈페이지의 서비스 개발/AI 검증 포지셔닝과 어긋난다.
+   - Evidence: `components/about/AboutWrapper.tsx:97` through `components/about/AboutWrapper.tsx:104`.
+   - Current impact: Home은 TypeScript/API/AI workflow verification을 말하지만 About은 "프론트엔드 집중, 곧 풀스택" 서사에 머물러 신뢰도가 분산된다.
+   - Recommended action: About 서사를 실제 강점 중심으로 재작성한다. 예: 사용자 흐름 설계, API 연동, 상태/성능, AI 산출물 검증, 실패 케이스 확인, 자동화된 품질 확인.
+
+4. About의 가상 클라이언트 목록은 현재 포지셔닝에 맞지 않는다.
+   - Evidence: `components/about/AboutWrapper.tsx:18` through `components/about/AboutWrapper.tsx:31`, and rendered heading at `components/about/AboutWrapper.tsx:181` through `components/about/AboutWrapper.tsx:184`.
+   - Current impact: "Clients i wish i had"라는 문구가 있더라도 실제 경력처럼 오해되거나 검증 중심 포트폴리오의 신뢰도를 낮춘다.
+   - Recommended action: 실제 경험 영역, 기술 영역, 검증한 문제 유형, 프로젝트 도메인 목록으로 교체한다.
+
+5. About의 Twitter 행은 링크처럼 보이지만 `href`가 없다.
+   - Evidence: `components/about/AboutWrapper.tsx:232`.
+   - Current impact: 사용자는 클릭 가능한 소셜 링크로 인식하지만 실제 이동이 없고, 접근성/키보드 탐색 의미도 불명확하다.
+   - Recommended action: 실제 URL을 넣거나, 없는 채널이면 `<a>`가 아닌 비상호작용 요소로 바꾼다.
+
+6. Navigation은 내부 이동에 `<button>`과 `router.push`를 사용한다.
+   - Evidence: `components/NaviBox.tsx:51`, `components/NaviBox.tsx:57`, and `components/NaviBox.tsx:65`.
+   - Current impact: 새 탭 열기, 링크 주소 복사, 브라우저 기본 링크 semantics를 잃는다.
+   - Recommended action: Home/Work/About은 Next `Link`로 렌더링하고, 모바일 메뉴 열기/닫기만 button으로 유지한다.
+
+7. 모바일 메뉴 버튼과 dim 닫기 버튼에 accessible name이 없다.
+   - Evidence: hamburger button at `components/NaviBox.tsx:30` through `components/NaviBox.tsx:38`; dim close button at `components/NaviBox.tsx:44` through `components/NaviBox.tsx:50`.
+   - Current impact: 스크린리더에서 목적 없는 버튼으로 노출된다.
+   - Recommended action: hamburger에는 `aria-label="메뉴 열기"`와 `aria-expanded={naviState}`, dim 버튼에는 `aria-label="메뉴 닫기"`를 추가한다.
+
+8. Footer의 top 컨트롤은 클릭 가능한 `div`다.
+   - Evidence: `components/Footer.tsx:80` through `components/Footer.tsx:85`.
+   - Current impact: 키보드 포커스와 버튼 semantics가 없어 마우스 중심 조작만 자연스럽다.
+   - Recommended action: `<button type="button" className="top" aria-label="맨 위로 이동">`으로 변경하고 SVG는 장식 요소로 숨긴다.
+
+9. Footer 소셜 아이콘은 아직 raw `<img>`이고 alt도 구현명에 가깝다.
+   - Evidence: `components/Footer.tsx:61`, `components/Footer.tsx:69`, and `components/Footer.tsx:77`.
+   - Current impact: `next lint`가 `<img>` 경고를 계속 내며, 스크린리더에는 `icoFacebook` 같은 파일명식 정보가 전달된다.
+   - Recommended action: `next/image`로 바꾸거나 SVG/아이콘 컴포넌트를 사용한다. 링크 목적은 anchor `aria-label`로 제공하고 장식 이미지는 `alt=""`로 둔다.
+
+10. Facebook 아이콘이 Naver로 연결된다.
+    - Evidence: `components/Footer.tsx:64` through `components/Footer.tsx:69`.
+    - Current impact: 사용자는 Facebook 링크를 기대하지만 무관한 페이지로 이동한다.
+    - Recommended action: 실제 Facebook URL로 수정하거나 해당 아이콘/링크를 제거한다.
+
+11. 의미 있는 랜드마크와 heading 구조가 부족하다.
+    - Evidence: page shell wrapper is `styled.div` at `components/templates/PortfolioPageShell.tsx:19`; shared section is `styled.div` at `components/atoms/PageSection.tsx:6`; route pages do not define page-level headings.
+    - Current impact: 검색 엔진과 보조기술이 페이지 구조를 파악하기 어렵다.
+    - Recommended action: route content를 `<main>`으로 감싸고, 페이지 대표 문구는 `h1`, 섹션 제목은 `h2`, 프로젝트 제목은 `h3`로 렌더링하되 기존 시각 스타일은 유지한다.
+
+12. route별 metadata, sitemap, robots가 없다.
+    - Evidence: only `app/layout.tsx:7` exports metadata; `app/page.tsx`, `app/about/page.tsx`, and `app/work/page.tsx` do not export metadata; no `app/sitemap.ts` or `app/robots.ts` is tracked.
+    - Current impact: `/about`과 `/work`가 동일한 전역 title/description만 공유하고, 검색/공유 미리보기 품질이 낮다.
+    - Recommended action: `metadataBase`, Open Graph/Twitter metadata, route별 metadata, `app/sitemap.ts`, `app/robots.ts`를 추가한다.
+
+13. `app/page.tsx`가 불필요하게 client route entrypoint다.
+    - Evidence: `app/page.tsx:1`.
+    - Current impact: 실제 상태와 이벤트는 `MainWrapper` 안에 있는데 route entry까지 client boundary가 된다.
+    - Recommended action: `app/page.tsx`의 `"use client"`는 제거하고 client 동작은 wrapper 컴포넌트에 둔다.
+
+14. 전역 smooth scroll 설정이 과하다.
+    - Evidence: `lib/smoothScrolling.tsx:7` uses `<ReactLenis root options={{ lerp: 0.1, duration: 10 }}>`.
+    - Current impact: 긴 duration은 휠/트랙패드/모바일 터치에서 입력과 스크롤 반응이 분리된 느낌을 줄 수 있다. Footer의 native `window.scrollTo({ behavior: "smooth" })`와도 스크롤 정책이 섞인다.
+    - Recommended action: Lenis 기본값 또는 더 짧은 duration으로 재검토하고, top scroll도 동일한 스크롤 정책으로 통합한다.
+
+15. `prefers-reduced-motion` 정책이 아직 없다.
+    - Evidence: `rg -n -F "prefers-reduced-motion" app components lib stores styles config` returned no matches, while `EffectBox`, `GalleryBox`, and `MainWrapper` use repeated marquee/transition animations.
+    - Current impact: 사용자가 reduced motion을 요청해도 지속 애니메이션과 페이지 전환 효과가 그대로 실행된다.
+    - Recommended action: 전역 `@media (prefers-reduced-motion: reduce)`에서 animation/transition을 줄이고, marquee류는 정지 상태를 제공한다.
+
+16. 큰 이미지를 CSS background로 렌더링하는 구조가 계속 남아 있다.
+    - Evidence: `components/main/MainWrapper.tsx:342`, `components/main/MainWrapper.tsx:538`, `components/main/MainWrapper.tsx:545`, `components/main/MainWrapper.tsx:553`, `components/about/AboutWrapper.tsx:170`, and `components/GalleryBox.tsx:228` through `components/GalleryBox.tsx:248`.
+    - Current impact: `next/image`의 responsive optimization, intrinsic sizing, lazy loading, alt text를 활용하지 못한다. 특히 `img_user_1.jpg`는 6.7 MB, `img_product_third.png`는 3.4 MB다.
+    - Recommended action: 콘텐츠 이미지는 `next/image`로 전환하고 web-sized AVIF/WebP 변환본을 준비한다. 장식 배경만 CSS background로 유지한다.
+
+17. dependency surface에 오래되거나 불명확한 패키지가 남아 있다.
+    - Evidence: `package.json:13` declares `@studio-freight/react-lenis` while source imports `lenis/react`; `package.json:19` uses old `react-textfit`; `package.json:21` declares `styled` although source uses `styled-components`.
+    - Current impact: 설치 표면과 호환성 리스크가 커진다. 특히 `react-textfit`은 React 18 peer dependency와 맞지 않아 npm 기반 설치에서 문제가 될 수 있다.
+    - Recommended action: 사용하지 않는 `@studio-freight/react-lenis`, `styled`를 제거하고, `react-textfit`은 CSS `clamp()`/반응형 타이포그래피로 대체한다.
+
+18. production start script가 매번 build를 수행한다.
+    - Evidence: `package.json:8` has `"start": "next build && next start"`.
+    - Current impact: PM2/운영 재시작 때 이미 검증된 build artifact를 바로 띄우지 못하고, 런타임 시작 시점에 빌드 실패 가능성이 생긴다.
+    - Recommended action: `build`와 `start` 책임을 분리한다. 일반적으로 `start`는 `next start`, CI/deploy 단계가 `next build`를 맡는 편이 명확하다.
+
+19. Node/Yarn 버전이 코드로 고정되어 있지 않다.
+    - Evidence: `package.json` has no `packageManager` or `engines`; `.nvmrc` and `.node-version` are not tracked.
+    - Current impact: 개발자/CI/서버가 서로 다른 Node/Yarn 조합을 사용해 Next/SWC/빌드 결과가 달라질 수 있다.
+    - Recommended action: `packageManager: "yarn@1.22.22"`, `engines.node`, `.nvmrc`를 추가해 재현성을 높인다.
+
+20. 전역 CSS가 모든 요소에 `flex-shrink: 0`을 적용한다.
+    - Evidence: `styles/GlobalStyles.ts:11` through `styles/GlobalStyles.ts:16`.
+    - Current impact: 모바일/좁은 화면에서 텍스트와 컨트롤이 줄어들지 못해 overflow 가능성이 커진다.
+    - Recommended action: 전역 적용을 제거하고, 크기가 고정되어야 하는 아이콘/썸네일/레이아웃 요소에만 선택적으로 적용한다.
+
+### Verification
+
+- `node ./node_modules/typescript/bin/tsc --noEmit`: passed.
+- `corepack yarn lint`: passed with three existing `<img>` warnings in `components/Footer.tsx`.
+- `corepack yarn build`: passed. Build emitted `punycode` deprecation and outdated `caniuse-lite` notices, plus the same Footer `<img>` warnings.
+- `git ls-files package-lock.json yarn.lock .nvmrc .node-version .github/workflows '*.md'`: `yarn.lock`, `README.md`, and `PEER_REVIEW.md` are tracked; `package-lock.json`, `.nvmrc`, `.node-version`, and CI workflow are not.
+- Image size scan confirmed several large public assets: `img_user_1.jpg` 6.7 MB, `img_product_third.png` 3.4 MB, `img_product_second.png` 2.8 MB, `main-portfolio-photo.png` 1.6 MB.
+
+### Next Review Angle
+
+- 10분 후 다시 처음부터 훑듯이 재검토한다.
+- 이번 회차에서 "해소됨"으로 표시한 과거 항목이 실제로 문서 상단의 오래된 표현과 충돌하는지 더 정리한다.
+- 다음 회차는 우선순위 재정렬을 한다: 사용자에게 실제 영향을 주는 링크/접근성/콘텐츠 신뢰도 이슈와, 유지보수성 이슈를 분리한다.
+
+## 2026-05-26 15:37 KST - Review 42
+
+### Scope
+
+- Review 41 이후 현재 worktree 기준 재점검
+- 사용자 영향 우선순위 재정렬
+- 링크/접근성/콘텐츠 신뢰도/SEO/운영 재현성 확인
+- 실제 코드는 수정하지 않고 `PEER_REVIEW.md`만 업데이트
+
+### Compared With Previous Review Log
+
+- Review 41의 핵심 항목 대부분은 현재도 유효하다. Work 카드 홈 링크, Work 더미 데이터, About 포지셔닝 불일치, navigation button semantics, Footer top `div`, raw `<img>` 경고, route metadata/sitemap/robots 부재가 재확인됐다.
+- 과거 문서에 있던 "가짜 주소" 성격의 contact 지적은 최신 코드 기준으로 낮은 우선순위로 내린다. `components/molecules/ContactInfoPanel.tsx`는 현재 `Service Development`, `AI Workflow Review`, `Seoul, Korea`를 보여준다.
+- `package-lock.json` 혼재 지적은 최신 상태에서는 더 이상 핵심 Finding으로 반복하지 않는다. 추적 파일은 `yarn.lock`만 확인된다.
+- 빌드 실패 지적도 최신 macOS 환경에서는 재현되지 않는다. Review 41에서 `next build`가 성공했으므로 현재는 환경별 과거 이슈로만 유지한다.
+
+### Findings
+
+1. Work 페이지의 모든 프로젝트 카드가 홈으로 이동한다.
+   - Evidence: `components/works/WorkWrapper.tsx:51`.
+   - Current impact: 사용자는 프로젝트 상세, 데모, 코드, 산출물로 갈 수 없고 Work 페이지의 클릭 affordance가 신뢰를 떨어뜨린다.
+   - Recommended action: `workArray`에 `href`를 필수 필드로 추가하고, 아직 공개 링크가 없는 항목은 클릭 가능한 카드 대신 상태를 명시한다.
+
+2. Work 데이터가 실제 case-study 모델이 아니다.
+   - Evidence: `components/works/WorkWrapper.tsx:19` through `components/works/WorkWrapper.tsx:39`.
+   - Current impact: `yummy yummy` 더미 카드와 동일 이미지 반복으로 서비스 개발/AI verification 포지셔닝을 증명하지 못한다.
+   - Recommended action: `id`, `title`, `summary`, `problem`, `role`, `stack`, `verification`, `result`, `href`를 가진 typed data로 분리한다.
+
+3. About 본문이 Home/Footer의 현재 포지셔닝과 맞지 않는다.
+   - Evidence: `components/about/AboutWrapper.tsx:97` through `components/about/AboutWrapper.tsx:104`.
+   - Current impact: Home은 `API / AI WORKFLOW VERIFICATION`을 말하지만 About은 "곧 풀스택" 성장 서사에 머물러 전체 메시지가 분산된다.
+   - Recommended action: 사용자 흐름 설계, API 연동, 상태 구조, 성능, AI 산출물 검증, 실패 케이스 확인 경험 중심으로 다시 쓴다.
+
+4. About의 가상 클라이언트 목록은 신뢰도 리스크가 크다.
+   - Evidence: `components/about/AboutWrapper.tsx:181` through `components/about/AboutWrapper.tsx:190`.
+   - Current impact: "wish i had"라고 적혀 있어도 실제 클라이언트처럼 보일 수 있고, 검증 중심 포트폴리오의 정직성 인상을 해친다.
+   - Recommended action: 실제 경험 영역, 프로젝트 도메인, 다룬 문제 유형, 기술 카테고리 목록으로 교체한다.
+
+5. About의 Twitter 행은 `<a>`지만 목적지가 없다.
+   - Evidence: `components/about/AboutWrapper.tsx:232` through `components/about/AboutWrapper.tsx:238`.
+   - Current impact: 클릭 가능한 링크처럼 보이지만 이동하지 않아 키보드/보조기술/사용자 기대가 어긋난다.
+   - Recommended action: 실제 URL을 넣거나, 없는 채널이면 anchor가 아닌 비상호작용 요소로 바꾼다.
+
+6. Navigation은 route 이동을 button으로 처리한다.
+   - Evidence: `components/NaviBox.tsx:51` through `components/NaviBox.tsx:66`.
+   - Current impact: 사용자가 새 탭 열기, 주소 복사, 브라우저 링크 동작을 사용할 수 없다.
+   - Recommended action: Home/Work/About은 Next `Link`로 바꾸고, 메뉴 열기/닫기만 button으로 유지한다.
+
+7. 모바일 navigation 버튼에 accessible name/state가 없다.
+   - Evidence: hamburger at `components/NaviBox.tsx:30` through `components/NaviBox.tsx:38`; dim close at `components/NaviBox.tsx:44` through `components/NaviBox.tsx:50`.
+   - Current impact: 스크린리더 사용자는 버튼 목적을 알 수 없고, 메뉴가 열린 상태도 전달받지 못한다.
+   - Recommended action: hamburger에 `aria-label`, `aria-expanded`, 필요 시 `aria-controls`를 추가하고 dim close에는 `aria-label="메뉴 닫기"`를 둔다.
+
+8. Footer의 top control은 클릭 가능한 `div`다.
+   - Evidence: `components/Footer.tsx:80` through `components/Footer.tsx:85`.
+   - Current impact: 키보드 포커스와 button semantics가 없어 마우스 사용자 중심으로 동작한다.
+   - Recommended action: `<button type="button" className="top" aria-label="맨 위로 이동">`으로 바꾸고 SVG는 `aria-hidden` 처리한다.
+
+9. Footer 소셜 아이콘은 lint 경고와 접근성 문제를 동시에 만든다.
+   - Evidence: `components/Footer.tsx:61`, `components/Footer.tsx:69`, and `components/Footer.tsx:77`; `corepack yarn lint` reports three `@next/next/no-img-element` warnings.
+   - Current impact: 이미지 최적화 기회를 잃고, `icoFacebook` 같은 구현명 alt가 링크 목적을 설명하지 못한다.
+   - Recommended action: `next/image` 또는 SVG/icon component로 교체하고, anchor에 목적 기반 `aria-label`을 둔다.
+
+10. Facebook 아이콘 링크가 Naver로 연결된다.
+    - Evidence: `components/Footer.tsx:64` through `components/Footer.tsx:69`.
+    - Current impact: 사용자는 Facebook 프로필을 기대하지만 무관한 사이트로 이동한다.
+    - Recommended action: 실제 Facebook URL로 바꾸거나 해당 링크를 제거한다.
+
+11. 페이지별 metadata와 crawler 기본 파일이 없다.
+    - Evidence: only `app/layout.tsx:7` exports metadata; no `app/sitemap.ts`, `app/robots.ts`, `opengraph-image`, or `twitter-image` was found.
+    - Current impact: `/`, `/about`, `/work`가 같은 전역 설명에 의존하고, 검색/공유 미리보기가 포트폴리오의 핵심 포지셔닝을 충분히 전달하지 못한다.
+    - Recommended action: route별 metadata, Open Graph/Twitter metadata, sitemap, robots를 추가한다.
+
+12. Home route entrypoint가 불필요하게 client component다.
+    - Evidence: `app/page.tsx:1`.
+    - Current impact: route 파일 자체에는 state/effect가 없는데 client boundary가 넓어진다.
+    - Recommended action: `app/page.tsx`의 `"use client"`를 제거하고 client 동작은 `MainWrapper` 아래로 제한한다.
+
+13. 전역 smooth scroll 설정이 입력 반응성을 해칠 수 있다.
+    - Evidence: `lib/smoothScrolling.tsx:7`.
+    - Current impact: `duration: 10`은 스크롤을 입력보다 뒤따라오는 느낌으로 만들 수 있고, Footer의 native smooth scroll과 정책이 섞인다.
+    - Recommended action: Lenis 옵션을 기본값/짧은 값으로 재검토하고, top scroll도 같은 스크롤 시스템으로 통합한다.
+
+14. reduced-motion 정책이 없다.
+    - Evidence: search for `prefers-reduced-motion` returned no matches; animation-heavy components remain `EffectBox`, `GalleryBox`, and `MainWrapper`.
+    - Current impact: motion-sensitive 사용자가 OS에서 reduced motion을 켜도 marquee/전환 애니메이션이 계속 실행된다.
+    - Recommended action: 전역 `@media (prefers-reduced-motion: reduce)`에서 animation/transition을 중지하거나 최소화한다.
+
+15. 큰 콘텐츠 이미지가 CSS background로 남아 있다.
+    - Evidence: `components/about/AboutWrapper.tsx:170`, `components/GalleryBox.tsx:228` through `components/GalleryBox.tsx:248`, and homepage background-image usages found by search.
+    - Current impact: alt text, intrinsic sizing, responsive image optimization, lazy loading을 활용하지 못한다. 이미지 스캔에서도 `img_user_1.jpg` 6.7 MB, `img_product_third.png` 3.4 MB가 확인됐다.
+    - Recommended action: 의미 있는 이미지는 `next/image`로 전환하고 web-size AVIF/WebP 변환본을 만든다.
+
+16. dependency surface에 오래된/미사용 가능성이 높은 패키지가 남아 있다.
+    - Evidence: `package.json:13`, `package.json:19`, `package.json:21`.
+    - Current impact: `@studio-freight/react-lenis`와 `lenis`가 함께 있고, `styled`는 `styled-components`와 혼동되며, `react-textfit`은 React 18 호환성 리스크가 있다.
+    - Recommended action: 실제 import 기준으로 unused dependency를 제거하고, `react-textfit`은 CSS responsive typography로 대체한다.
+
+17. 운영 start script가 build와 runtime start를 섞는다.
+    - Evidence: `package.json:8`.
+    - Current impact: PM2/운영 재시작 때 매번 build가 실행되어 이미 검증된 artifact를 바로 띄우지 못한다.
+    - Recommended action: `start`는 `next start`로 두고, build는 CI/deploy 단계에서 별도로 실행한다.
+
+18. Node/Yarn 버전 고정 정보가 없다.
+    - Evidence: `git ls-files package-lock.json yarn.lock .nvmrc .node-version .github/workflows '*.md'` only returned `PEER_REVIEW.md`, `README.md`, and `yarn.lock`.
+    - Current impact: 로컬/CI/서버의 Node/Yarn 조합이 달라져 build나 dependency resolution 결과가 바뀔 수 있다.
+    - Recommended action: `packageManager`, `engines.node`, `.nvmrc` 또는 `.node-version`, 최소 CI workflow를 추가한다.
+
+19. 전역 `flex-shrink: 0`은 모바일 overflow 리스크를 키운다.
+    - Evidence: `styles/GlobalStyles.ts:11` through `styles/GlobalStyles.ts:16`.
+    - Current impact: 모든 요소가 flex shrink를 거부해 좁은 화면에서 텍스트/컨트롤이 부모를 넘기 쉬워진다.
+    - Recommended action: 전역 설정을 제거하고 고정 크기가 필요한 요소에만 선택적으로 적용한다.
+
+### Verification
+
+- `node ./node_modules/typescript/bin/tsc --noEmit`: passed.
+- `corepack yarn lint`: passed with three existing Footer `<img>` warnings.
+- `git ls-files package-lock.json yarn.lock .nvmrc .node-version .github/workflows '*.md'`: tracked review/readme/yarn lock only; no package-lock, Node version file, or CI workflow.
+- Image size scan confirmed large assets remain: `img_user_1.jpg` 6.7 MB, `img_product_third.png` 3.4 MB, `img_product_second.png` 2.8 MB, `main-portfolio-photo.png` 1.6 MB.
+
+### Next Review Angle
+
+- 다음 회차는 "문서의 오래된 지적 정리"에 집중한다. 상단 과거 로그는 기록으로 두되, 최신 상태와 충돌하는 항목이 무엇인지 별도 summary를 만들지 판단한다.
+- Work proof model을 계속 핵심 1순위로 본다. 현재 가장 큰 사용자 영향은 "클릭 가능한 Work가 증거로 연결되지 않는 것"이다.
+
+## 2026-05-26 16:10 KST - Implementation Follow-up
+
+### Scope
+
+- Review 41/42에서 반복된 핵심 지적사항을 실제 코드에 반영
+- 이력서/프로젝트 문서에서 확인한 서비스 개발, AI 검증, API 연동 중심 포지셔닝을 사이트 전반에 맞춤
+- 코드 동작은 수정하되, 공개할 수 없는 실제 산출물 URL이나 없는 이미지는 임의로 만들지 않음
+
+### Resolved
+
+1. Work 카드가 홈으로 이동하던 문제를 해결했다.
+   - `config/projects.ts`에 typed project data를 추가했다.
+   - `components/works/WorkWrapper.tsx`는 이 데이터를 사용해 `/work/[slug]`로 연결한다.
+   - `app/work/[slug]/page.tsx`를 추가해 각 프로젝트의 문제, 역할, 검증, 결과, 스택을 볼 수 있게 했다.
+
+2. Work 더미 데이터와 중복 key 문제를 정리했다.
+   - 프로젝트별 `slug`, `title`, `summary`, `role`, `verification`, `result`, `stack`, `images`를 분리했다.
+   - 카드 key는 `project.slug`를 사용한다.
+
+3. About 포지셔닝 불일치를 수정했다.
+   - 가상 클라이언트/미래형 풀스택 서사를 제거했다.
+   - 실제 프로젝트 증거, 서비스 개발 역량, AI 산출물 검증, API/상태/품질 확인 중심으로 다시 구성했다.
+
+4. 목적지가 없거나 잘못된 소셜/푸터 링크를 정리했다.
+   - Footer의 Facebook 아이콘과 Naver 오연결을 제거했다.
+   - 연락 채널은 `config/profile.ts`의 실제 이메일/소셜 데이터에서 가져오도록 통일했다.
+   - `ContactInfoPanel`도 같은 이메일 데이터를 사용한다.
+
+5. Navigation 접근성과 링크 semantics를 개선했다.
+   - 내부 이동은 Next `Link`로 렌더링한다.
+   - 모바일 메뉴 버튼에 `aria-label`, `aria-expanded`, `aria-controls`를 추가했다.
+   - dim close 버튼에 `aria-label`을 추가했다.
+
+6. Footer 접근성과 이미지 경고를 정리했다.
+   - top control을 `button`으로 바꾸고 `aria-label`을 추가했다.
+   - 소셜 아이콘은 raw `<img>` 대신 `next/image`를 사용한다.
+   - `corepack yarn lint` 기준 기존 Footer `<img>` 경고는 사라졌다.
+
+7. 페이지 구조와 SEO 기본값을 보강했다.
+   - `PortfolioPageShell`은 `main`, `PageSection`은 `section`으로 변경했다.
+   - home route의 불필요한 `"use client"`를 제거하고 client boundary를 `MainWrapper`로 좁혔다.
+   - route별 metadata, Open Graph/Twitter metadata, `app/sitemap.ts`, `app/robots.ts`를 추가했다.
+   - 상세 페이지 title 중복도 수정했다.
+
+8. 모션/스크롤/전역 CSS 리스크를 낮췄다.
+   - Lenis `duration`을 과한 값에서 짧은 값으로 조정했다.
+   - 전역 `prefers-reduced-motion` 정책을 추가했다.
+   - 모든 요소에 적용되던 `flex-shrink: 0`을 제거했다.
+
+9. dependency와 실행 스크립트 재현성을 정리했다.
+   - `react-textfit`, `@studio-freight/react-lenis`, `styled`, `@types/react-textfit`을 제거했다.
+   - `MainWrapper`는 `react-textfit` 대신 CSS 기반 반응형 타이포그래피를 사용한다.
+   - `packageManager`, `engines.node`, `.nvmrc`를 추가했다.
+   - `start`는 `next start`만 수행하도록 분리하고 `typecheck`, `verify` 스크립트를 추가했다.
+
+### Remaining Notes
+
+- 실제 AmazonCar, Location, Community Downloader용 고유 이미지 파일은 repo 안에서 확인되지 않아, 새 이미지를 임의 생성하지 않고 기존 YummyGame 이미지를 임시 preview로만 사용했다.
+- 홈페이지의 일부 장식/배경 이미지는 아직 CSS background로 남아 있다. 콘텐츠 증거 이미지는 Work/About/Gallery 중심으로 `next/image`를 적용했지만, 전체 이미지 최적화와 web-size AVIF/WebP 변환은 별도 asset 작업으로 남긴다.
+- CI workflow는 아직 추가하지 않았다. 이번 변경은 로컬 검증 스크립트와 Node/Yarn 고정까지만 다뤘다.
+
+### Verification
+
+- `corepack yarn typecheck`: passed.
+- `corepack yarn lint`: passed with no warnings or errors.
+- `corepack yarn build`: passed. Static routes generated for `/`, `/about`, `/work`, `/work/amazoncar`, `/work/yummygame`, `/work/location`, `/work/community-downloader`, `/robots.txt`, and `/sitemap.xml`.
+- Production HTTP smoke check was performed on port 3010 before cleanup: `/`, `/work`, `/work/location`, `/sitemap.xml`, and `/robots.txt` returned expected content.

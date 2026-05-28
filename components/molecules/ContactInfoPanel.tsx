@@ -2,6 +2,7 @@
 
 import React from "react";
 import styled from "styled-components";
+import { siteProfile } from "@/config/profile";
 
 type Props = {
   infoRef?: React.Ref<HTMLDivElement>;
@@ -12,7 +13,9 @@ const ContactInfoPanel = ({ infoRef }: Props) => {
     <Wrapper>
       <div className="about-info" ref={infoRef}>
         <p className="title">Inquiries:</p>
-        <p className="mail">soojoon92@gmail.com</p>
+        <a className="mail" href={`mailto:${siteProfile.email}`}>
+          {siteProfile.email}
+        </a>
         <p className="info">
           CONTACT:
           <br />
@@ -43,7 +46,8 @@ const Wrapper = styled.div`
     padding: 10px 50px 10px 10px;
     box-sizing: border-box;
 
-    > p {
+    > p,
+    > a {
       &.title {
         font-size: 1.875vw;
       }

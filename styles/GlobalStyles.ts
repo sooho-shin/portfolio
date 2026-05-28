@@ -12,7 +12,6 @@ const GlobalStyles = createGlobalStyle`
     :after,
     :before {
         box-sizing: border-box;
-        flex-shrink: 0;
     }
     :root {
         -webkit-tap-highlight-color: transparent;
@@ -39,14 +38,29 @@ const GlobalStyles = createGlobalStyle`
         max-width: 100%;
     }
     
+    a,
+    button,
+    [role="button"] {
+        cursor: pointer;
+    }
+
     button {
         background: none;
         border: 0;
-        cursor: pointer;
     }
     
     a {
         text-decoration: none;
+    }
+
+    button:disabled,
+    [aria-disabled="true"] {
+        cursor: default;
+    }
+
+    :focus-visible {
+        outline: 3px solid #000;
+        outline-offset: 3px;
     }
     
     table {
@@ -76,6 +90,17 @@ const GlobalStyles = createGlobalStyle`
     .pc{
         @media (max-width: ${breakpoints.md}px) {
             display:none !important;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            scroll-behavior: auto !important;
+            transition-duration: 0.01ms !important;
         }
     }
 

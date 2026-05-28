@@ -23,7 +23,7 @@ const PortfolioPageShell = ({
   </Wrapper>
 );
 
-const Wrapper = styled.div`
+const Wrapper = styled.main`
   width: 100%;
   height: 100%;
   display: block;

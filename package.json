@@ -2,23 +2,26 @@
   "name": "portfolio",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "yarn@1.22.22",
+  "engines": {
+    "node": ">=20.12.2 <23"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next build && next start",
+    "start": "next start",
     "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "verify": "yarn typecheck && yarn lint",
     "only-start": "pm2 start ecosystem.config.js --env production"
   },
   "dependencies": {
-    "@studio-freight/react-lenis": "^0.0.47",
     "classnames": "^2.5.1",
     "lenis": "^1.0.45",
     "next": "14.2.3",
     "react": "^18",
     "react-dom": "^18",
-    "react-textfit": "^1.1.1",
     "react-use": "^17.5.0",
-    "styled": "^1.0.0",
     "styled-components": "^6.1.8",
     "zustand": "^4.5.2"
   },
@@ -26,7 +29,6 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "@types/react-textfit": "^1.1.4",
     "eslint": "^8",
     "eslint-config-next": "14.2.3",
     "prettier": "^3.2.5",
