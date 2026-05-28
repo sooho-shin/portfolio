@@ -30,6 +30,36 @@ Extracted: 2026-05-28 KST
 
 기간: 2025.05 - 재직중.
 
+#### Narrow
+
+기간: 2026.04 - 2026.05.
+
+핵심 역할:
+
+- AI 기반 한국어 연상 퍼즐 서비스 Narrow(Pinpoint) 개발.
+- Codex를 활용해 요구사항 분석, 퍼즐 생성, 구현, 검증, QA 수정까지 이어지는 AI-assisted 개발 루프 구축.
+- Next.js 기반 일일 퍼즐 서비스, Supabase Auth/DB, 랭킹, 그룹 공유, 연승 랭킹, 피드백 기능을 포함한 풀스택 구조 설계 및 구현.
+- 로그인/비로그인 플레이, 정답 판정, 시도 기록, 랭킹 projection, 1등 메시지 등 핵심 게임 플로우와 서버 API 안정화.
+- 프로젝트 로컬 Skills와 AGENTS.md를 활용해 퍼즐 생성, 품질 검증, DB 동기화, 오늘 문제 초기화, QA 검수 절차 표준화.
+- 퍼즐 후보 JSON 검증, 품질 점수화, 중복/alias 검사, dry-run 저장 흐름을 자동화하여 운영 리스크 감소.
+- Figma MCP와 앱 계약 검증 스크립트를 활용해 디자인 정합성, API 계약, 화면 구현 상태를 반복 검증.
+- React/Next.js 기반으로 모바일 중심 퍼즐 UI, 결과 화면, 랭킹 화면, 로그인/닉네임 플로우 구현.
+- 서버 상태와 사용자 상태를 명확히 분리해 로그인 여부, 실패/성공 상태, 랭킹 참여 가능 여부에 따른 UX 개선.
+- TypeScript 타입체크, Next.js 빌드, 앱 계약 검증을 통해 회귀 방지 체계 유지.
+
+기술 스택:
+
+- Frontend: Next.js, React, TypeScript, Tailwind CSS.
+- Backend: Next.js Route Handlers, Supabase, PostgreSQL.
+- Auth/DB: Supabase Auth, RLS, SQL Migration.
+- AI Engineering: Codex, Skills, Figma MCP, Harness Engineering, AI Verification.
+- Collaboration: Git, GitHub, AI-assisted development workflow.
+
+포트폴리오 활용 방향:
+
+- 공개 가능한 한국어 퍼즐 제품 사례로, AI-assisted 개발 루프가 실제 서비스 기능과 운영 검증까지 이어진 경험을 강조한다.
+- 퍼즐 운영 자동화와 품질 검증은 내부 명령/DB 세부사항보다 `후보 검증`, `dry-run`, `계약 검증`, `회귀 방지` 같은 공개 가능한 수준으로 일반화한다.
+
 #### MMIS
 
 기간: 2026.02 - 2026.05.
@@ -354,12 +384,13 @@ URL: `https://www.amazoncar.co.kr/`
 
 ## Work 페이지 추천 우선순위
 
-1. MMIS 또는 AI Harness Engineering 계열 사례가 공개 가능하면 최상단에 둔다. 단, 비공개 내부 정보는 일반화한다.
-2. RedClick: Next.js/Express/Chrome Extension, 캠페인/어드민 시스템, AI 코드 검증, 상태 관리 최적화.
-3. Location: AI 추천, 실제 위치 API, 지도 UI, 타입/아키텍처 검증.
-4. AmazonCar: 실무 서비스 프론트엔드, 상태 관리, API 연동, 성능/협업 품질.
-5. Yummy Game: 게임 UI 상태 모델링, 사용자 액션과 게임 루프 분리.
-6. Zudice/Entropy Explorer/Fruttidino: 과거 게임/Web3/실시간 상태 경험 보강용.
+1. Narrow/Pinpoint: 공개 가능한 한국어 퍼즐 제품, Next.js/Supabase, AI-assisted 개발 루프, 퍼즐 운영/검증 자동화.
+2. MMIS 또는 AI Harness Engineering 계열 사례가 공개 가능하면 상단에 둔다. 단, 비공개 내부 정보는 일반화한다.
+3. RedClick: Next.js/Express/Chrome Extension, 캠페인/어드민 시스템, AI 코드 검증, 상태 관리 최적화.
+4. Location: AI 추천, 실제 위치 API, 지도 UI, 타입/아키텍처 검증.
+5. AmazonCar: 실무 서비스 프론트엔드, 상태 관리, API 연동, 성능/협업 품질.
+6. Yummy Game: 게임 UI 상태 모델링, 사용자 액션과 게임 루프 분리.
+7. Zudice/Entropy Explorer/Fruttidino: 과거 게임/Web3/실시간 상태 경험 보강용.
 
 ## 톤 가이드
 

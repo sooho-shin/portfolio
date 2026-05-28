@@ -405,26 +405,22 @@ const SnsWrapper = styled.section`
     border-bottom: 4px solid #000;
     overflow: hidden;
     position: relative;
+    color: #000;
+    background: #fff;
+    transition:
+      background-color 150ms ease,
+      color 150ms ease;
 
     @media (max-width: ${breakpoints.md}px) {
       padding: 1vw 2vw;
     }
 
     .mask {
-      position: absolute;
-      left: 0;
-      top: 0;
-      transform: translateY(100%);
-      width: 100%;
-      height: 100%;
-      background-color: #000;
-      display: block;
-      transition: transform 150ms;
-      z-index: -1;
+      display: none;
     }
 
     span:first-child {
-      color: #000;
+      color: inherit;
       font-size: clamp(28px, 3vw, 52px);
       text-transform: uppercase;
       transition: all 150ms;
@@ -439,13 +435,8 @@ const SnsWrapper = styled.section`
 
     &:hover,
     &:focus-visible {
-      .mask {
-        transform: translateY(0%);
-      }
-
-      span {
-        color: #fff;
-      }
+      color: #fff;
+      background: #000;
     }
   }
 `;

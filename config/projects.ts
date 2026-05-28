@@ -83,7 +83,74 @@ const amazoncarImages = [
   },
 ] as const;
 
+const narrowImages = [
+  {
+    src: "/images/work/narrow/overview.png",
+    alt: "Narrow Korean daily word puzzle overview with mobile puzzle screen",
+  },
+  {
+    src: "/images/work/narrow/today.png",
+    alt: "Narrow today puzzle screen with clues and answer input",
+  },
+  {
+    src: "/images/work/narrow/solved.png",
+    alt: "Narrow solved result screen showing clue sequence and share action",
+  },
+  {
+    src: "/images/work/narrow/daily-ranking.png",
+    alt: "Narrow daily ranking screen showing time-based puzzle leaderboard",
+  },
+] as const;
+
 export const projects: Project[] = [
+  {
+    slug: "narrow",
+    title: "Narrow",
+    type: "AI Puzzle Product",
+    company: "Freelance",
+    period: "2026.04 - 2026.05",
+    summary:
+      "Codex를 활용한 AI-assisted 개발 루프로 한국어 연상 퍼즐 서비스 Narrow(Pinpoint)의 일일 퍼즐, 랭킹, 그룹 공유, 연승, 피드백 흐름을 구현했습니다.",
+    cardSummary:
+      "한국어 연상 퍼즐의 플레이, 정답 판정, 랭킹, 그룹 공유, 운영 검증 루프를 Next.js와 Supabase로 구성했습니다.",
+    problem:
+      "매일 공개되는 퍼즐 서비스는 익명/로그인 플레이, 정답 판정, 시도 기록, 랭킹 projection, 운영용 퍼즐 품질 검증이 함께 맞물려야 안정적으로 운영됩니다.",
+    role: [
+      "Codex 기반 요구사항 분석, 구현, 검증, QA 수정 루프 구축",
+      "Next.js 일일 퍼즐 UI와 결과/랭킹/로그인/닉네임 플로우 구현",
+      "Supabase Auth/DB, RLS, SQL Migration 기반 백엔드 구조 정리",
+      "퍼즐 후보 JSON 검증, 품질 점수화, DB 동기화, 오늘 문제 초기화 자동화",
+    ],
+    stack: [
+      "Next.js",
+      "React",
+      "TypeScript",
+      "Tailwind CSS",
+      "Next.js Route Handlers",
+      "Supabase",
+      "PostgreSQL",
+      "Supabase Auth",
+      "RLS",
+      "SQL Migration",
+      "Codex",
+      "Skills",
+      "Figma MCP",
+    ],
+    proofPoints: ["Daily Puzzle", "Supabase Auth/DB", "AI Harness"],
+    verification: [
+      "퍼즐 후보 JSON 검증, 품질 점수화, 중복/alias 검사, dry-run 저장 흐름으로 운영 리스크를 낮춤",
+      "Figma MCP와 앱 계약 검증 스크립트로 디자인 정합성, API 계약, 화면 구현 상태를 반복 확인",
+      "TypeScript 타입체크, Next.js 빌드, 앱 계약 검증으로 로그인/비로그인 플레이와 랭킹 흐름의 회귀를 방지",
+    ],
+    result: [
+      "로그인/비로그인 플레이, 정답 판정, 시도 기록, 랭킹 projection, 1등 메시지까지 핵심 게임 플로우를 안정화",
+      "프로젝트 로컬 Skills와 AGENTS.md 기반으로 퍼즐 생성, 품질 검증, DB 동기화, QA 절차를 표준화",
+    ],
+    images: narrowImages,
+    externalUrl: "https://pinpoint-seven.vercel.app/",
+    externalLabel: "Visit Narrow",
+    source: "Resume: Narrow, 2026.04 - 2026.05",
+  },
   {
     slug: "mmis-ai-harness",
     title: "MMIS AI Harness",

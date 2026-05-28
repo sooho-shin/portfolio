@@ -23,11 +23,6 @@ export const siteProfile = {
   ],
   socials: [
     {
-      label: "Instagram",
-      href: "https://www.instagram.com/_soooho/",
-      icon: "/images/ico_insta.png",
-    },
-    {
       label: "SoundCloud",
       href: "https://soundcloud.com/soohozzang/sets/hiphop",
       icon: "/images/ico_soundcloud.png",
