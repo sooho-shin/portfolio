@@ -140,21 +140,23 @@ export default function WorkDetailPage({ params }: Props) {
       {supportImages.length > 0 ? (
         <section style={styles.imageGrid}>
           {supportImages.map(image => (
-            <div key={image.src} style={styles.previewImage}>
+            <div
+              key={image.src}
+              style={{
+                ...styles.previewImage,
+                aspectRatio: image.aspectRatio ?? styles.previewImage.aspectRatio,
+              }}
+            >
               <Image
                 src={image.src}
                 alt={image.alt}
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"
-                style={{ objectFit: "cover" }}
+                style={{ objectFit: image.fit ?? "cover" }}
               />
             </div>
           ))}
         </section>
-      ) : null}
-
-      {project.source ? (
-        <p style={styles.source}>Source note: {project.source}</p>
       ) : null}
     </main>
   );
@@ -301,9 +303,6 @@ const styles: Record<string, CSSProperties> = {
     aspectRatio: "4 / 3",
     border: "4px solid #000",
     overflow: "hidden",
-  },
-  source: {
-    marginTop: 24,
-    fontSize: 13,
+    background: "#f4f1ea",
   },
 };

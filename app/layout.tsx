@@ -24,13 +24,13 @@ export const metadata: Metadata = {
     siteName: "Sooho Shin Portfolio",
     type: "website",
     locale: "ko_KR",
-    images: ["/images/main-portfolio-photo.png"],
+    images: ["/images/main-portfolio-photo.jpg"],
   },
   twitter: {
     card: "summary_large_image",
     title: siteMetadata.title,
     description: siteMetadata.description,
-    images: ["/images/main-portfolio-photo.png"],
+    images: ["/images/main-portfolio-photo.jpg"],
   },
 };
 

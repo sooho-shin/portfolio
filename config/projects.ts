@@ -1,6 +1,8 @@
 export type ProjectImage = {
   src: string;
   alt: string;
+  fit?: "cover" | "contain";
+  aspectRatio?: string;
 };
 
 export type Project = {
@@ -91,14 +93,20 @@ const narrowImages = [
   {
     src: "/images/work/narrow/today.png",
     alt: "Narrow today puzzle screen with clues and answer input",
+    fit: "contain",
+    aspectRatio: "390 / 844",
   },
   {
     src: "/images/work/narrow/solved.png",
     alt: "Narrow solved result screen showing clue sequence and share action",
+    fit: "contain",
+    aspectRatio: "390 / 844",
   },
   {
     src: "/images/work/narrow/daily-ranking.png",
     alt: "Narrow daily ranking screen showing time-based puzzle leaderboard",
+    fit: "contain",
+    aspectRatio: "390 / 844",
   },
 ] as const;
 

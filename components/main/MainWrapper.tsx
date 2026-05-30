@@ -311,7 +311,7 @@ const MainBgContainer = styled.div`
   width: 100%;
   height: 100%;
   z-index: -1;
-  background-image: url("/images/main-portfolio-photo.png");
+  background-image: url("/images/main-portfolio-photo.jpg");
   background-position: center;
   background-size: cover;
 `;

@@ -4022,3 +4022,270 @@
 - `corepack yarn lint`: passed with no warnings or errors.
 - `corepack yarn build`: passed. Static routes generated for `/`, `/about`, `/work`, `/work/amazoncar`, `/work/yummygame`, `/work/location`, `/work/community-downloader`, `/robots.txt`, and `/sitemap.xml`.
 - Production HTTP smoke check was performed on port 3010 before cleanup: `/`, `/work`, `/work/location`, `/sitemap.xml`, and `/robots.txt` returned expected content.
+
+## 2026-05-28 14:38 KST - Review 43
+
+### Scope
+
+- 현재 `main...origin/main` 기준으로 처음부터 다시 점검.
+- routing, Work 상세 페이지, About/Footer 연락 채널, SEO 파일, public assets, package/deploy 설정을 확인.
+- 기존 `PEER_REVIEW.md`와 비교하되 결론을 그대로 재사용하지 않고 현재 코드 증거만 기준으로 판단.
+- 실제 소스 코드는 수정하지 않고 `PEER_REVIEW.md`만 갱신.
+
+### Compared With Previous Review Log
+
+- Review 42의 핵심 사용자 영향 항목 중 Work 카드가 홈으로 이동하던 문제, Work 더미 데이터, About 가상 클라이언트, 목적지 없는 Twitter 행, Footer raw `<img>` 경고, route metadata/sitemap/robots 부재, 전역 `flex-shrink: 0`, packageManager/engines 누락은 현재 코드에서 해소됐다.
+- `start` script는 이제 `next start`로 분리되어 Review 42의 운영 start script 지적은 해소됐다.
+- 여전히 유효한 축은 CI 부재, PM2 설정 불명확성, 큰 이미지/배경 이미지 최적화, 문서의 설치 안내 불일치다.
+- 신규로 확인된 항목은 Work 상세 페이지의 공개용 `Source note`, 모바일 세로 스크린샷 crop, production URL 기본값 리스크, 제거된 Instagram의 public asset 잔존이다.
+
+### Findings
+
+1. Work 상세 페이지가 내부 작성 근거를 공개 문구로 노출한다.
+   - Evidence: `app/work/[slug]/page.tsx:156` through `app/work/[slug]/page.tsx:158`, and `config/projects.ts:152`.
+   - Current impact: 방문자가 보는 프로젝트 상세 하단에 `Source note: Resume: ...`가 그대로 표시되어, 완성된 case study보다 내부 정리 문서 흔적처럼 보인다. 이전에 사용자가 공개 문구에서 "이력서" 언급을 어색하다고 지적한 방향과도 충돌한다.
+   - Recommended action: `source`는 내부 검증/작성용 데이터로만 남기고 public UI에서는 제거하거나, 필요하면 "Based on verified project records"처럼 방문자용 문구로 재작성한다.
+
+2. Work 상세의 보조 이미지가 모바일 세로 스크린샷을 강제로 crop한다.
+   - Evidence: `app/work/[slug]/page.tsx:140` through `app/work/[slug]/page.tsx:150` uses `objectFit: "cover"`; `app/work/[slug]/page.tsx:299` through `app/work/[slug]/page.tsx:303` fixes every preview to `aspectRatio: "4 / 3"`; Narrow support images are `390 x 844`.
+   - Current impact: Narrow의 오늘 퍼즐/결과/랭킹 같은 세로 화면은 핵심 UI가 잘려서 프로젝트 증거 이미지로서 의미가 약해질 수 있다.
+   - Recommended action: 이미지별 `fit`/`aspectRatio` 메타를 추가하거나, 세로 스크린샷은 `object-fit: contain`과 밝은 배경을 사용해 전체 화면을 보여준다.
+
+3. production URL 환경변수가 없으면 sitemap, robots, canonical, OG URL이 localhost로 생성된다.
+   - Evidence: `config/profile.ts:9`, `app/layout.tsx:9`, `app/layout.tsx:23`, `app/sitemap.ts:7` through `app/sitemap.ts:14`, `app/robots.ts:10`.
+   - Current impact: 배포 환경에서 `NEXT_PUBLIC_SITE_URL`이 빠지면 검색엔진과 공유 메타가 `http://localhost:3000`을 가리킬 수 있다.
+   - Recommended action: production 기본값을 실제 도메인으로 두거나, `NODE_ENV === "production"`에서 `NEXT_PUBLIC_SITE_URL` 누락 시 build를 실패시키는 검증을 추가한다.
+
+4. README의 설치/실행 안내가 현재 package manager 정책과 맞지 않는다.
+   - Evidence: `README.md:5` through `README.md:13` still recommends `npm`, `yarn`, `pnpm`, `bun`; `package.json:5` pins `yarn@1.22.22`.
+   - Current impact: 새 환경에서 npm/pnpm/bun으로 시작하면 lockfile과 검증 경로가 달라지고, 이 프로젝트가 기대하는 Yarn 1 기준과 어긋난다.
+   - Recommended action: README를 Yarn 1 기준으로 정리하고 `yarn install --frozen-lockfile`, `yarn dev`, `yarn verify`, `yarn build`, `yarn start`를 명시한다.
+
+5. PM2 설정은 다중 인스턴스 의도가 불명확하다.
+   - Evidence: `ecosystem.config.js:8` through `ecosystem.config.js:12`; `instances: 4` is set while `exec_mode: 'cluster'` is commented out.
+   - Current impact: 실제 운영에서 4개 fork를 띄우려는지, cluster mode를 의도한 것인지, 단일 Next 서버가 맞는지 판단하기 어렵다. `env_production`도 주석이라 포트/환경값이 PM2 실행과 분리되어 있다.
+   - Recommended action: 단일 인스턴스면 `instances: 1`로 줄이고, 다중 인스턴스가 필요하면 `exec_mode: "cluster"`와 production env를 명시한 뒤 배포 절차에 기록한다.
+
+6. 홈페이지 핵심 이미지가 큰 원본과 CSS background에 의존한다.
+   - Evidence: `components/main/MainWrapper.tsx:314`, `components/main/MainWrapper.tsx:510`, `components/main/MainWrapper.tsx:517`, `components/main/MainWrapper.tsx:525`; asset scan shows `public/images/img_user_1.jpg` 6.7 MB, `img_product_third.png` 3.4 MB, `img_product_second.png` 2.8 MB, `main-portfolio-photo.png` 1.6 MB.
+   - Current impact: `next/image`의 responsive sizing/lazy loading/format negotiation을 쓰지 못하고, homepage initial load와 모바일 데이터 사용량이 커질 수 있다.
+   - Recommended action: 의미 있는 이미지는 `Image` 컴포넌트로 전환하고, 장식 이미지도 web-size AVIF/WebP로 압축한 뒤 CSS background 원본을 교체한다.
+
+7. 제거된 소셜 채널의 public asset이 계속 배포된다.
+   - Evidence: `config/profile.ts:24` through `config/profile.ts:30` now only exposes SoundCloud, but `public/images/ico_insta.png`, `public/images/ico_twitter.png`, and `public/images/ico_facebook.png` are still tracked and `rg` found no current code references.
+   - Current impact: 화면에서는 보이지 않지만 public URL로는 오래된/불필요한 소셜 자산이 계속 노출된다. 사용자가 Instagram 제거를 요청한 맥락에서는 asset까지 정리하는 편이 더 일관적이다.
+   - Recommended action: 실제로 더 이상 쓰지 않는 아이콘 파일을 삭제하고, 향후 소셜 링크는 `siteProfile.socials`에서만 추가되게 유지한다.
+
+8. CI workflow가 아직 없어 로컬 수동 검증에 의존한다.
+   - Evidence: `git ls-files package-lock.json yarn.lock .nvmrc .node-version .github/workflows package.json README.md next.config.mjs` returned no `.github/workflows` path.
+   - Current impact: `typecheck`, `lint`, `build`가 현재는 통과하지만 push 전에 자동으로 강제되지 않는다.
+   - Recommended action: GitHub Actions에서 Node 20.12.2와 Yarn 1.22.22를 사용해 `yarn install --frozen-lockfile`, `yarn typecheck`, `yarn lint`, `yarn build`를 실행한다.
+
+### Verification
+
+- `pwd`: `/Users/sinsuho/Desktop/mywork/portfolio`.
+- `git status --short --branch`: clean at start, `## main...origin/main`.
+- `rg --files`: current source/assets reviewed.
+- `rg -n "TODO|FIXME|any|useEffect|target=\"_blank\"|<img|console\\.|eslint-disable|href=\"#\"|router.push|prefers-reduced-motion|aria-label|metadata|sitemap|robots"`: no `<img>`, `console`, `href="#"`, or `eslint-disable` hits in app/components/config/lib/styles; relevant `target="_blank"` links have `rel="noopener noreferrer"`.
+- `yarn typecheck`: passed.
+- `yarn lint`: passed with no warnings or errors.
+- `yarn build`: passed. Static generation included `/work/narrow`, `/work/mmis-ai-harness`, `/work/redclick`, and four additional Work detail paths.
+- Image size scan confirmed large public assets remain as listed above.
+- No local dev server was started during this review cycle.
+
+### Next Review Angle
+
+- 다음 회차는 실제 브라우저/HTML 출력 없이도 확인 가능한 route output, metadata URL 값, dead asset 목록을 다시 검증한다.
+- 특히 `Source note` 제거 여부, Narrow 세로 이미지 표시 정책, README/PM2/CI 정리 여부를 우선 비교한다.
+
+## 2026-05-28 14:50 KST - Review 44
+
+### Scope
+
+- Review 43 이후 10분 간격 재점검.
+- 현재 작업 트리, 핵심 파일 목록, 공개 문구/이미지/메타/배포 설정 관련 증거를 다시 확인.
+- 실제 소스 코드는 수정하지 않고 `PEER_REVIEW.md`만 갱신.
+
+### Compared With Previous Review Log
+
+- Review 43 이후 소스 파일 변경은 없었다. `git status --short --branch` 기준 변경 파일은 `PEER_REVIEW.md`뿐이다.
+- Review 43의 8개 Findings는 모두 현재도 재현된다.
+- 새로 추가할 고위험 사용자 영향 이슈는 확인하지 못했다. 이번 회차는 Review 43 항목의 유지 여부를 검증한 회차로 기록한다.
+- 과거 Review 42 이전 항목 중 Work 카드 홈 이동, 더미 데이터, About 가상 클라이언트, Footer `<img>` lint 경고, route metadata/sitemap/robots 부재, 전역 `flex-shrink: 0`, packageManager/engines 누락은 계속 해소 상태다.
+
+### Findings
+
+1. Work 상세 페이지가 내부 작성 근거를 공개 문구로 노출한다.
+   - Evidence: `app/work/[slug]/page.tsx:157`, `config/projects.ts:152`, `config/projects.ts:196`, `config/projects.ts:239`, `config/projects.ts:281`, `config/projects.ts:325`, `config/projects.ts:364`, `config/projects.ts:405`.
+   - Current impact: 모든 프로젝트 상세 하단에 `Source note: Resume: ...` 계열 문구가 노출될 수 있어, 방문자용 포트폴리오보다 내부 관리 문서처럼 보인다.
+   - Recommended action: public UI에서 `source` 렌더링을 제거하고, 필요하면 내부 검증용 데이터로만 유지한다.
+
+2. Work 상세의 보조 이미지가 모바일 세로 스크린샷을 강제로 crop한다.
+   - Evidence: `app/work/[slug]/page.tsx:149`, `app/work/[slug]/page.tsx:301`; Narrow support images are `390 x 844`.
+   - Current impact: Narrow의 모바일 화면 증거 이미지가 4:3 박스와 `objectFit: "cover"` 때문에 잘릴 수 있다.
+   - Recommended action: 이미지별 표시 정책을 데이터화해 세로 스크린샷은 `contain` 또는 세로 aspect ratio로 보여준다.
+
+3. production URL 환경변수가 없으면 sitemap, robots, canonical, OG URL이 localhost로 생성된다.
+   - Evidence: `config/profile.ts:9`, `app/layout.tsx:9`, `app/layout.tsx:23`, `app/work/[slug]/page.tsx:38`, `app/sitemap.ts:8`, `app/sitemap.ts:13`, `app/robots.ts:10`.
+   - Current impact: 배포 환경변수 누락 시 검색/공유 메타가 localhost를 가리킬 수 있다.
+   - Recommended action: production 도메인을 기본값으로 두거나 production build에서 `NEXT_PUBLIC_SITE_URL` 누락을 실패시킨다.
+
+4. README의 설치/실행 안내가 현재 package manager 정책과 맞지 않는다.
+   - Evidence: `README.md:6`, `README.md:10`, `README.md:12`, while `package.json:5` pins `yarn@1.22.22`.
+   - Current impact: 새 환경에서 npm/pnpm/bun으로 시작하면 lockfile과 검증 경로가 달라질 수 있다.
+   - Recommended action: README를 Yarn 1 기준 설치/검증/빌드/실행 절차로 정리한다.
+
+5. PM2 설정은 다중 인스턴스 의도가 불명확하다.
+   - Evidence: `ecosystem.config.js:8` through `ecosystem.config.js:12`.
+   - Current impact: `instances: 4`와 주석 처리된 `exec_mode: 'cluster'`가 함께 있어 실제 운영 방식이 불명확하다.
+   - Recommended action: 단일 인스턴스 또는 cluster 중 하나를 명시하고, production env/port 설정도 코드로 고정한다.
+
+6. 홈페이지 핵심 이미지가 큰 원본과 CSS background에 의존한다.
+   - Evidence: `components/main/MainWrapper.tsx:314`, `components/main/MainWrapper.tsx:510`, `components/main/MainWrapper.tsx:517`, `components/main/MainWrapper.tsx:525`; size scan still shows `img_user_1.jpg` 6.7 MB, `img_product_third.png` 3.4 MB, `img_product_second.png` 2.8 MB, `main-portfolio-photo.png` 1.6 MB.
+   - Current impact: responsive image optimization과 lazy loading을 활용하지 못해 모바일 초기 로딩 비용이 커질 수 있다.
+   - Recommended action: 큰 이미지를 web-size AVIF/WebP로 압축하고, 의미 있는 이미지는 `next/image` 기반으로 전환한다.
+
+7. 제거된 소셜 채널의 public asset이 계속 배포된다.
+   - Evidence: `config/profile.ts:24` through `config/profile.ts:30` only includes SoundCloud; `public/images/ico_insta.png`, `public/images/ico_twitter.png`, `public/images/ico_facebook.png` remain in `rg --files`.
+   - Current impact: 화면에서는 제거됐지만 public asset URL로는 불필요한 소셜 자산이 남는다.
+   - Recommended action: 미사용 소셜 아이콘 파일을 삭제하고, 소셜 채널은 `siteProfile.socials` 단일 데이터로만 관리한다.
+
+8. CI workflow가 아직 없어 로컬 수동 검증에 의존한다.
+   - Evidence: `git ls-files .github/workflows package-lock.json yarn.lock .nvmrc .node-version package.json README.md next.config.mjs ecosystem.config.js` returned no `.github/workflows` path.
+   - Current impact: `typecheck`, `lint`, `build`가 통과해도 push 전에 자동으로 강제되지 않는다.
+   - Recommended action: GitHub Actions workflow를 추가해 Node 20.12.2, Yarn 1.22.22 기준 install/typecheck/lint/build를 실행한다.
+
+### Verification
+
+- `pwd`: `/Users/sinsuho/Desktop/mywork/portfolio`.
+- `git status --short --branch`: `## main...origin/main`, only `PEER_REVIEW.md` modified.
+- `rg --files`: current file list rechecked.
+- Targeted search for `Source note`, `source:`, `objectFit: "cover"`, `aspectRatio: "4 / 3"`, `siteUrl`, `NEXT_PUBLIC_SITE_URL`, `instances: 4`, `exec_mode`, package-manager README commands, dead social icons, and `background-image`: Review 43 evidence reproduced.
+- `yarn typecheck`: passed.
+- `yarn lint`: passed with no warnings or errors.
+- `yarn build`: passed. Static generation again included `/work/narrow`, `/work/mmis-ai-harness`, `/work/redclick`, and four additional Work detail paths.
+- No local dev server was started during this review cycle.
+
+### Next Review Angle
+
+- 다음 회차도 먼저 현재 작업 트리를 확인한다. 만약 소스 변경이 없으면 동일 항목 반복보다 우선순위와 수정 순서를 더 압축해 기록한다.
+- 특히 public UI에 보이는 내부 작성 흔적(`Source note`)과 이미지 표시 품질을 가장 먼저 본다.
+
+## 2026-05-28 14:56 KST - Review 45
+
+### Scope
+
+- 사용자 요청에 따라 반복 리뷰를 중단하기 전 마지막 회차로 수행.
+- Review 44 이후 현재 파일 상태, 핵심 지적 증거, 검증 명령 결과를 다시 확인.
+- 실제 소스 코드는 수정하지 않고 `PEER_REVIEW.md`만 갱신.
+
+### Compared With Previous Review Log
+
+- Review 44 이후 소스 변경은 없었다. `git status --short --branch` 기준 변경 파일은 `PEER_REVIEW.md`뿐이다.
+- Review 44의 8개 Findings는 모두 유지된다.
+- 추가로, `yarn typecheck`와 `yarn build`를 병렬 실행하면 `.next/types` 재생성 타이밍 때문에 typecheck가 일시 실패할 수 있음을 확인했다. build 완료 후 typecheck 단독 실행은 통과했다.
+- 반복 리뷰는 이 회차로 중단한다.
+
+### Findings
+
+1. Public UI에서 먼저 제거해야 할 항목은 `Source note`다.
+   - Evidence: `app/work/[slug]/page.tsx:157`, `config/projects.ts:152`, `config/projects.ts:196`, `config/projects.ts:239`, `config/projects.ts:281`, `config/projects.ts:325`, `config/projects.ts:364`, `config/projects.ts:405`.
+   - Current impact: 프로젝트 상세 페이지가 방문자용 case study가 아니라 내부 이력서 근거 표시처럼 보일 수 있다.
+   - Recommended action: `source` 렌더링을 public UI에서 제거하고, 데이터는 내부 검증용으로만 유지한다.
+
+2. Narrow 모바일 증거 이미지 표시 방식이 현재 상세 레이아웃과 맞지 않는다.
+   - Evidence: `app/work/[slug]/page.tsx:149`, `app/work/[slug]/page.tsx:301`; Narrow support images are portrait screenshots.
+   - Current impact: 4:3 `cover` crop 때문에 퍼즐/랭킹 화면의 핵심 정보가 잘릴 수 있다.
+   - Recommended action: portrait 이미지에는 `contain` 또는 이미지별 aspect ratio를 적용한다.
+
+3. production URL 기본값이 localhost다.
+   - Evidence: `config/profile.ts:9`, `app/layout.tsx:9`, `app/layout.tsx:23`, `app/work/[slug]/page.tsx:38`, `app/sitemap.ts:8`, `app/sitemap.ts:13`, `app/robots.ts:10`.
+   - Current impact: 배포 환경변수 누락 시 canonical, sitemap, robots, OG URL이 localhost를 가리킨다.
+   - Recommended action: production 기본 도메인을 실제 배포 URL로 바꾸거나 production build에서 `NEXT_PUBLIC_SITE_URL` 누락을 실패시킨다.
+
+4. README와 package manager 정책이 불일치한다.
+   - Evidence: `README.md:6`, `README.md:10`, `README.md:12`; `package.json:5`.
+   - Current impact: 문서는 npm/pnpm/bun도 안내하지만 실제 repo는 Yarn 1로 고정되어 있다.
+   - Recommended action: README를 Yarn 1 기준 명령으로 정리한다.
+
+5. PM2 설정의 다중 인스턴스 의도가 불명확하다.
+   - Evidence: `ecosystem.config.js:8` through `ecosystem.config.js:12`.
+   - Current impact: `instances: 4`인데 cluster mode는 주석이라 운영 방식이 애매하다.
+   - Recommended action: 단일 인스턴스 또는 cluster mode 중 하나를 명시하고 production env/port도 코드화한다.
+
+6. 큰 이미지와 CSS background 의존이 남아 있다.
+   - Evidence: `components/main/MainWrapper.tsx:314`, `components/main/MainWrapper.tsx:510`, `components/main/MainWrapper.tsx:517`, `components/main/MainWrapper.tsx:525`; largest assets include `img_user_1.jpg` 6.7 MB, `img_product_third.png` 3.4 MB, `img_product_second.png` 2.8 MB, `main-portfolio-photo.png` 1.6 MB.
+   - Current impact: homepage image loading cost가 크고 `next/image` 최적화 이점을 쓰지 못한다.
+   - Recommended action: web-size AVIF/WebP로 압축하고 의미 있는 이미지는 `next/image`로 전환한다.
+
+7. 제거된 소셜 채널의 public asset이 남아 있다.
+   - Evidence: `public/images/ico_insta.png`, `public/images/ico_twitter.png`, `public/images/ico_facebook.png`; `config/profile.ts:24` through `config/profile.ts:30`.
+   - Current impact: 화면에서는 빠졌지만 public asset URL은 계속 배포된다.
+   - Recommended action: 미사용 소셜 아이콘을 삭제한다.
+
+8. CI가 없어 검증이 수동 실행에 의존한다.
+   - Evidence: `git ls-files .github/workflows package-lock.json yarn.lock .nvmrc .node-version package.json README.md next.config.mjs ecosystem.config.js` returned no `.github/workflows` path.
+   - Current impact: 검증 명령이 통과해도 push 전 자동 게이트가 없다.
+   - Recommended action: Node 20.12.2/Yarn 1.22.22 기준 GitHub Actions workflow를 추가한다.
+
+9. `typecheck`와 `build` 병렬 실행은 `.next/types` 간섭을 만들 수 있다.
+   - Evidence: parallel `yarn typecheck` failed with missing `.next/types/app/...` files, while immediately rerunning `yarn typecheck` after `yarn build` completed passed.
+   - Current impact: CI나 로컬 스크립트에서 typecheck/build를 병렬화하면 flaky failure가 생길 수 있다.
+   - Recommended action: 검증 순서를 `yarn typecheck && yarn lint && yarn build`처럼 직렬로 유지한다. 이미 `verify`는 typecheck/lint 직렬이므로 build까지 포함한 CI에서도 병렬화하지 않는다.
+
+### Verification
+
+- `pwd`: `/Users/sinsuho/Desktop/mywork/portfolio`.
+- `git status --short --branch`: `## main...origin/main`, only `PEER_REVIEW.md` modified.
+- `rg --files`: current file list rechecked.
+- Targeted search for `Source note`, `source:`, `objectFit: "cover"`, `aspectRatio: "4 / 3"`, `siteUrl`, `NEXT_PUBLIC_SITE_URL`, `instances: 4`, `exec_mode`, package-manager README commands, dead social icons, and `background-image`: prior evidence reproduced.
+- `yarn lint`: passed with no warnings or errors.
+- `yarn build`: passed. Static generation included `/work/narrow`, `/work/mmis-ai-harness`, `/work/redclick`, and four additional Work detail paths.
+- Parallel `yarn typecheck` failed while `yarn build` was regenerating `.next/types`; rerun after build completed passed.
+- No local dev server was started during this review cycle.
+
+### Next Review Angle
+
+- 반복 리뷰는 사용자 요청에 따라 중단한다.
+- 다음에 수정 작업을 시작한다면 우선순위는 `Source note` 제거, Narrow portrait 이미지 표시 개선, production URL 기본값 정리, README/CI 정리 순서가 적절하다.
+
+## 2026-05-28 15:03 KST - Implementation Follow-up
+
+### Scope
+
+- Review 45의 우선순위 항목을 실제 코드에 반영.
+- 반복 리뷰는 재시작하지 않고, 수정 결과와 검증만 기록.
+
+### Resolved
+
+1. Work 상세의 `Source note` 공개 노출을 제거했다.
+   - `app/work/[slug]/page.tsx`에서 `Source note: ...` 렌더링을 제거했다.
+   - `config/projects.ts`의 `source` 데이터는 내부 검증용으로 남겨 두었다.
+
+2. Narrow 세로 스크린샷 crop 문제를 줄였다.
+   - `ProjectImage`에 `fit`, `aspectRatio` 옵션을 추가했다.
+   - Narrow support 이미지에는 `fit: "contain"`과 `390 / 844` 비율을 적용했다.
+
+3. 메타 URL fallback을 개선했다.
+   - `config/profile.ts`에서 `NEXT_PUBLIC_SITE_URL` 우선, Vercel의 `VERCEL_URL` 보조, 로컬 fallback 순서로 정리했다.
+   - README에 배포 환경에서 `NEXT_PUBLIC_SITE_URL`을 실제 도메인으로 설정하라고 명시했다.
+
+4. README와 PM2 설정을 정리했다.
+   - README를 Yarn 1 기준 설치/개발/검증/빌드/실행 명령으로 정리했다.
+   - PM2는 단일 인스턴스 기준으로 명확히 바꾸고 production env를 코드에 명시했다.
+
+5. CI workflow를 추가했다.
+   - `.github/workflows/ci.yml`에서 Node 20.12.2, Yarn 1.22.22 기준 install/typecheck/lint/build를 직렬 실행한다.
+
+6. 미사용 public asset과 큰 이미지 일부를 정리했다.
+   - 더 이상 참조되지 않는 Instagram/Twitter/Facebook 아이콘, Next/Vercel 기본 SVG, 미사용 user/main 이미지를 삭제했다.
+   - `main-portfolio-photo.png`를 `main-portfolio-photo.jpg`로 변환해 약 208 KB로 줄이고 참조 경로를 갱신했다.
+   - `img_product_second.png`, `img_product_third.png`는 크기를 줄여 각각 약 1.2 MB 수준으로 낮췄다.
+
+### Verification
+
+- `yarn typecheck`: passed.
+- `yarn lint`: passed with no warnings or errors.
+- `yarn build`: passed. Static generation includes `/work/narrow`, `/work/mmis-ai-harness`, `/work/redclick`, and four additional Work detail paths.
+- Targeted search confirmed removed references no longer appear in app/components/config/README/ecosystem/public search scope.
+- No local dev server was started.
