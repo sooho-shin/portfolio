@@ -1,16 +1,16 @@
 import type { MetadataRoute } from "next";
 import { projects } from "@/config/projects";
-import { siteProfile } from "@/config/profile";
+import { buildCanonicalUrl, publicRoutes } from "@/config/seo";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
-  const routes = ["", "/about", "/work"].map(path => ({
-    url: `${siteProfile.siteUrl}${path}`,
+  const routes = publicRoutes.map(path => ({
+    url: buildCanonicalUrl(path),
     lastModified: now,
   }));
 
   const projectRoutes = projects.map(project => ({
-    url: `${siteProfile.siteUrl}/work/${project.slug}`,
+    url: buildCanonicalUrl(`/work/${project.slug}`),
     lastModified: now,
   }));
 

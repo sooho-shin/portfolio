@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProject, projects } from "@/config/projects";
-import { siteProfile } from "@/config/profile";
+import { buildCanonicalUrl } from "@/config/seo";
 
 type Props = {
   params: {
@@ -29,13 +29,21 @@ export function generateMetadata({ params }: Props): Metadata {
     title: project.title,
     description: project.summary,
     alternates: {
-      canonical: `/work/${project.slug}`,
+      canonical: buildCanonicalUrl(`/work/${project.slug}`),
     },
     openGraph: {
       title: `${project.title} | Sooho Shin`,
       description: project.summary,
       type: "article",
-      url: `${siteProfile.siteUrl}/work/${project.slug}`,
+      url: buildCanonicalUrl(`/work/${project.slug}`),
+      siteName: "신수호 개발자 포트폴리오",
+      locale: "ko_KR",
+      images: project.images?.[0] ? [project.images[0].src] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${project.title} | 신수호 개발자 포트폴리오`,
+      description: project.summary,
       images: project.images?.[0] ? [project.images[0].src] : undefined,
     },
   };

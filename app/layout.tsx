@@ -4,24 +4,27 @@ import NaviComponent from "@/components/NaviBox";
 import { Noto_Sans_KR } from "next/font/google";
 import SmoothScrolling from "@/lib/smoothScrolling";
 import { siteMetadata, siteProfile } from "@/config/profile";
+import { buildCanonicalUrl, candidateKeywords } from "@/config/seo";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteProfile.siteUrl),
   title: {
     default: siteMetadata.title,
-    template: "%s | Sooho Shin",
+    template: "%s | 신수호 개발자 포트폴리오",
   },
   description: siteMetadata.description,
-  authors: [{ name: siteProfile.name }],
-  creator: siteProfile.name,
+  applicationName: "신수호 개발자 포트폴리오",
+  authors: [{ name: siteProfile.koreanName }, { name: siteProfile.name }],
+  creator: siteProfile.koreanName,
+  keywords: [...candidateKeywords],
   alternates: {
-    canonical: "/",
+    canonical: buildCanonicalUrl("/"),
   },
   openGraph: {
     title: siteMetadata.title,
     description: siteMetadata.description,
-    url: siteProfile.siteUrl,
-    siteName: "Sooho Shin Portfolio",
+    url: buildCanonicalUrl("/"),
+    siteName: "신수호 개발자 포트폴리오",
     type: "website",
     locale: "ko_KR",
     images: ["/images/main-portfolio-photo.jpg"],
@@ -31,6 +34,34 @@ export const metadata: Metadata = {
     title: siteMetadata.title,
     description: siteMetadata.description,
     images: ["/images/main-portfolio-photo.jpg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
+};
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "ProfilePage",
+  name: siteMetadata.title,
+  url: buildCanonicalUrl("/"),
+  inLanguage: "ko-KR",
+  description: siteMetadata.description,
+  mainEntity: {
+    "@type": "Person",
+    name: siteProfile.koreanName,
+    alternateName: siteProfile.name,
+    url: buildCanonicalUrl("/"),
+    email: siteProfile.email,
+    jobTitle: siteProfile.role,
+    description: siteProfile.description,
+    knowsAbout: [...candidateKeywords, ...siteProfile.capabilities],
+    sameAs: siteProfile.socials.map(social => social.href),
   },
 };
 
@@ -47,6 +78,12 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className={notoSansKr.className}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(structuredData).replace(/</g, "\\u003c"),
+          }}
+        />
         <SmoothScrolling>
           <StyledComponentsRegistry>
             <NaviComponent />

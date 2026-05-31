@@ -1,17 +1,15 @@
-const localSiteUrl = "http://localhost:3000";
-const vercelSiteUrl = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : undefined;
+import { canonicalBaseUrl } from "./seo";
 
 export const siteProfile = {
   name: "Sooho Shin",
+  koreanName: "신수호",
   displayName: "Sooho",
   email: "soojoon92@gmail.com",
-  role: "Service-oriented frontend developer",
+  role: "AI-assisted service frontend developer",
   headline: "서비스 흐름, API 연동, 상태 구조, 검증 가능한 동작을 함께 설계하는 개발자",
   description:
     "React, Next.js, TypeScript 기반의 서비스 UI를 만들고, API 연동과 상태 관리, 자동화된 검증 흐름까지 제품 맥락에 맞게 정리합니다.",
-  siteUrl: process.env.NEXT_PUBLIC_SITE_URL || vercelSiteUrl || localSiteUrl,
+  siteUrl: canonicalBaseUrl,
   capabilities: [
     "Service Frontend",
     "React / Next.js",
@@ -36,7 +34,7 @@ export const siteProfile = {
 };
 
 export const siteMetadata = {
-  title: "Sooho Shin | Service Frontend Developer",
+  title: "신수호 | AI 개발자 포트폴리오",
   description:
-    "React, Next.js, TypeScript 기반 서비스 프론트엔드와 API 연동, 상태 구조, AI 추천 흐름, 자동화 검증 경험을 정리한 포트폴리오입니다.",
+    "React, Next.js, TypeScript 기반 서비스 프론트엔드와 API 연동, 상태 구조, AI 추천 흐름, 자동화 검증 경험을 정리한 개발자 포트폴리오입니다.",
 };

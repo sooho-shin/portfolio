@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { siteProfile } from "@/config/profile";
+import { buildCanonicalUrl } from "@/config/seo";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
     },
-    sitemap: `${siteProfile.siteUrl}/sitemap.xml`,
+    sitemap: buildCanonicalUrl("/sitemap.xml"),
   };
 }

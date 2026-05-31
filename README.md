@@ -7,13 +7,10 @@
 
 ## Environment
 
-배포 환경에서는 canonical URL, sitemap, robots, Open Graph URL 생성을 위해 `NEXT_PUBLIC_SITE_URL`을 실제 사이트 주소로 설정한다.
+canonical URL, sitemap, robots, Open Graph URL은 `config/seo.ts`의 대표 URL을 기준으로 생성한다.
 
-Vercel에서는 `VERCEL_URL`이 있으면 보조 fallback으로 사용한다. GitHub Actions에서는 repository variable `NEXT_PUBLIC_SITE_URL`을 설정한다. 로컬 개발에서만 `http://localhost:3000`을 fallback으로 사용한다.
-
-```bash
-NEXT_PUBLIC_SITE_URL=https://your-production-domain.example
-```
+- 대표 URL: `https://portfolio-beta-navy-98.vercel.app`
+- Search Console 준비 문서: `docs/search-console-seo-checklist.md`
 
 ## Commands
 
