@@ -6,6 +6,7 @@ import { breakpoints } from "@/config/breakboint";
 import LeftWrapperComponent from "@/components/LeftWrapper";
 import RightWrapperComponent from "@/components/RightWrapper";
 import Link from "next/link";
+import Image from "next/image";
 import { Playfair_Display } from "next/font/google";
 import PageSection from "@/components/atoms/PageSection";
 import BlackholeSvg from "@/components/atoms/BlackholeSvg";
@@ -68,7 +69,15 @@ const MainWrapper = () => {
               </span>
             </div>
           </TopRightInfo>
-          <MainBgContainer />
+          <MainBgContainer aria-hidden="true">
+            <Image
+              src="/images/main-portfolio-photo.jpg"
+              alt=""
+              fill
+              priority
+              sizes="(max-width: 768px) 100vw, 75vw"
+            />
+          </MainBgContainer>
           <BlackholePositioner>
             <div className="js-blackhole-pinner blackhole-pinner">
               <BlackholeSvg id="blackhole" className="blackhole" />
@@ -189,16 +198,42 @@ const MainWrapper = () => {
       <ProjectWrapper $hover={hoverState}>
         <LeftWrapperComponent></LeftWrapperComponent>
         <RightWrapperComponent>
-          <div
+          <Link
+            href="/work"
             className="gallery"
+            aria-label="Work 프로젝트 보기"
             onMouseEnter={() => setHoverState(true)}
             onMouseLeave={() => setHoverState(false)}
+            onFocus={() => setHoverState(true)}
+            onBlur={() => setHoverState(false)}
+            onTouchStart={() => setHoverState(true)}
           >
             <div className="content">
               <div className="project-box">
-                <div className="project first"></div>
-                <div className="project second"></div>
-                <div className="project third"></div>
+                <div className="project first" aria-hidden="true">
+                  <Image
+                    src="/images/img_product_first.png"
+                    alt=""
+                    fill
+                    sizes="(max-width: 768px) 50vw, 37vw"
+                  />
+                </div>
+                <div className="project second" aria-hidden="true">
+                  <Image
+                    src="/images/img_product_second.png"
+                    alt=""
+                    fill
+                    sizes="(max-width: 768px) 50vw, 37vw"
+                  />
+                </div>
+                <div className="project third" aria-hidden="true">
+                  <Image
+                    src="/images/img_product_third.png"
+                    alt=""
+                    fill
+                    sizes="(max-width: 768px) 50vw, 37vw"
+                  />
+                </div>
               </div>
               <div className="text-loop-container top">
                 <div className="loop-box">
@@ -252,7 +287,7 @@ const MainWrapper = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </Link>
         </RightWrapperComponent>
       </ProjectWrapper>
     </PortfolioPageShell>
@@ -311,9 +346,10 @@ const MainBgContainer = styled.div`
   width: 100%;
   height: 100%;
   z-index: -1;
-  background-image: url("/images/main-portfolio-photo.jpg");
-  background-position: center;
-  background-size: cover;
+
+  img {
+    object-fit: cover;
+  }
 `;
 
 const productShowAniFirst = keyframes`
@@ -505,27 +541,20 @@ const ProjectWrapper = styled.div<{ $hover: boolean }>`
         position: absolute;
         left: 50%;
         top: 50%;
+        overflow: hidden;
+
+        img {
+          object-fit: cover;
+        }
 
         &.first {
-          background-image: url("/images/img_product_first.png");
-          background-size: cover;
-          background-position: center;
-          background-repeat: no-repeat;
           transform: translate(-50%, -50%);
         }
         &.second {
-          background-image: url("/images/img_product_second.png");
-          background-size: cover;
-          background-position: center;
-          background-repeat: no-repeat;
           transform: translate(-50%, -50%) rotate(6deg);
           opacity: 0;
         }
         &.third {
-          background-image: url("/images/img_product_third.png");
-          background-size: cover;
-          background-position: center;
-          background-repeat: no-repeat;
           transform: translate(-50%, -50%) rotate(-2deg);
           opacity: 0;
         }

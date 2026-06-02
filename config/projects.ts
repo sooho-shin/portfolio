@@ -22,7 +22,6 @@ export type Project = {
   images?: readonly ProjectImage[];
   externalUrl?: string;
   externalLabel?: string;
-  source?: string;
 };
 
 const yummygameImages = [
@@ -157,7 +156,6 @@ export const projects: Project[] = [
     images: narrowImages,
     externalUrl: "https://pinpoint-seven.vercel.app/",
     externalLabel: "Visit Narrow",
-    source: "Resume: Narrow, 2026.04 - 2026.05",
   },
   {
     slug: "mmis-ai-harness",
@@ -201,7 +199,6 @@ export const projects: Project[] = [
       "화면 구현, API 흐름, DB 영향 검증을 같은 루프 안에서 다루도록 작업 기준을 구체화",
     ],
     images: mmisImages,
-    source: "Resume: MMIS, 2026.02 - 2026.05",
   },
   {
     slug: "redclick",
@@ -244,7 +241,6 @@ export const projects: Project[] = [
     images: redclickImages,
     externalUrl: "https://redclick.net/",
     externalLabel: "Visit RedClick",
-    source: "Resume: RedClick, 2025.10 - 2025.12",
   },
   {
     slug: "location",
@@ -286,7 +282,6 @@ export const projects: Project[] = [
       "AI 추천을 실제 위치 데이터와 지도 UI에 연결한 서비스 흐름을 구성",
       "프론트엔드와 백엔드를 분리한 TypeScript 모노레포 구조를 정리",
     ],
-    source: "Resume: Location, 2025.05 - 2025.06",
   },
   {
     slug: "amazoncar",
@@ -330,7 +325,6 @@ export const projects: Project[] = [
     images: amazoncarImages,
     externalUrl: "https://www.amazoncar.co.kr/",
     externalLabel: "Visit AmazonCar",
-    source: "Resume: AmazonCar, 2025.01 - 2025.08",
   },
   {
     slug: "yummygame",
@@ -369,7 +363,6 @@ export const projects: Project[] = [
       "사용자 직접 액션과 자동 진행 흐름을 같은 UI 안에서 구분해 처리",
     ],
     images: yummygameImages,
-    source: "Resume: Yummy Game, 2023.07 - 2024.03",
   },
   {
     slug: "zudice",
@@ -410,7 +403,6 @@ export const projects: Project[] = [
       "재사용 가능한 UI 컴포넌트 기반으로 신규 게임 개발 속도와 유지보수성을 개선",
       "실시간 게임 데이터 처리와 초기 로딩 경험 개선에 기여",
     ],
-    source: "Resume: Zudice, 2022.05 - 2023.06",
   },
 ];
 

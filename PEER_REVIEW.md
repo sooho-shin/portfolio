@@ -4289,3 +4289,293 @@
 - `yarn build`: passed. Static generation includes `/work/narrow`, `/work/mmis-ai-harness`, `/work/redclick`, and four additional Work detail paths.
 - Targeted search confirmed removed references no longer appear in app/components/config/README/ecosystem/public search scope.
 - No local dev server was started.
+
+## 2026-06-02 12:56 KST - Review 46
+
+### Scope
+
+- 사용자 요청에 따라 반복 피어리뷰를 재시작한 1회차.
+- 현재 작업 트리, 기존 리뷰 로그, App Router 라우트/메타데이터, Work/About/Home 주요 컴포넌트, 이미지/접근성/배포 설정을 다시 확인.
+- 실제 소스 코드는 수정하지 않고 `PEER_REVIEW.md`만 갱신.
+
+### Compared With Previous Review Log
+
+- Review 45 이후 Implementation Follow-up에서 다수의 고우선순위 항목이 해소된 상태다.
+- 해소됨: Work 상세 `Source note` 공개 렌더링 제거, Narrow 세로 이미지 contain/aspectRatio 적용, canonical URL localhost fallback 제거, README Yarn 1 기준 정리, PM2 단일 인스턴스 명시, GitHub Actions CI 추가, 미사용 소셜 아이콘 제거.
+- 유지됨: 홈페이지 갤러리 reveal은 여전히 mouse hover 전용이고, 큰 이미지 일부는 여전히 CSS background에 의존한다.
+- 변경됨: `source` 데이터는 화면 렌더링에서는 제거됐지만, About 클라이언트 컴포넌트가 `projects` 전체를 import하면서 build output에 `Resume: ...` 문자열이 포함되는 것을 확인했다.
+
+### Findings
+
+1. 내부 provenance용 `source` 문자열이 클라이언트/서버 build output에 포함된다.
+   - Evidence: `config/projects.ts:25`, `config/projects.ts:160`, `config/projects.ts:204`, `config/projects.ts:247`, `config/projects.ts:289`, `config/projects.ts:333`, `config/projects.ts:372`, `config/projects.ts:413`; `rg` confirmed `Resume: Narrow` and related strings in `.next/server/chunks/702.js` after `yarn build`.
+   - Current impact: public UI에는 더 이상 보이지 않지만, 빌드 산출물에는 이력서 출처 문자열이 그대로 들어간다. 내부 검증 메모라면 방문자가 받을 수 있는 JS/server bundle 데이터와 분리하는 편이 낫다.
+   - Recommended action: public-facing `projects` 데이터에서는 `source`를 제거하고, 내부 검증용 provenance가 필요하면 별도 private/reference 문서나 서버 전용 데이터로 분리한다.
+
+2. 홈페이지 하단 갤러리 reveal이 mouse hover 전용이다.
+   - Evidence: `components/main/MainWrapper.tsx:192` through `components/main/MainWrapper.tsx:196` uses `onMouseEnter` / `onMouseLeave`; no matching `onFocus`, `onBlur`, touch handler, button, or link semantics were found for the gallery container.
+   - Current impact: 키보드 사용자와 일부 터치 사용자는 상품 이미지 reveal 상태를 같은 방식으로 경험하거나 제어하기 어렵다.
+   - Recommended action: 갤러리를 실제 Work 이동 링크나 버튼으로 만들고 `onFocus`/`onBlur`/touch interaction을 함께 연결한다. 단순 장식이면 `aria-hidden` 처리와 정적 표시 정책을 명확히 한다.
+
+3. 홈페이지 핵심 이미지는 아직 CSS background와 원본 PNG에 의존한다.
+   - Evidence: `components/main/MainWrapper.tsx:314`, `components/main/MainWrapper.tsx:510`, `components/main/MainWrapper.tsx:517`, `components/main/MainWrapper.tsx:525`; current size scan still shows `public/images/img_product_second.png` 1.2 MB and `public/images/img_product_third.png` 1.2 MB.
+   - Current impact: 이전보다 줄었지만 responsive `next/image` 최적화, intrinsic sizing, lazy/priority 제어, semantic `alt`를 활용하지 못한다. 모바일 첫 방문에서 이미지 decode/transfer 비용이 남을 수 있다.
+   - Recommended action: 의미 있는 이미지는 `next/image`로 전환하고, 장식용 product layer라면 더 작은 WebP/AVIF asset과 명시적 reduced-motion/static fallback을 사용한다.
+
+### Verification
+
+- `pwd`: `/Users/sinsuho/Desktop/mywork/portfolio`.
+- `git status --short --branch`: `## main...origin/main`, clean at review start.
+- `rg --files`: current source/assets reviewed.
+- Read existing `PEER_REVIEW.md`, `package.json`, `app/layout.tsx`, `app/work/[slug]/page.tsx`, `components/NaviBox.tsx`, `components/main/MainWrapper.tsx`, `components/about/AboutWrapper.tsx`, `components/Footer.tsx`, `styles/GlobalStyles.ts`, `config/profile.ts`, `config/seo.ts`, `config/projects.ts`, `README.md`, `ecosystem.config.js`, and `.github/workflows/ci.yml`.
+- Targeted searches checked `Source note`, `source:`, `target="_blank"`, `rel=`, `<img`, `background-image`, `objectFit`, `aspectRatio`, `NEXT_PUBLIC_SITE_URL`, `localhost`, removed social icons, package-manager commands, PM2 instance settings, and `prefers-reduced-motion`.
+- `yarn typecheck`: passed.
+- `yarn lint`: passed with no warnings or errors.
+- `yarn build`: passed. Static generation produced 16 app routes including `/work/narrow`, `/work/mmis-ai-harness`, `/work/redclick`, and four additional Work detail paths.
+- `rg` against `.next/static` and `.next/server` confirmed `Resume: ...` provenance strings are present in build output.
+- No local dev server was started during this review cycle.
+
+### Next Review Angle
+
+- 다음 회차는 소스 변경 여부를 먼저 확인하고, `source` 데이터 분리 여부와 homepage gallery 접근성 개선 여부를 우선 비교한다.
+- 소스 변경이 없으면 이미지 최적화 잔여분과 build bundle에 포함되는 public data 범위를 더 좁혀 본다.
+
+## 2026-06-02 13:07 KST - Review 47
+
+### Scope
+
+- Review 46 이후 10분 간격 재점검.
+- 현재 작업 트리, 파일 목록, Review 46의 핵심 증거, 이미지 크기, build output 포함 데이터를 다시 확인.
+- 실제 소스 코드는 수정하지 않고 `PEER_REVIEW.md`만 갱신.
+
+### Compared With Previous Review Log
+
+- Review 46 이후 소스 변경은 없었다. `git status --short --branch` 기준 변경 파일은 `PEER_REVIEW.md`뿐이다.
+- Review 46의 3개 Findings는 모두 유지된다.
+- 추가 확인: `source` 문자열은 `.next/server`뿐 아니라 `.next/static/chunks/649-89efabcc0a599329.js`에도 포함된다. About 페이지가 클라이언트 컴포넌트에서 `projects` 전체를 import하기 때문에 방문자에게 전달되는 JS chunk에도 내부 provenance 문자열이 들어갈 수 있다.
+- 이전 고우선순위 해소 항목은 계속 해소 상태다. `Source note` public 렌더링, localhost canonical fallback, README package-manager 불일치, PM2 다중 인스턴스 혼선, CI 부재, 제거된 소셜 아이콘 잔존은 재현되지 않았다.
+
+### Findings
+
+1. 내부 provenance용 `source` 문자열이 클라이언트 static chunk에 포함된다.
+   - Evidence: `config/projects.ts:25`, `config/projects.ts:160`, `config/projects.ts:204`, `config/projects.ts:247`, `config/projects.ts:289`, `config/projects.ts:333`, `config/projects.ts:372`, `config/projects.ts:413`; after `yarn build`, `rg -l "Resume: Narrow|Resume: MMIS|..." .next/static .next/server` returned `.next/static/chunks/649-89efabcc0a599329.js`, `.next/server/chunks/702.js`, `.next/server/app/sitemap.xml/route.js`, and `.next/server/app/work/[slug]/page.js`.
+   - Current impact: 화면에는 표시되지 않지만 내부 출처 메모가 방문자에게 내려가는 번들에 포함된다. 민감정보는 아니어도 public portfolio data와 private provenance의 경계가 흐려진다.
+   - Recommended action: `Project` public 타입에서 `source`를 제거하거나, `source`가 필요한 내부 검증 데이터는 클라이언트가 import하지 않는 별도 파일로 분리한다.
+
+2. 홈페이지 하단 갤러리 reveal이 여전히 mouse hover 전용이다.
+   - Evidence: `components/main/MainWrapper.tsx:192` through `components/main/MainWrapper.tsx:196` only wires `onMouseEnter` / `onMouseLeave`; targeted search found no matching `onFocus`, `onBlur`, or touch handler for the gallery.
+   - Current impact: 키보드와 터치 사용자는 hover 기반 이미지 reveal을 동등하게 제어하기 어렵다.
+   - Recommended action: 갤러리 컨테이너를 `/work` 링크나 명시적 버튼으로 바꾸고 focus/touch 상태를 함께 처리한다. 장식이면 `aria-hidden`과 정적 상태로 정리한다.
+
+3. 홈페이지 product layer 이미지는 아직 CSS background와 1 MB대 PNG에 의존한다.
+   - Evidence: `components/main/MainWrapper.tsx:314`, `components/main/MainWrapper.tsx:510`, `components/main/MainWrapper.tsx:517`, `components/main/MainWrapper.tsx:525`; current size scan shows `public/images/img_product_second.png` 1.2 MB and `public/images/img_product_third.png` 1.2 MB.
+   - Current impact: `next/image`의 responsive loading과 intrinsic size 제어를 받지 못하고, 모바일 초기 로딩 비용이 아직 남는다.
+   - Recommended action: product layer를 WebP/AVIF로 더 압축하거나 `next/image`로 전환한다. 의미 없는 장식이면 alt가 필요한 content image가 아니라는 정책도 함께 명시한다.
+
+### Verification
+
+- `git status --short --branch`: `## main...origin/main`, only `PEER_REVIEW.md` modified.
+- `rg --files`: current file list rechecked.
+- Targeted searches checked `source:`, `Source note`, hover/focus/touch handlers, `background-image`, product image paths, `<img`, external link `rel`, `prefers-reduced-motion`, canonical URL, and localhost references.
+- Image size scan confirmed current largest relevant homepage assets: `img_product_second.png` 1.2 MB, `img_product_third.png` 1.2 MB, `img_product_first.png` 224 KB, `main-portfolio-photo.jpg` 208 KB.
+- `yarn typecheck`: passed.
+- `yarn lint`: passed with no warnings or errors.
+- `yarn build`: passed. Static generation produced 16 app routes including `/work/narrow`, `/work/mmis-ai-harness`, `/work/redclick`, and four additional Work detail paths.
+- `rg -l` against `.next/static` and `.next/server` confirmed `Resume: ...` provenance strings are present in both client static and server build output.
+- No local dev server was started during this review cycle.
+
+### Next Review Angle
+
+- 다음 회차는 소스 변경 여부를 다시 확인하고, `source` 분리 여부를 최우선으로 비교한다.
+- 소스 변경이 없으면 반복 항목을 길게 복사하지 않고, bundle exposure와 homepage accessibility/image 항목의 유지 여부만 압축해 기록한다.
+
+## 2026-06-02 13:18 KST - Review 48
+
+### Scope
+
+- Review 47 이후 10분 간격 재점검.
+- 현재 작업 트리, 파일 목록, 반복 지적 증거, build output 포함 문자열, type/lint/build 검증을 다시 확인.
+- 실제 소스 코드는 수정하지 않고 `PEER_REVIEW.md`만 갱신.
+
+### Compared With Previous Review Log
+
+- Review 47 이후 소스 변경은 없었다. `git status --short --branch` 기준 변경 파일은 `PEER_REVIEW.md`뿐이다.
+- Review 47의 3개 Findings는 그대로 유지된다.
+- 추가 신규 고위험 항목은 확인하지 못했다. 이번 회차는 같은 증거가 현재 코드와 build output에서 계속 재현되는지 확인한 유지 회차다.
+
+### Findings
+
+1. 내부 provenance용 `source` 문자열이 public build output에 계속 포함된다.
+   - Evidence: `config/projects.ts:25`, `config/projects.ts:160`, `config/projects.ts:204`, `config/projects.ts:247`, `config/projects.ts:289`, `config/projects.ts:333`, `config/projects.ts:372`, `config/projects.ts:413`; `rg -l "Resume: Narrow|Resume: MMIS|..." .next/static .next/server` returned `.next/static/chunks/649-89efabcc0a599329.js`, `.next/server/chunks/702.js`, `.next/server/app/sitemap.xml/route.js`, and `.next/server/app/work/[slug]/page.js`.
+   - Current impact: 화면 노출은 제거됐지만 내부 출처 메모가 클라이언트 static chunk까지 포함되어 public data/private memo 경계가 흐려진다.
+   - Recommended action: `source`를 public `projects` 데이터에서 제거하거나 클라이언트가 import하지 않는 내부 전용 파일로 분리한다.
+
+2. 홈페이지 하단 갤러리 reveal은 여전히 mouse hover 전용이다.
+   - Evidence: `components/main/MainWrapper.tsx:192` through `components/main/MainWrapper.tsx:196`; targeted search again found `onMouseEnter` without equivalent focus/touch interaction.
+   - Current impact: 키보드와 터치 사용자는 hover 기반 이미지 reveal을 동등하게 사용할 수 없다.
+   - Recommended action: 갤러리를 링크/버튼으로 만들고 `onFocus`, `onBlur`, touch state를 함께 처리하거나, 장식 요소로 확정해 `aria-hidden`/정적 표시로 정리한다.
+
+3. 홈페이지 product layer 이미지는 여전히 CSS background와 1 MB대 PNG를 사용한다.
+   - Evidence: `components/main/MainWrapper.tsx:314`, `components/main/MainWrapper.tsx:510`, `components/main/MainWrapper.tsx:517`, `components/main/MainWrapper.tsx:525`; prior size scan in this run still showed `img_product_second.png` and `img_product_third.png` at 1.2 MB each.
+   - Current impact: `next/image` 최적화, intrinsic sizing, semantic alt, lazy/priority 제어를 활용하지 못한다.
+   - Recommended action: WebP/AVIF asset으로 더 압축하거나 `next/image`로 전환한다.
+
+### Verification
+
+- `git status --short --branch`: `## main...origin/main`, only `PEER_REVIEW.md` modified.
+- `rg --files`: current file list rechecked.
+- Targeted search checked `TODO`, `FIXME`, `any`, `useEffect`, `target="_blank"`, `<img`, `console.`, `eslint-disable`, `href="#"`, `router.push`, `prefers-reduced-motion`, `source:`, `onMouseEnter`, and `background-image`.
+- `rg -l` against `.next/static` and `.next/server` confirmed `Resume: ...` provenance strings are still present after build.
+- `yarn typecheck`: passed.
+- `yarn lint`: passed with no warnings or errors.
+- `yarn build`: passed. Static generation produced 16 app routes including `/work/narrow`, `/work/mmis-ai-harness`, `/work/redclick`, and four additional Work detail paths.
+- No local dev server was started during this review cycle.
+
+### Next Review Angle
+
+- 다음 회차도 먼저 소스 변경 여부를 확인한다.
+- 소스 변경이 없으면 세 항목의 유지 여부만 압축 기록하고, 새 증거가 있을 때만 Finding 세부 내용을 확장한다.
+
+## 2026-06-02 13:29 KST - Review 49
+
+### Scope
+
+- Review 48 이후 10분 간격 재점검.
+- 작업 트리, 파일 목록, 반복 지적 증거, 이미지 크기, type/lint/build, build output 포함 문자열을 다시 확인.
+- 실제 소스 코드는 수정하지 않고 `PEER_REVIEW.md`만 갱신.
+
+### Compared With Previous Review Log
+
+- Review 48 이후 소스 변경은 없었다. `git status --short --branch` 기준 변경 파일은 `PEER_REVIEW.md`뿐이다.
+- Review 48의 3개 Findings는 그대로 유지된다.
+- 새 고위험 항목은 확인하지 못했다.
+
+### Findings
+
+1. 내부 provenance용 `source` 문자열이 public build output에 계속 포함된다.
+   - Evidence: `config/projects.ts:160`, `config/projects.ts:204`, `config/projects.ts:247`, `config/projects.ts:289`, `config/projects.ts:333`, `config/projects.ts:372`, `config/projects.ts:413`; after `yarn build`, `rg -l "Resume: Narrow|Resume: MMIS|..." .next/static .next/server` returned `.next/static/chunks/649-89efabcc0a599329.js`, `.next/server/chunks/702.js`, `.next/server/app/sitemap.xml/route.js`, and `.next/server/app/work/[slug]/page.js`.
+   - Current impact: public UI에는 보이지 않지만 내부 출처 메모가 클라이언트 static chunk에 남는다.
+   - Recommended action: `source`를 public `projects` 데이터에서 제거하거나 클라이언트가 import하지 않는 내부 전용 파일로 분리한다.
+
+2. 홈페이지 하단 갤러리 reveal은 여전히 mouse hover 전용이다.
+   - Evidence: `components/main/MainWrapper.tsx:194`, `components/main/MainWrapper.tsx:195`; targeted search found no matching focus/touch handler for the gallery.
+   - Current impact: 키보드와 터치 사용자는 hover 기반 reveal을 동등하게 사용할 수 없다.
+   - Recommended action: 갤러리를 링크/버튼으로 만들고 focus/touch 상태를 함께 처리하거나, 장식 요소로 정리한다.
+
+3. 홈페이지 product layer 이미지는 여전히 CSS background와 1 MB대 PNG를 사용한다.
+   - Evidence: `components/main/MainWrapper.tsx:314`, `components/main/MainWrapper.tsx:510`, `components/main/MainWrapper.tsx:517`, `components/main/MainWrapper.tsx:525`; size check shows `img_product_second.png` 1.2 MB and `img_product_third.png` 1.2 MB.
+   - Current impact: `next/image` 최적화, intrinsic sizing, semantic alt, lazy/priority 제어를 활용하지 못한다.
+   - Recommended action: WebP/AVIF asset으로 더 압축하거나 `next/image`로 전환한다.
+
+### Verification
+
+- `git status --short --branch`: `## main...origin/main`, only `PEER_REVIEW.md` modified.
+- `rg --files`: current file list rechecked.
+- Targeted search checked `source:`, hover/focus/touch handlers, background image usage, removed `Source note`, localhost references, and external link `rel`.
+- Homepage image size check: `img_product_first.png` 224 KB, `img_product_second.png` 1.2 MB, `img_product_third.png` 1.2 MB, `main-portfolio-photo.jpg` 208 KB.
+- `yarn typecheck`: passed.
+- `yarn lint`: passed with no warnings or errors.
+- `yarn build`: passed. Static generation produced 16 app routes including `/work/narrow`, `/work/mmis-ai-harness`, `/work/redclick`, and four additional Work detail paths.
+- `rg -l` against `.next/static` and `.next/server` confirmed `Resume: ...` provenance strings remain present after build.
+- No local dev server was started during this review cycle.
+
+### Next Review Angle
+
+- 다음 회차는 소스 변경 여부와 세 유지 항목의 해소 여부만 먼저 확인한다.
+- 변화가 없으면 반복 로그를 계속 짧게 유지한다.
+
+## 2026-06-02 13:40 KST - Review 50
+
+### Scope
+
+- Review 49 이후 10분 간격 재점검.
+- 작업 트리, 파일 목록, 세 유지 항목의 증거, 이미지 크기, type/lint/build, build output 포함 문자열을 다시 확인.
+- 실제 소스 코드는 수정하지 않고 `PEER_REVIEW.md`만 갱신.
+
+### Compared With Previous Review Log
+
+- Review 49 이후 소스 변경은 없었다. `git status --short --branch` 기준 변경 파일은 `PEER_REVIEW.md`뿐이다.
+- Review 49의 3개 Findings는 그대로 유지된다.
+- 신규 고위험 항목은 확인하지 못했다.
+
+### Findings
+
+1. 내부 provenance용 `source` 문자열이 public build output에 계속 포함된다.
+   - Evidence: `config/projects.ts:160`, `config/projects.ts:204`, `config/projects.ts:247`, `config/projects.ts:289`, `config/projects.ts:333`, `config/projects.ts:372`, `config/projects.ts:413`; after `yarn build`, `rg -l "Resume: Narrow|Resume: MMIS|..." .next/static .next/server` returned `.next/static/chunks/649-89efabcc0a599329.js` and related server files.
+   - Current impact: 내부 출처 메모가 클라이언트 static chunk에 남는다.
+   - Recommended action: `source`를 public `projects` 데이터에서 제거하거나 클라이언트가 import하지 않는 내부 전용 파일로 분리한다.
+
+2. 홈페이지 하단 갤러리 reveal은 mouse hover 전용이다.
+   - Evidence: `components/main/MainWrapper.tsx:194`, `components/main/MainWrapper.tsx:195`.
+   - Current impact: 키보드와 터치 사용자는 hover 기반 reveal을 동등하게 사용할 수 없다.
+   - Recommended action: 링크/버튼 semantics와 focus/touch 상태를 추가하거나 장식 요소로 정리한다.
+
+3. 홈페이지 product layer 이미지는 CSS background와 1 MB대 PNG를 사용한다.
+   - Evidence: `components/main/MainWrapper.tsx:314`, `components/main/MainWrapper.tsx:510`, `components/main/MainWrapper.tsx:517`, `components/main/MainWrapper.tsx:525`; size check shows `img_product_second.png` 1.2 MB and `img_product_third.png` 1.2 MB.
+   - Current impact: `next/image` 최적화와 intrinsic size 제어를 활용하지 못한다.
+   - Recommended action: WebP/AVIF asset으로 더 압축하거나 `next/image`로 전환한다.
+
+### Verification
+
+- `git status --short --branch`: `## main...origin/main`, only `PEER_REVIEW.md` modified.
+- `rg --files`: current file list rechecked.
+- Targeted search checked `source:`, hover/focus/touch handlers, background image usage, removed `Source note`, and localhost references.
+- Homepage image size check: `img_product_first.png` 224 KB, `img_product_second.png` 1.2 MB, `img_product_third.png` 1.2 MB, `main-portfolio-photo.jpg` 208 KB.
+- `yarn typecheck`: passed.
+- `yarn lint`: passed with no warnings or errors.
+- `yarn build`: passed. Static generation produced 16 app routes including `/work/narrow`, `/work/mmis-ai-harness`, `/work/redclick`, and four additional Work detail paths.
+- `rg -l` against `.next/static` and `.next/server` confirmed `Resume: ...` provenance strings remain present after build.
+- No local dev server was started during this review cycle.
+
+### Next Review Angle
+
+- 다음 회차도 소스 변경 여부를 먼저 확인한다.
+- 변화가 없으면 유지 항목만 짧게 기록한다.
+
+## 2026-06-02 13:51 KST - Review 51
+
+### Scope
+
+- Review 50 이후 10분 간격 재점검.
+- 작업 트리, 파일 목록, 세 유지 항목의 증거, 이미지 크기, type/lint/build, build output 포함 문자열을 다시 확인.
+- 실제 소스 코드는 수정하지 않고 `PEER_REVIEW.md`만 갱신.
+
+### Compared With Previous Review Log
+
+- Review 50 이후 소스 변경은 없었다. `git status --short --branch` 기준 변경 파일은 `PEER_REVIEW.md`뿐이다.
+- Review 50의 3개 Findings는 그대로 유지된다.
+- 신규 고위험 항목은 확인하지 못했다.
+
+### Findings
+
+1. 내부 provenance용 `source` 문자열이 public build output에 계속 포함된다.
+   - Evidence: `config/projects.ts:160`, `config/projects.ts:204`, `config/projects.ts:247`, `config/projects.ts:289`, `config/projects.ts:333`, `config/projects.ts:372`, `config/projects.ts:413`; after `yarn build`, `rg -l "Resume: Narrow|Resume: MMIS|..." .next/static .next/server` returned `.next/static/chunks/649-89efabcc0a599329.js` and related server files.
+   - Current impact: 내부 출처 메모가 클라이언트 static chunk에 남는다.
+   - Recommended action: `source`를 public `projects` 데이터에서 제거하거나 클라이언트가 import하지 않는 내부 전용 파일로 분리한다.
+
+2. 홈페이지 하단 갤러리 reveal은 mouse hover 전용이다.
+   - Evidence: `components/main/MainWrapper.tsx:194`, `components/main/MainWrapper.tsx:195`.
+   - Current impact: 키보드와 터치 사용자는 hover 기반 reveal을 동등하게 사용할 수 없다.
+   - Recommended action: 링크/버튼 semantics와 focus/touch 상태를 추가하거나 장식 요소로 정리한다.
+
+3. 홈페이지 product layer 이미지는 CSS background와 1 MB대 PNG를 사용한다.
+   - Evidence: `components/main/MainWrapper.tsx:314`, `components/main/MainWrapper.tsx:510`, `components/main/MainWrapper.tsx:517`, `components/main/MainWrapper.tsx:525`; size check shows `img_product_second.png` 1.2 MB and `img_product_third.png` 1.2 MB.
+   - Current impact: `next/image` 최적화와 intrinsic size 제어를 활용하지 못한다.
+   - Recommended action: WebP/AVIF asset으로 더 압축하거나 `next/image`로 전환한다.
+
+### Verification
+
+- `git status --short --branch`: `## main...origin/main`, only `PEER_REVIEW.md` modified.
+- `rg --files`: current file list rechecked.
+- Targeted search checked `source:`, hover/focus/touch handlers, background image usage, removed `Source note`, and localhost references.
+- Homepage image size check: `img_product_first.png` 224 KB, `img_product_second.png` 1.2 MB, `img_product_third.png` 1.2 MB, `main-portfolio-photo.jpg` 208 KB.
+- `yarn typecheck`: passed.
+- `yarn lint`: passed with no warnings or errors.
+- `yarn build`: passed. Static generation produced 16 app routes including `/work/narrow`, `/work/mmis-ai-harness`, `/work/redclick`, and four additional Work detail paths.
+- `rg -l` against `.next/static` and `.next/server` confirmed `Resume: ...` provenance strings remain present after build.
+- No local dev server was started during this review cycle.
+
+### Next Review Angle
+
+- 다음 회차도 소스 변경 여부를 먼저 확인한다.
+- 변화가 없으면 유지 항목만 짧게 기록한다.
