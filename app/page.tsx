@@ -1,5 +1,5 @@
-import MainWrapper from "@/components/main/MainWrapper";
+import RestyartPortfolio from "@/components/main/RestyartPortfolio";
 
 export default function Home() {
-  return <MainWrapper />;
+  return <RestyartPortfolio />;
 }

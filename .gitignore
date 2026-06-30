@@ -19,6 +19,7 @@
 # misc
 .DS_Store
 *.pem
+.agents/skills/resume-context/references/source-resume.pdf
 
 # debug
 npm-debug.log*

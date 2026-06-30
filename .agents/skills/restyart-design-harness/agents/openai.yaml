@@ -1,0 +1,7 @@
+interface:
+  display_name: "Restyart Design Harness"
+  short_description: "Restyart형 다크 이력서 포트폴리오 구현 기준"
+  default_prompt: "Use $restyart-design-harness to redesign this portfolio with the Restyart dark resume layout and verify responsive interactions."
+
+policy:
+  allow_implicit_invocation: true

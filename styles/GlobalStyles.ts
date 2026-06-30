@@ -59,8 +59,12 @@ const GlobalStyles = createGlobalStyle`
     }
 
     :focus-visible {
-        outline: 3px solid #000;
+        outline: 2px solid #e8e8e8;
         outline-offset: 3px;
+    }
+
+    body {
+        background: #050505;
     }
     
     table {

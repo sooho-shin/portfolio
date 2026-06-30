@@ -1,6 +1,6 @@
 # 신수호 이력서 기준 문서
 
-Source: `/Users/sinsuho/Downloads/신수호_이력서 (1).pdf`
+Source: `.agents/skills/resume-context/references/source-resume.pdf`
 Extracted: 2026-05-28 KST
 
 이 문서는 포트폴리오 수정 시 참고할 이력 기반 맥락이다. 공개 페이지에는 민감 정보나 비공개 세부사항을 그대로 노출하지 말고, 역할과 검증 가능한 기술 경험 중심으로 재작성한다.

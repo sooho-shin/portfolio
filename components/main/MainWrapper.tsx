@@ -180,7 +180,7 @@ const MainWrapper = () => {
                   검토하고 검증합니다.
                 </p>
               </div>
-              <Link prefetch href={"/about"} passHref>
+              <Link prefetch href={"/#about"} passHref>
                 <StyledButton>About</StyledButton>
               </Link>
             </div>

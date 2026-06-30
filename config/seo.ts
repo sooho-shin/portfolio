@@ -10,7 +10,7 @@ export const candidateKeywords = [
   "TypeScript 개발자 포트폴리오",
 ] as const;
 
-export const publicRoutes = ["/", "/about", "/work"] as const;
+export const publicRoutes = ["/", "/work"] as const;
 
 export const buildCanonicalUrl = (path = "/") => {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;

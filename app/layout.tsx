@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import StyledComponentsRegistry from "@/lib/registry";
-import NaviComponent from "@/components/NaviBox";
 import { Noto_Sans_KR } from "next/font/google";
 import SmoothScrolling from "@/lib/smoothScrolling";
 import { siteMetadata, siteProfile } from "@/config/profile";
@@ -86,7 +85,6 @@ export default function RootLayout({
         />
         <SmoothScrolling>
           <StyledComponentsRegistry>
-            <NaviComponent />
             {children}
           </StyledComponentsRegistry>
         </SmoothScrolling>

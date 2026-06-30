@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getProject, projects } from "@/config/projects";
 import { buildCanonicalUrl } from "@/config/seo";
@@ -60,9 +59,6 @@ export default function WorkDetailPage({ params }: Props) {
 
   return (
     <main style={styles.page}>
-      <Link href="/work" style={styles.backLink}>
-        Back to work
-      </Link>
       <section style={styles.hero}>
         <p style={styles.eyebrow}>{project.type}</p>
         <h1 style={styles.title}>{project.title}</h1>
@@ -140,7 +136,9 @@ export default function WorkDetailPage({ params }: Props) {
         <h2 style={styles.heading}>Stack</h2>
         <ul style={styles.stackList}>
           {project.stack.map(item => (
-            <li key={item}>{item}</li>
+            <li key={item} style={styles.stackListItem}>
+              {item}
+            </li>
           ))}
         </ul>
       </section>
@@ -173,39 +171,41 @@ export default function WorkDetailPage({ params }: Props) {
 const styles: Record<string, CSSProperties> = {
   page: {
     minHeight: "100vh",
-    background: "#fff",
-    color: "#000",
-    padding: "96px 32px 48px",
-  },
-  backLink: {
-    display: "inline-block",
-    border: "2px solid #000",
-    padding: "8px 12px",
-    marginBottom: 32,
-    fontWeight: 700,
-    textTransform: "uppercase",
+    background:
+      "radial-gradient(60rem 40rem at 70% -10%, rgb(48 193 178 / 8%), transparent), #050505",
+    color: "#fafafa",
+    padding: "96px max(24px, calc((100vw - 1072px) / 2)) 120px",
+    fontFamily:
+      '"Geist", "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
   },
   hero: {
-    maxWidth: 980,
-    marginBottom: 32,
+    maxWidth: 820,
+    marginBottom: 40,
   },
   eyebrow: {
-    fontSize: 13,
-    fontWeight: 700,
+    color: "#e8e8e8",
+    fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
+    fontSize: 12,
+    lineHeight: "16px",
+    fontWeight: 400,
+    letterSpacing: "0.25em",
     textTransform: "uppercase",
-    marginBottom: 12,
+    marginBottom: 22,
   },
   title: {
-    fontSize: "clamp(48px, 9vw, 140px)",
-    lineHeight: 0.92,
+    color: "#fafafa",
+    fontSize: 64,
+    lineHeight: 1.04,
+    fontWeight: 800,
     marginBottom: 24,
-    textTransform: "uppercase",
+    letterSpacing: 0,
   },
   summary: {
     maxWidth: 760,
-    fontSize: 20,
-    lineHeight: 1.6,
-    marginBottom: 20,
+    color: "#b8b8b8",
+    fontSize: 17,
+    lineHeight: 1.75,
+    marginBottom: 24,
   },
   metaList: {
     display: "flex",
@@ -214,18 +214,23 @@ const styles: Record<string, CSSProperties> = {
     margin: "0 0 24px",
   },
   metaItem: {
-    border: "2px solid #000",
-    padding: "8px 10px",
+    border: "1px solid rgb(255 255 255 / 10%)",
+    borderRadius: 999,
+    background: "#262626",
+    padding: "8px 12px",
   },
   metaLabel: {
+    color: "#a3a3a3",
+    fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
     fontSize: 11,
     fontWeight: 700,
     textTransform: "uppercase",
     marginBottom: 4,
   },
   metaValue: {
+    color: "#e8e8e8",
     margin: 0,
-    fontSize: 15,
+    fontSize: 13,
     fontWeight: 700,
   },
   proofList: {
@@ -237,16 +242,25 @@ const styles: Record<string, CSSProperties> = {
     listStyle: "none",
   },
   proofItem: {
-    border: "2px solid #000",
-    padding: "6px 10px",
-    fontSize: 13,
+    borderRadius: 999,
+    background: "#262626",
+    color: "#e8e8e8",
+    padding: "7px 11px",
+    fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
+    fontSize: 11,
     fontWeight: 700,
   },
   externalLink: {
-    display: "inline-block",
-    border: "2px solid #000",
-    padding: "10px 12px",
+    display: "inline-flex",
+    minHeight: 40,
+    alignItems: "center",
+    border: "1px solid rgb(232 232 232 / 40%)",
+    borderRadius: 8,
+    background: "#262626",
+    color: "#e8e8e8",
+    padding: "10px 14px",
     marginTop: 18,
+    fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
     fontSize: 13,
     fontWeight: 800,
     textTransform: "uppercase",
@@ -255,43 +269,52 @@ const styles: Record<string, CSSProperties> = {
     position: "relative",
     width: "100%",
     aspectRatio: "16 / 9",
-    border: "4px solid #000",
-    marginBottom: 32,
+    border: "1px solid rgb(255 255 255 / 10%)",
+    borderRadius: 14,
+    marginBottom: 40,
     overflow: "hidden",
+    background: "#141414",
   },
   grid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
-    borderTop: "4px solid #000",
-    borderLeft: "4px solid #000",
-    marginBottom: 32,
+    gap: 16,
+    marginBottom: 40,
   },
   panel: {
     padding: 24,
-    borderRight: "4px solid #000",
-    borderBottom: "4px solid #000",
+    border: "1px solid rgb(255 255 255 / 10%)",
+    borderRadius: 14,
+    background: "#141414",
     minHeight: 220,
   },
   heading: {
+    color: "#e8e8e8",
+    fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
     fontSize: 18,
     textTransform: "uppercase",
+    letterSpacing: "0.08em",
     marginBottom: 16,
   },
   body: {
+    color: "#a3a3a3",
     fontSize: 16,
     lineHeight: 1.7,
   },
   list: {
+    color: "#a3a3a3",
     margin: 0,
-    padding: 0,
-    listStyle: "none",
+    paddingLeft: 18,
+    listStyle: "disc",
     fontSize: 16,
     lineHeight: 1.7,
   },
   stackSection: {
-    border: "4px solid #000",
+    border: "1px solid rgb(255 255 255 / 10%)",
+    borderRadius: 14,
+    background: "#141414",
     padding: 24,
-    marginBottom: 32,
+    marginBottom: 40,
   },
   stackList: {
     display: "flex",
@@ -301,6 +324,15 @@ const styles: Record<string, CSSProperties> = {
     padding: 0,
     listStyle: "none",
   },
+  stackListItem: {
+    borderRadius: 999,
+    background: "#262626",
+    color: "#e8e8e8",
+    padding: "7px 11px",
+    fontFamily: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace",
+    fontSize: 11,
+    fontWeight: 700,
+  },
   imageGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
@@ -309,8 +341,9 @@ const styles: Record<string, CSSProperties> = {
   previewImage: {
     position: "relative",
     aspectRatio: "4 / 3",
-    border: "4px solid #000",
+    border: "1px solid rgb(255 255 255 / 10%)",
+    borderRadius: 14,
     overflow: "hidden",
-    background: "#f4f1ea",
+    background: "#141414",
   },
 };

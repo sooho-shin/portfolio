@@ -1,211 +1,254 @@
 "use client";
 
-import React from "react";
+import Image from "next/image";
 import Link from "next/link";
+import React from "react";
 import styled from "styled-components";
-import { breakpoints } from "@/config/breakboint";
-import ContactSidebarLayout from "@/components/templates/ContactSidebarLayout";
-import PortfolioPageShell from "@/components/templates/PortfolioPageShell";
 import { projects } from "@/config/projects";
 
 const WorkWrapper = () => {
   return (
-    <PortfolioPageShell
-      effectTitle="work"
-      effectRollingText="RESUME PROOF"
-    >
-      <ContactSidebarLayout>
-        <WorkRoot>
-          <Intro>
-            <p className="eyebrow">Selected work</p>
-            <h1>서비스가 완성되는 순간까지 화면과 흐름을 다듬어온 기록입니다.</h1>
-            <p>
-              React, TypeScript, Next.js 기반 화면 구현부터 API 연동, 상태
-              관리, AI-assisted workflow, 실시간 게임 UI까지 제품이 실제로
-              움직이는 과정에서 맡았던 작업들을 모았습니다.
-            </p>
-          </Intro>
+    <WorkPage>
+      <div className="ambient" aria-hidden="true" />
+      <div className="frame">
+        <header className="page-header">
+          <Link href="/" className="back-link">
+            ← HOME
+          </Link>
+          <p className="eyebrow">SELECTED WORK</p>
+          <h1>서비스 흐름과 검증 루프를 함께 정리한 프로젝트 기록입니다.</h1>
+          <p className="intro">
+            React, TypeScript, Next.js 기반 화면 구현부터 API 연동, 상태 관리,
+            AI-assisted workflow, 실시간 UI까지 실제 제품 흐름 안에서 맡았던 작업을
+            모았습니다.
+          </p>
+        </header>
 
-          <SummaryBar aria-label="Work summary">
-            <div>
-              <strong>{projects.length}</strong>
-              <span>Project cases</span>
-            </div>
-            <div>
-              <strong>6Y+</strong>
-              <span>Frontend career</span>
-            </div>
-            <div>
-              <strong>AI QA</strong>
-              <span>Assisted workflow</span>
-            </div>
-          </SummaryBar>
+        <aside className="summary-bar" aria-label="Work summary">
+          <div>
+            <strong>{projects.length}</strong>
+            <span>Project cases</span>
+          </div>
+          <div>
+            <strong>6Y+</strong>
+            <span>Frontend career</span>
+          </div>
+          <div>
+            <strong>Type</strong>
+            <span>API and UI check</span>
+          </div>
+        </aside>
 
-          <ProjectList>
-            {projects.map((project, index) => (
-              <ProjectCard href={`/work/${project.slug}`} key={project.slug}>
-                <span className="index">{String(index + 1).padStart(2, "0")}</span>
-                <div className="content">
+        <section className="project-list" aria-label="Project list">
+          {projects.map((project, index) => {
+            const image = project.images?.[0];
+
+            return (
+              <Link href={`/work/${project.slug}`} className="project-card" key={project.slug}>
+                <div className="index">{String(index + 1).padStart(2, "0")}</div>
+                <div className="card-copy">
                   <div className="meta">
                     <span>{project.type}</span>
                     <span>{project.period}</span>
                   </div>
                   <h2>{project.title}</h2>
-                  <p className="summary">{project.cardSummary}</p>
-                  <ul className="proof">
+                  <p>{project.cardSummary}</p>
+                  <div className="tag-list">
                     {project.proofPoints.map(point => (
-                      <li key={point}>{point}</li>
+                      <span key={point}>{point}</span>
                     ))}
-                  </ul>
+                  </div>
                 </div>
-                <span className="arrow" aria-hidden="true">
-                  View
-                </span>
-              </ProjectCard>
-            ))}
-          </ProjectList>
-        </WorkRoot>
-      </ContactSidebarLayout>
-    </PortfolioPageShell>
+                <div className="preview" aria-hidden={!image}>
+                  {image ? (
+                    <Image
+                      src={image.src}
+                      alt={image.alt}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 260px"
+                    />
+                  ) : (
+                    <span>{project.title.slice(0, 1)}</span>
+                  )}
+                </div>
+              </Link>
+            );
+          })}
+        </section>
+      </div>
+    </WorkPage>
   );
 };
 
-const WorkRoot = styled.div`
-  margin-top: 84px;
-  background: #fff;
-  border-top: 4px solid #000;
+const WorkPage = styled.main`
+  --background: #050505;
+  --foreground: #fafafa;
+  --card: #141414;
+  --muted: #262626;
+  --muted-foreground: #a3a3a3;
+  --border: rgb(255 255 255 / 10%);
+  --primary: #e8e8e8;
+  min-height: 100vh;
+  background: var(--background);
+  color: var(--foreground);
+  font-family:
+    "Geist",
+    "Noto Sans KR",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
 
-  @media (max-width: ${breakpoints.sm}px) {
-    margin-top: 0;
+  .ambient {
+    pointer-events: none;
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(
+      60rem 40rem at 70% -10%,
+      rgb(48 193 178 / 8%),
+      transparent
+    );
   }
-`;
 
-const Intro = styled.section`
-  padding: 40px 32px 36px;
-  border-bottom: 4px solid #000;
-  background: #fff;
+  .frame {
+    position: relative;
+    z-index: 1;
+    width: min(1072px, calc(100% - 48px));
+    margin: 0 auto;
+    padding: 96px 0 120px;
+  }
 
-  @media (max-width: ${breakpoints.sm}px) {
-    padding: 28px 16px;
+  .back-link,
+  .eyebrow,
+  .meta,
+  .tag-list,
+  .summary-bar span {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+
+  .back-link {
+    display: inline-flex;
+    min-height: 36px;
+    align-items: center;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    padding: 8px 12px;
+    color: var(--muted-foreground);
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    transition:
+      border-color 180ms ease,
+      color 180ms ease;
+
+    &:hover,
+    &:focus-visible {
+      border-color: rgb(232 232 232 / 40%);
+      color: var(--primary);
+    }
+  }
+
+  .page-header {
+    max-width: 760px;
   }
 
   .eyebrow {
-    font-size: 13px;
-    font-weight: 700;
-    text-transform: uppercase;
-    margin-bottom: 12px;
+    margin-top: 56px;
+    color: var(--primary);
+    font-size: 12px;
+    line-height: 16px;
+    letter-spacing: 0.25em;
   }
 
   h1 {
-    max-width: 900px;
-    font-size: clamp(36px, 5.8vw, 86px);
-    line-height: 1.02;
-    margin-bottom: 20px;
+    margin-top: 22px;
+    color: var(--foreground);
+    font-size: 54px;
+    line-height: 1.08;
+    font-weight: 800;
     letter-spacing: 0;
   }
 
-  p:last-child {
-    max-width: 780px;
-    font-size: 17px;
+  .intro {
+    margin-top: 24px;
+    color: var(--muted-foreground);
+    font-size: 16px;
     line-height: 1.75;
   }
-`;
 
-const SummaryBar = styled.aside`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  border-bottom: 4px solid #000;
+  .summary-bar {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1px;
+    overflow: hidden;
+    margin-top: 46px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--border);
 
-  @media (max-width: ${breakpoints.sm}px) {
-    grid-template-columns: 1fr;
+    > div {
+      min-height: 124px;
+      background: var(--card);
+      padding: 22px;
+    }
+
+    strong {
+      display: block;
+      color: var(--foreground);
+      font-size: 32px;
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    span {
+      display: block;
+      margin-top: 16px;
+      color: var(--muted-foreground);
+      font-size: 12px;
+      line-height: 1.5;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
   }
 
-  > div {
-    min-height: 108px;
-    padding: 20px 24px;
-    border-right: 4px solid #000;
+  .project-list {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-
-    &:last-child {
-      border-right: none;
-    }
-
-    @media (max-width: ${breakpoints.sm}px) {
-      min-height: 88px;
-      border-right: none;
-      border-bottom: 4px solid #000;
-
-      &:last-child {
-        border-bottom: none;
-      }
-    }
-  }
-
-  strong {
-    font-size: clamp(32px, 5vw, 64px);
-    line-height: 0.9;
-  }
-
-  span {
-    font-size: 13px;
-    font-weight: 700;
-    text-transform: uppercase;
-  }
-`;
-
-const ProjectList = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-
-const ProjectCard = styled(Link)`
-  min-height: 260px;
-  display: grid;
-  grid-template-columns: 88px minmax(0, 1fr) 88px;
-  gap: 24px;
-  padding: 28px 32px;
-  border-bottom: 4px solid #000;
-  color: #000;
-  background: #fff;
-  transition:
-    background-color 180ms ease,
-    color 180ms ease;
-
-  &:hover,
-  &:focus-visible {
-    background: #000;
-    color: #fff;
-
-    .proof li {
-      border-color: #fff;
-    }
-  }
-
-  @media (max-width: ${breakpoints.md}px) {
-    grid-template-columns: 64px minmax(0, 1fr);
     gap: 16px;
-
-    .arrow {
-      grid-column: 2;
-      justify-self: start;
-    }
+    margin-top: 54px;
   }
 
-  @media (max-width: ${breakpoints.sm}px) {
-    min-height: auto;
-    grid-template-columns: 1fr;
-    padding: 24px 16px;
+  .project-card {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr) 240px;
+    gap: 24px;
+    min-height: 248px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--card);
+    padding: 24px;
+    color: inherit;
+    transition:
+      border-color 180ms ease,
+      background-color 180ms ease;
+
+    &:hover,
+    &:focus-visible {
+      border-color: rgb(232 232 232 / 40%);
+      background: #171717;
+    }
   }
 
   .index {
-    font-size: clamp(32px, 5vw, 64px);
-    line-height: 0.9;
-    font-weight: 800;
+    color: #737373;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 36px;
+    line-height: 1;
+    font-style: italic;
   }
 
-  .content {
+  .card-copy {
     min-width: 0;
   }
 
@@ -213,60 +256,123 @@ const ProjectCard = styled(Link)`
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    margin-bottom: 18px;
 
     span {
-      border: 2px solid currentColor;
-      padding: 4px 8px;
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      line-height: 1.2;
+      min-height: 26px;
+      border-radius: 999px;
+      background: var(--muted);
+      padding: 6px 10px;
+      color: var(--muted-foreground);
+      font-size: 11px;
+      line-height: 1;
+      white-space: nowrap;
     }
   }
 
   h2 {
-    font-size: clamp(34px, 6vw, 92px);
-    line-height: 0.96;
-    margin-bottom: 18px;
-    text-transform: uppercase;
+    margin-top: 20px;
+    color: var(--foreground);
+    font-size: 28px;
+    line-height: 1.2;
+    font-weight: 800;
     letter-spacing: 0;
-    overflow-wrap: anywhere;
   }
 
-  .summary {
-    max-width: 760px;
-    font-size: 17px;
-    line-height: 1.7;
-    margin-bottom: 22px;
+  .card-copy p {
+    max-width: 620px;
+    margin-top: 16px;
+    color: var(--muted-foreground);
+    font-size: 15px;
+    line-height: 1.75;
   }
 
-  .proof {
+  .tag-list {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
+    margin-top: 22px;
 
-    li {
-      border: 2px solid #000;
-      padding: 6px 10px;
-      font-size: 13px;
+    span {
+      display: inline-flex;
+      min-height: 27px;
+      align-items: center;
+      border-radius: 999px;
+      background: var(--muted);
+      padding: 5px 11px;
+      color: var(--primary);
+      font-size: 11px;
       font-weight: 700;
-      text-transform: uppercase;
-      transition: border-color 180ms ease;
+      line-height: 1;
+      white-space: nowrap;
     }
   }
 
-  .arrow {
-    align-self: start;
-    justify-self: end;
-    border: 2px solid currentColor;
-    padding: 8px 10px;
-    font-size: 13px;
-    font-weight: 800;
-    text-transform: uppercase;
+  .preview {
+    position: relative;
+    overflow: hidden;
+    min-height: 200px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: #0d0d0d;
+
+    img {
+      object-fit: cover;
+      object-position: top center;
+    }
+
+    > span {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      min-height: 200px;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      font-size: 42px;
+      font-weight: 800;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .frame {
+      padding: 72px 0 96px;
+    }
+
+    h1 {
+      font-size: 42px;
+    }
+
+    .project-card {
+      grid-template-columns: 52px minmax(0, 1fr);
+
+      .preview {
+        grid-column: 1 / -1;
+      }
+    }
+  }
+
+  @media (max-width: 640px) {
+    .frame {
+      width: min(100% - 48px, 720px);
+      padding: 40px 0 72px;
+    }
+
+    .summary-bar {
+      grid-template-columns: 1fr;
+    }
+
+    .project-card {
+      grid-template-columns: 1fr;
+      padding: 20px;
+    }
+
+    h1 {
+      font-size: 34px;
+    }
+
+    .preview {
+      min-height: 220px;
+    }
   }
 `;
 
