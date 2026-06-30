@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import React, { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
@@ -13,7 +12,6 @@ const sections = [
   { id: "experience", label: "EXPERIENCE" },
   { id: "projects", label: "PROJECTS" },
   { id: "skills", label: "SKILLS" },
-  { id: "gallery", label: "GALLERY" },
   { id: "contact", label: "CONTACT" },
 ] as const;
 
@@ -219,39 +217,6 @@ const skillGroups = [
   },
 ];
 
-const linkCards = [
-  {
-    title: "GitHub",
-    body: "공개 가능한 코드와 실험 저장소",
-    href: "https://github.com/sooho-shin?tab=repositories",
-  },
-  {
-    title: "Email",
-    body: siteProfile.email,
-    href: `mailto:${siteProfile.email}`,
-  },
-  {
-    title: "Work Index",
-    body: "프로젝트 상세 페이지",
-    href: "/work",
-  },
-  {
-    title: "Narrow",
-    body: "AI 기반 한국어 연상 퍼즐",
-    href: "https://pinpoint-seven.vercel.app/",
-  },
-  {
-    title: "AmazonCar",
-    body: "렌트/리스 서비스 프론트엔드",
-    href: "https://www.amazoncar.co.kr/",
-  },
-  {
-    title: "RedClick",
-    body: "캠페인/어드민 플랫폼 구조",
-    href: "https://redclick.net/",
-  },
-];
-
 function scrollToSection(id: string) {
   const target = document.getElementById(id);
   if (!target) return;
@@ -265,10 +230,6 @@ const RestyartPortfolio = () => {
   const [activeSection, setActiveSection] = useState<(typeof sections)[number]["id"]>("about");
   const [menuOpen, setMenuOpen] = useState(false);
   const featuredProjects = useMemo(() => projects.slice(0, 6), []);
-  const previewProjects = useMemo(
-    () => projects.filter(project => project.images?.[0]).slice(0, 6),
-    [],
-  );
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -509,49 +470,6 @@ const RestyartPortfolio = () => {
             </div>
           </section>
 
-          <section id="gallery" className="section">
-            <div className="section-headline">
-              <div>
-                <SectionTitle>Project Gallery</SectionTitle>
-                <p>프로젝트 중 실제 화면 이미지를 확인할 수 있는 사례만 모아둔 프리뷰입니다.</p>
-              </div>
-              <Link href="/work" className="subtle-button">
-                전체 목록 보기
-                <ExternalIcon />
-              </Link>
-            </div>
-            <div className="preview-grid">
-              {previewProjects.map(project => {
-                const image = project.images?.[0];
-                if (!image) return null;
-                const href = project.externalUrl || `/work/${project.slug}`;
-                const external = Boolean(project.externalUrl);
-
-                return (
-                  <Link
-                    key={project.slug}
-                    href={href}
-                    target={external ? "_blank" : undefined}
-                    rel={external ? "noopener noreferrer" : undefined}
-                    className="preview-card"
-                  >
-                    <div className="preview-meta">
-                      <span>{project.title.slice(0, 1)}</span>
-                      <div>
-                        <strong>{project.title}</strong>
-                        <small>{project.type}</small>
-                      </div>
-                    </div>
-                    <div className="preview-image">
-                      <Image src={image.src} alt={image.alt} fill sizes="180px" />
-                      <div className="preview-overlay">사례 보기</div>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </section>
-
           <section id="contact" className="section contact-section">
             <SectionTitle>Contact</SectionTitle>
             <p>
@@ -563,28 +481,6 @@ const RestyartPortfolio = () => {
               <SendIcon />
               문의 보내기
             </a>
-
-            <div className="links-heading">LINKS</div>
-            <div className="link-grid">
-              {linkCards.map(card => {
-                const external = card.href.startsWith("http");
-                return (
-                  <Link
-                    key={card.title}
-                    href={card.href}
-                    target={external ? "_blank" : undefined}
-                    rel={external ? "noopener noreferrer" : undefined}
-                    className="link-card"
-                  >
-                    <strong>
-                      {card.title}
-                      {external ? <ExternalIcon /> : <ArrowIcon />}
-                    </strong>
-                    <span>{card.body}</span>
-                  </Link>
-                );
-              })}
-            </div>
             <footer className="page-footer">
               <p>함께 만들고 싶은 제품이 있다면 언제든 연락 주세요. {siteProfile.email}</p>
               <p>© 2026 신수호 · Built with Next.js & styled-components</p>
@@ -1196,136 +1092,6 @@ const MainContent = styled.main`
     }
   }
 
-  .section-headline {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 20px;
-    margin-bottom: 24px;
-
-    .section-title {
-      margin-bottom: 14px;
-    }
-
-    p {
-      color: var(--muted-foreground);
-      font-size: 15px;
-      line-height: 1.6;
-    }
-  }
-
-  .subtle-button {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    flex: 0 0 auto;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--card);
-    padding: 9px 12px;
-    color: var(--foreground);
-    font-size: 12px;
-    font-weight: 600;
-    transition:
-      color 180ms ease,
-      border-color 180ms ease;
-
-    &:hover,
-    &:focus-visible {
-      border-color: rgb(232 232 232 / 40%);
-      color: var(--primary);
-    }
-  }
-
-  .preview-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 16px;
-  }
-
-  .preview-card {
-    overflow: hidden;
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    background: var(--card);
-    color: inherit;
-
-    &:hover .preview-overlay,
-    &:focus-visible .preview-overlay,
-    &:focus-within .preview-overlay {
-      opacity: 1;
-    }
-  }
-
-  .preview-meta {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px;
-
-    > span {
-      display: inline-flex;
-      width: 28px;
-      height: 28px;
-      align-items: center;
-      justify-content: center;
-      border-radius: 8px;
-      background: #3b82f6;
-      color: white;
-      font-size: 13px;
-      font-weight: 800;
-    }
-
-    strong,
-    small {
-      display: block;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    strong {
-      max-width: 120px;
-      color: var(--foreground);
-      font-size: 14px;
-    }
-
-    small {
-      max-width: 120px;
-      margin-top: 3px;
-      color: var(--muted-foreground);
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 11px;
-    }
-  }
-
-  .preview-image {
-    position: relative;
-    aspect-ratio: 1 / 1.12;
-    overflow: hidden;
-    background: #f5f5f5;
-
-    img {
-      object-fit: cover;
-      object-position: top center;
-    }
-  }
-
-  .preview-overlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgb(5 5 5 / 80%);
-    color: var(--primary);
-    font-size: 13px;
-    font-weight: 700;
-    opacity: 0;
-    backdrop-filter: blur(2px);
-    transition: opacity 180ms ease;
-  }
-
   .contact-section {
     min-height: 860px;
 
@@ -1352,55 +1118,6 @@ const MainContent = styled.main`
     &:hover,
     &:focus-visible {
       opacity: 0.9;
-    }
-  }
-
-  .links-heading {
-    margin-top: 66px;
-    margin-bottom: 18px;
-    color: var(--muted-foreground);
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-size: 12px;
-    letter-spacing: 0.25em;
-  }
-
-  .link-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px;
-  }
-
-  .link-card {
-    min-height: 118px;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    background: var(--card);
-    padding: 18px;
-    color: inherit;
-    transition: border-color 180ms ease;
-
-    &:hover,
-    &:focus-visible {
-      border-color: rgb(232 232 232 / 40%);
-    }
-
-    strong {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 8px;
-      color: var(--foreground);
-      font-size: 14px;
-      line-height: 1.5;
-    }
-
-    span {
-      display: block;
-      margin-top: 10px;
-      color: var(--muted-foreground);
-      font-size: 13px;
-      line-height: 1.5;
-      overflow-wrap: anywhere;
     }
   }
 
@@ -1439,12 +1156,7 @@ const MainContent = styled.main`
     .metric-grid,
     .card-grid,
     .project-grid,
-    .skill-grid,
-    .link-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .preview-grid {
+    .skill-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
@@ -1462,9 +1174,7 @@ const MainContent = styled.main`
     .metric-grid,
     .card-grid,
     .project-grid,
-    .skill-grid,
-    .preview-grid,
-    .link-grid {
+    .skill-grid {
       grid-template-columns: 1fr;
     }
 
@@ -1483,13 +1193,6 @@ const MainContent = styled.main`
       min-height: auto;
     }
 
-    .section-headline {
-      display: block;
-    }
-
-    .subtle-button {
-      margin-top: 18px;
-    }
   }
 `;
 
